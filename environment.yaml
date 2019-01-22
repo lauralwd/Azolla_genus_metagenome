@@ -16,7 +16,9 @@ docutils=0.14=py36_0
 dropbox=5.2.1=py36_0
 entrypoints=0.3=py36_0
 expat=2.2.6=he6710b0_0
+fastqc=0.11.8=1
 filechunkio=1.6=py36_0
+font-ttf-dejavu-sans-mono=2.37=h6964260_0
 fontconfig=2.13.0=h9420a91_0
 freetype=2.9.1=h8a8886c_1
 ftputil=3.2=py36_0
@@ -61,6 +63,7 @@ ncurses=6.1=he6710b0_1
 notebook=5.7.4=py36_0
 numpy=1.15.4=py36h7e9f1db_0
 numpy-base=1.15.4=py36hde5b4d6_0
+openjdk=8.0.152=h46b5887_1
 openssl=1.1.1a=h7b6447c_0
 pandas=0.23.4=py36h04863e7_0
 pandoc=2.2.3.2=0
@@ -68,6 +71,7 @@ pandocfilters=1.4.2=py36_1
 paramiko=2.4.2=py36_0
 parso=0.3.1=py36_0
 pcre=8.42=h439df22_0
+perl=5.26.2=h14c3975_0
 pexpect=4.6.0=py36_0
 pickleshare=0.7.5=py36_0
 pip=18.1=py36_0
@@ -96,6 +100,7 @@ sip=4.19.8=py36hf484d3e_0
 six=1.12.0=py36_0
 snakemake=3.13.3=py36_0
 sqlite=3.26.0=h7b6447c_0
+sra-tools=2.9.1_1=h470a237_0
 terminado=0.8.1=py36_1
 testpath=0.4.2=py36_0
 tk=8.6.8=hbc83047_0
