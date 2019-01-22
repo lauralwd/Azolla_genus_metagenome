@@ -1,0 +1,15 @@
+# Short reads
+## caroliniana
+SRA: SRS2841097
+## caroliniana 2
+SRA: SRS2841067
+## nilotica 
+SRA: SRS2841062
+## mexicana
+SRA: SRS2841025
+## microphylla
+SRA: SRS2841027
+## rubra
+SRA: SRS2841026
+## filiculoides
+SRA: SRS2841024
