@@ -4,6 +4,7 @@
 asn1crypto=0.24.0=py36_0
 backcall=0.1.0=py36_0
 bcrypt=3.1.6=py36h7b6447c_0
+biopython=1.73=py36h14c3975_0
 blas=1.0=mkl
 bleach=1.4.2=py36_0
 bwa=0.7.17=ha92aebf_3
