@@ -1,4 +1,4 @@
-#study accession: PRJNA430527
+study accession: PRJNA430527
 # caroliniana
 SRA: SRS2841097
 ENA sample: SAMN08375393
