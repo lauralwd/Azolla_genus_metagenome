@@ -3,12 +3,24 @@ DIRECTIONS=["1","2"]
 
 rule fastqc_raw_data:
   input:
-    "sequencing_genomic/{hostcode}_{PE}.fastq.gz"
+    "data/sequencing_genomic/{hostcode}_{PE}.fastq.gz"
   output:
-    "analyses_reads/{hostcode}_{PE}"
+    "analyses/analyses_reads/{hostcode}_{PE}"
   shell:
     "mkdir {output} 2> /dev/null && fastqc -o {output} {input}"
 
 rule all:
   input:
     expand("analyses_reads/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
+
+rule CAT_prepare:
+  output:
+    db="references/cat_database",
+#    tf="references/cat_taxonomy"
+#  threads: 12
+  log: "logs/CAT_prepare.log"
+  shell:
+#    "CAT prepare --fresh --database_folder {output.db} --taxonomy_folder {output.tf} --nproc {threads} > {log}"
+    "wget tbb.bio.uu.nl/bastiaan/CAT_prepare -O {output.db}"
+
+
