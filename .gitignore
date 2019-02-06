@@ -3,3 +3,6 @@
 .snakemake
 sequencing_genomic/
 host_genome
+analyses/
+logs/  
+references/
