@@ -13,14 +13,25 @@ rule all:
   input:
     expand("analyses_reads/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
 
-rule CAT_prepare:
+rule CAT_download:
   output:
-    db="references/cat_database",
-#    tf="references/cat_taxonomy"
-#  threads: 12
-  log: "logs/CAT_prepare.log"
+    db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
+    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy"
   shell:
-#    "CAT prepare --fresh --database_folder {output.db} --taxonomy_folder {output.tf} --nproc {threads} > {log}"
-    "wget tbb.bio.uu.nl/bastiaan/CAT_prepare -O {output.db}"
+    "cd ./references && wget -qO - http://tbb.bio.uu.nl/bastiaan/CAT_prepare/CAT_prepare_20190108.tar.gz | tar -xz "
 
+rule CAT_classify_host:
+  input:
+    c="references/host_genome/Azolla_filiculoides.genome_v1.2.fasta",
+    db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
+    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy"
+  output: 
+    "references/host_genome/CAT/"
+  threads: 12
+  log: 
+    stdout="logs/CAT_classify_host.stdout",
+    stderr="logs/Cat_classify_host.stderr"
+  shell:
+    "CAT contigs -c {input.c} -d {input.db} -t {input.tf} --out_prefix 'host' -n {threads} 2> {log.stderr} > {log.stdout}"
+ 
 
