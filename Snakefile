@@ -10,7 +10,7 @@ rule allfastqc_trimmed:
     expand("analyses/analyses_reads_trimmed/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
 rule allfiltered:
   input:
-    expand("data/sequencing_genomic_trimmed_mapped/{hostcode}",hostcode=HOSTCODES)
+    expand("data/sequencing_genomic_trimmed_mapped/{hostcode}.{PE}",hostcode=HOSTCODES,PE=DIRECTIONS)
 
 ## analyses rules
 rule fastqc_raw_data:
@@ -128,11 +128,15 @@ rule filter_for_host:
     s2="data/sequencing_genomic_trimmed/{hostcode}_2.fastq.gz",
   params:
     opts="--very-fast",
-    i="references/host_genome/host_filter_bt2index/host_filter"
+    i="references/host_genome/host_filter_bt2index/host_filter",
+    outbase="data/sequencing_genomic_trimmed_mapped/{hostcode}"
   output:
-    "data/sequencing_genomic_trimmed_mapped/{hostcode}"
+#    "data/sequencing_genomic_trimmed_mapped/hostcode.1",
+    "data/sequencing_genomic_trimmed_mapped/{hostcode}.{PE}"
+#    "data/sequencing_genomic_trimmed_mapped/hostcode.2"
+#    "data/sequencing_genomic_trimmed_mapped/{hostcode}"
   threads: 12
   log:
     stderr="logs/bowtie2filterforhost{hostcode}.stderr"
   shell:
-    "bowtie2 {params.opts} --threads {threads} --un-conc-gz {output} -x {params.i} -1 {input.s1} -2 {input.s2}   > /dev/null 2> {log.stderr}"
+    "bowtie2 {params.opts} --threads {threads} --un-conc-gz {params.outbase} -x {params.i} -1 {input.s1} -2 {input.s2}   > /dev/null 2> {log.stderr}"
