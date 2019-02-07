@@ -131,10 +131,7 @@ rule filter_for_host:
     i="references/host_genome/host_filter_bt2index/host_filter",
     outbase="data/sequencing_genomic_trimmed_mapped/{hostcode}"
   output:
-#    "data/sequencing_genomic_trimmed_mapped/hostcode.1",
     "data/sequencing_genomic_trimmed_mapped/{hostcode}.{PE}"
-#    "data/sequencing_genomic_trimmed_mapped/hostcode.2"
-#    "data/sequencing_genomic_trimmed_mapped/{hostcode}"
   threads: 12
   log:
     stderr="logs/bowtie2filterforhost{hostcode}.stderr"
