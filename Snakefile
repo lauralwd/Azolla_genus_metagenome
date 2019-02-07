@@ -1,6 +1,18 @@
 HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
 DIRECTIONS=["1","2"]
 
+## 'All'-rules
+rule allfastqc:
+  input:
+    expand("analyses/analyses_reads/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
+rule allfastqc_trimmed:
+  input:
+    expand("analyses/analyses_reads_trimmed/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
+rule allfiltered:
+  input:
+    expand("data/sequencing_genomic_trimmed_mapped/{hostcode}",hostcode=HOSTCODES)
+
+## analyses rules
 rule fastqc_raw_data:
   input:
     "data/sequencing_genomic/{hostcode}_{PE}.fastq.gz"
@@ -9,10 +21,15 @@ rule fastqc_raw_data:
   shell:
     "mkdir {output} 2> /dev/null && fastqc -o {output} {input}"
 
-rule allfastqc:
+rule fastqc_trimmed_data:
   input:
-    expand("analyses_reads/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
+    "data/sequencing_genomic_trimmed/{hostcode}_{PE}.fastq.gz"
+  output:
+    "analyses/analyses_genomic_trimmed/{hostcode}_{PE}"
+  shell:
+    "mkdir {output} 2> /dev/null && fastqc -o {output} {input}"
 
+## reference rules
 rule CAT_download:
   output:
     db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
@@ -87,26 +104,21 @@ rule create_host_filter_bt2_index:
   shell:
     "bowtie2-build --threads {threads} {input} {params} > {log.stdout} 2> {log.stderr}"
 
+## data processing rules
 rule trimmomatic_genomic_sequencing:
   input:
     expand("data/sequencing_genomic/{{hostcode}}_{PE}.fastq.gz", PE=DIRECTIONS)
   params:
-    outputbase="data/sequencing_genomic_trimmed/{hostcode}"
+    "LEADING:5 TRAILING:5 SLIDINGWINDOW:4:15 MINLEN:36"
   output:
-    "p1={params}_1.fastq.gz",
-    "p2={params}_2.fastq.gz",
-    "s1={params}_s1.fastq.gz",
-    "s2={params}_s2.fastq.gz"
+    p1="data/sequencing_genomic_trimmed/{hostcode}_1.fastq.gz",
+    p2="data/sequencing_genomic_trimmed/{hostcode}_2.fastq.gz",
   threads: 2
   log:
-    log="logs/trimmomatic_genomicsequencing.log",
-    summary="logs/trimmomatic_genomicsequencing_summary.log"
+    log="logs/trimmomatic_genomicsequencing.{hostcode}.log",
+    summary="logs/trimmomatic_genomicsequencing_summary{hostcode}.log"
   shell:
-    "trimmomatic PE -threads {threads} -trimlog {log.log} -summary {log.summary} {input} {output.p1} {output.s1} {output.p2} {output.s2}"
-
-rule all_rimmed:
-  input:
-    expand("data/sequencing_genomic_trimmed/{hostcode}_1.fastq.gz", hostcode=HOSTCODES)
+    "trimmomatic PE -threads {threads} -trimlog {log.log} -summary {log.summary} {input} {output.p1} /dev/null {output.p2} /dev/null {params}"
 
 rule filter_for_host:
   input:
@@ -114,13 +126,13 @@ rule filter_for_host:
     expand("references/host_genome/host_filter_bt2index/host_filter.rev.{i}.bt2",i=range(1,2)),
     s1="data/sequencing_genomic_trimmed/{hostcode}_1.fastq.gz",
     s2="data/sequencing_genomic_trimmed/{hostcode}_2.fastq.gz",
-    i="references/host_genome/host_filter_bt2index"
+  params:
+    opts="--very-fast",
+    i="references/host_genome/host_filter_bt2index/host_filter"
   output:
-    "data/sequencing_genomic_trimmed_mapped/{hostcode}_{PE}.bam"
+    "data/sequencing_genomic_trimmed_mapped/{hostcode}"
   threads: 12
   log:
-    stdout="logs/bowtie2filterforhost.stdout",
-    stderr="logs/bowtie2filterforhost.stderr"
+    stderr="logs/bowtie2filterforhost{hostcode}.stderr"
   shell:
-    "bowtie2 -x {input.i} -1 {input.s1} -2 {input.s2}   > {log.stdout} 2> {log.stderr}"
-
+    "bowtie2 {params.opts} --threads {threads} --un-conc-gz {output} -x {params.i} -1 {input.s1} -2 {input.s2}   > /dev/null 2> {log.stderr}"
