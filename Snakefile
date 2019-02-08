@@ -47,7 +47,7 @@ rule CAT_classify_host:
     tf="references/CAT_prepare_20190108/2019-01-08_taxonomy"
   output: 
     "references/host_genome/CAT/"
-  threads: 12
+  threads: shell("nproc")
   log: 
     stdout="logs/CAT_classify_host.stdout",
     stderr="logs/CAT_classify_host.stderr"
@@ -100,7 +100,7 @@ rule create_host_filter_bt2_index:
   output:
     expand("references/host_genome/host_filter_bt2index/host_filter.{i}.bt2",i=range(1,4)),
     expand("references/host_genome/host_filter_bt2index/host_filter.rev.{i}.bt2",i=range(1,2))
-  threads: 24
+  threads: shell("nproc")
   log:
     stdout="logs/CAT_createhostfilterbt2index.stdout",
     stderr="logs/CAT_createhostfilterbt2index.stderr"
@@ -135,7 +135,7 @@ rule filter_for_host:
     outbase="data/sequencing_genomic_trimmed_filtered/{hostcode}"
   output:
        expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS)
-  threads: 24
+  threads: shell("nproc")
   log:
     stderr="logs/bowtie2filterforhost{hostcode}.stderr"
   shell:
@@ -151,7 +151,7 @@ rule spades_first_assembly:
   output:
     basedir="data/hostfiltered_assembly_{hostcode}",
     contigs="data/hostfiltered_assembly_{hostcode}/contigs.fasta"
-  threads: 24
+  threads: shell("nproc")
   resources:
     mem_mb=450000
   log:
