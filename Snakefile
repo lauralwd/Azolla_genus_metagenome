@@ -10,7 +10,7 @@ rule allfastqc_trimmed:
     expand("analyses/analyses_reads_trimmed/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
 rule allfiltered:
   input:
-    expand("data/sequencing_genomic_trimmed_mapped/{hostcode}.{PE}",hostcode=HOSTCODES,PE=DIRECTIONS)
+    expand("data/sequencing_genomic_trimmed_filtered/{hostcode}.{PE}",hostcode=HOSTCODES,PE=DIRECTIONS)
 
 ## analyses rules
 rule fastqc_raw_data:
@@ -97,7 +97,7 @@ rule create_host_filter_bt2_index:
   output:
     expand("references/host_genome/host_filter_bt2index/host_filter.{i}.bt2",i=range(1,4)),
     expand("references/host_genome/host_filter_bt2index/host_filter.rev.{i}.bt2",i=range(1,2))
-  threads: 12
+  threads: 24
   log:
     stdout="logs/CAT_createhostfilterbt2index.stdout",
     stderr="logs/CAT_createhostfilterbt2index.stderr"
@@ -124,15 +124,15 @@ rule filter_for_host:
   input:
     expand("references/host_genome/host_filter_bt2index/host_filter.{i}.bt2",i=range(1,4)),
     expand("references/host_genome/host_filter_bt2index/host_filter.rev.{i}.bt2",i=range(1,2)),
-    s1="data/sequencing_genomic_trimmed/{hostcode}_1.fastq.gz",
-    s2="data/sequencing_genomic_trimmed/{hostcode}_2.fastq.gz",
+    s1=expand("data/sequencing_genomic_trimmed/{{hostcode}}_{PE}.fastq.gz",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed/{{hostcode}}_{PE}.fastq.gz",PE=2)
   params:
     opts="--very-fast",
     i="references/host_genome/host_filter_bt2index/host_filter",
-    outbase="data/sequencing_genomic_trimmed_mapped/{hostcode}"
+    outbase="data/sequencing_genomic_trimmed_filtered/{hostcode}"
   output:
-    "data/sequencing_genomic_trimmed_mapped/{hostcode}.{PE}"
-  threads: 12
+    expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS)
+  threads: 24
   log:
     stderr="logs/bowtie2filterforhost{hostcode}.stderr"
   shell:
