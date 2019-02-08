@@ -11,6 +11,9 @@ rule allfastqc_trimmed:
 rule allfiltered:
   input:
     expand("data/sequencing_genomic_trimmed_filtered/{hostcode}.{PE}",hostcode=HOSTCODES,PE=DIRECTIONS)
+rule allfirstassemblies:
+  input:
+    expand("data/hostfiltered_assembly_{hostcode}/contigs.fasta",hostcode=HOSTCODES)
 
 ## analyses rules
 rule fastqc_raw_data:
@@ -131,9 +134,29 @@ rule filter_for_host:
     i="references/host_genome/host_filter_bt2index/host_filter",
     outbase="data/sequencing_genomic_trimmed_filtered/{hostcode}"
   output:
-    expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS)
+       expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS)
   threads: 24
   log:
     stderr="logs/bowtie2filterforhost{hostcode}.stderr"
   shell:
     "bowtie2 {params.opts} --threads {threads} --un-conc-gz {params.outbase} -x {params.i} -1 {input.s1} -2 {input.s2}   > /dev/null 2> {log.stderr}"
+
+rule spades_first_assembly:
+  input:
+    reads=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS),
+    s1=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=2)
+  params:
+    "--meta"
+  output:
+    basedir="data/hostfiltered_assembly_{hostcode}",
+    contigs="data/hostfiltered_assembly_{hostcode}/contigs.fasta"
+  threads: 24
+  resources:
+    mem_mb=450000
+  log:
+    stdout="logs/SPADES_first_assembly_{hostcode}.stdout",
+    stderr="logs/SPADES_first_assembly_{hostcode}.stderr" 
+  shell:
+    "spades.py {params} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
+
