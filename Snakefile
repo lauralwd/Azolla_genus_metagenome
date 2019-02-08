@@ -245,7 +245,7 @@ rule filter_for_assembly:
     s1="data/hostfiltered_assembly_{hostcode}/corrected/{hostcode}.R1.00.0_0.fastq.gz",
     s2="data/hostfiltered_assembly_{hostcode}/corrected/{hostcode}.R2.00.0_0.fastq.gz"
   params:
-    opts="--very-sensitive -N 1",
+    opts="--very-fast",
     i="data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}_filter_bt2index/{hostcode}_filter",
     outbase="data/assemblyfiltered_reads/{hostcode}"
   output:
