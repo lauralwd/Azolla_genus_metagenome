@@ -135,7 +135,7 @@ rule filter_for_host:
     outbase="data/sequencing_genomic_trimmed_filtered/{hostcode}"
   output:
        expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS)
-  threads: shell("nproc")
+  threads: 72 # shell("nproc")
   log:
     stderr="logs/bowtie2filterforhost{hostcode}.stderr"
   shell:
@@ -151,7 +151,7 @@ rule spades_first_assembly:
   output:
     basedir="data/hostfiltered_assembly_{hostcode}",
     contigs="data/hostfiltered_assembly_{hostcode}/contigs.fasta"
-  threads: shell("nproc")
+  threads: 72 # shell("nproc")
   resources:
     mem_mb=450000
   log:
