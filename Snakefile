@@ -165,7 +165,7 @@ rule spades_first_assembly:
     contigs="data/hostfiltered_assembly_{hostcode}/contigs.fasta"
   threads: 72 # shell("nproc")
   resources:
-    mem_mb=450000
+    mem_mb=400
   log:
     stdout="logs/SPADES_first_assembly_{hostcode}.stdout",
     stderr="logs/SPADES_first_assembly_{hostcode}.stderr" 
