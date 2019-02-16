@@ -14,6 +14,10 @@ rule allfiltered:
 rule allfirstassemblies:
   input:
     expand("data/hostfiltered_assembly_{hostcode}/contigs.fasta",hostcode=HOSTCODES)
+rule allreadscorrected:
+  input:
+    expand("data/sequencing_genomic_trimmed_filtered_corrected_{{hostcode}}/corrected/{{hostcode}}.R{PE}.00.0_0.cor.fastq.gz",PE=DIRECTIONS)
+
 
 ## analyses rules
 rule fastqc_raw_data:
