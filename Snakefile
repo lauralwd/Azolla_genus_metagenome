@@ -141,11 +141,28 @@ rule filter_for_host:
   shell:
     "bowtie2 {params.opts} --threads {threads} --un-conc-gz {params.outbase} -x {params.i} -1 {input.s1} -2 {input.s2}   > /dev/null 2> {log.stderr}"
 
-rule spades_first_assembly:
+rule spades_hammer:
   input:
     reads=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS),
     s1=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=1),
     s2=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=2)
+  params:
+    "--only-error-correction"
+  output:
+    basedir="data/sequencing_genomic_trimmed_filtered_corrected_{hostcode}/",
+    reads=expand("data/sequencing_genomic_trimmed_filtered_corrected_{{hostcode}}/corrected/{{hostcode}}.R{PE}.00.0_0.cor.fastq.gz",PE=DIRECTIONS)
+  threads: shell("nproc")
+  log:
+    stdout="logs/SPAdes_correct_sequencing{hostcode}.stdout",
+    stderr="logs/SPAdes_correct_sequencing{hostcode}.stderr" 
+  shell:
+    "spades.py {params} -t {threads} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
+
+rule spades_first_assembly:
+  input:
+    reads=expand("data/sequencing_genomic_trimmed_filtered_corrected_{{hostcode}}/corrected/{{hostcode}}.R{PE}.00.0_0.cor.fastq.gz",PE=DIRECTIONS),
+    s1=expand("data/sequencing_genomic_trimmed_filtered_corrected_{{hostcode}}/corrected/{{hostcode}}.R{PE}.00.0_0.cor.fastq.gz",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed_filtered_corrected_{{hostcode}}/corrected/{{hostcode}}.R{PE}.00.0_0.cor.fastq.gz",PE=2)
   params:
     "--meta"
   output:
