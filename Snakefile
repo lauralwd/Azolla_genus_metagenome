@@ -10,14 +10,13 @@ rule allfastqc_trimmed:
     expand("analyses/analyses_reads_trimmed/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
 rule allfiltered:
   input:
-    expand("data/sequencing_genomic_trimmed_filtered/{hostcode}.{PE}",hostcode=HOSTCODES,PE=DIRECTIONS)
+    expand("data/sequencing_genomic_trimmed_filtered/{hostcode}.{PE}.fastq.gz",hostcode=HOSTCODES,PE=DIRECTIONS)
 rule allfirstassemblies:
   input:
     expand("data/hostfiltered_assembly_{hostcode}/contigs.fasta",hostcode=HOSTCODES)
 rule allreadscorrected:
   input:
-    expand("data/sequencing_genomic_trimmed_filtered_corrected_{{hostcode}}/corrected/{{hostcode}}.R{PE}.00.0_0.cor.fastq.gz",PE=DIRECTIONS)
-
+    expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",hostcode=HOSTCODES, PE=DIRECTIONS)
 
 ## analyses rules
 rule fastqc_raw_data:
@@ -139,23 +138,35 @@ rule filter_for_host:
     outbase="data/sequencing_genomic_trimmed_filtered/{hostcode}"
   output:
        expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS)
-  threads: shell("nproc")
+  threads: 35
   log:
     stderr="logs/bowtie2filterforhost{hostcode}.stderr"
   shell:
     "bowtie2 {params.opts} --threads {threads} --un-conc-gz {params.outbase} -x {params.i} -1 {input.s1} -2 {input.s2}   > /dev/null 2> {log.stderr}"
 
-rule spades_hammer:
+rule filter_for_host_rename:
   input:
     reads=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS),
     s1=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=1),
     s2=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=2)
+  output:
+    reads=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=DIRECTIONS),
+    s1=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=2)
+  shell:
+    "mv {input.s1} {output.s1} && mv {input.s2} {output.s2}"
+
+rule spades_hammer:
+  input:
+    reads=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=DIRECTIONS),
+    s1=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=2)
   params:
     "--only-error-correction"
   output:
-    basedir="data/sequencing_genomic_trimmed_filtered_corrected_{hostcode}/",
-    reads=expand("data/sequencing_genomic_trimmed_filtered_corrected_{{hostcode}}/corrected/{{hostcode}}.R{PE}.00.0_0.cor.fastq.gz",PE=DIRECTIONS)
-  threads: shell("nproc")
+    basedir="data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/",
+    reads=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=DIRECTIONS)
+  threads: 35
   log:
     stdout="logs/SPAdes_correct_sequencing{hostcode}.stdout",
     stderr="logs/SPAdes_correct_sequencing{hostcode}.stderr" 
@@ -164,15 +175,15 @@ rule spades_hammer:
 
 rule spades_first_assembly:
   input:
-    reads=expand("data/sequencing_genomic_trimmed_filtered_corrected_{{hostcode}}/corrected/{{hostcode}}.R{PE}.00.0_0.cor.fastq.gz",PE=DIRECTIONS),
-    s1=expand("data/sequencing_genomic_trimmed_filtered_corrected_{{hostcode}}/corrected/{{hostcode}}.R{PE}.00.0_0.cor.fastq.gz",PE=1),
-    s2=expand("data/sequencing_genomic_trimmed_filtered_corrected_{{hostcode}}/corrected/{{hostcode}}.R{PE}.00.0_0.cor.fastq.gz",PE=2)
+    reads=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=DIRECTIONS),
+    s1=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
   params:
     "--meta"
   output:
     basedir="data/hostfiltered_assembly_{hostcode}",
     contigs="data/hostfiltered_assembly_{hostcode}/contigs.fasta"
-  threads: shell("nproc")
+  threads: 35
   resources:
     mem_mb=450000
   log:
