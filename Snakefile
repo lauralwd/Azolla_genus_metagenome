@@ -13,13 +13,13 @@ rule allfiltered:
     expand("data/sequencing_genomic_trimmed_filtered/{hostcode}.{PE}.fastq.gz",hostcode=HOSTCODES,PE=DIRECTIONS)
 rule allfirstassemblies:
   input:
-    expand("data/hostfiltered_assembly_{hostcode}/contigs.fasta",hostcode=HOSTCODES)
+    expand("data/assembly_singles_hostfiltered/{hostcode}/contigs.fasta",hostcode=HOSTCODES)
 rule allreadscorrected:
   input:
     expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",hostcode=HOSTCODES, PE=DIRECTIONS)
 rule allsecondassemblies:
   input:
-    expand("data/doublefiltered_assembly_{hostcode}/contigs.fasta",hostcode=HOSTCODES)
+    expand("data/assembly_singles_doublefiltered/{hostcode}/contigs.fasta",hostcode=HOSTCODES)
 
 ## analyses rules
 rule fastqc_raw_data:
@@ -184,7 +184,7 @@ rule spades_first_assembly:
   params:
     "--meta"
   output:
-    basedir=""data/assembly_singles_hostfiltered/{hostcode}/contigs.fasta"",
+    basedir="data/assembly_singles_hostfiltered/{hostcode}/",
     contigs="data/assembly_singles_hostfiltered/{hostcode}/contigs.fasta"
   threads: 100
   resources:
