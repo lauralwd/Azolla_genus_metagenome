@@ -17,6 +17,9 @@ rule allfirstassemblies:
 rule allreadscorrected:
   input:
     expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",hostcode=HOSTCODES, PE=DIRECTIONS)
+rule allsecondassemblies:
+  input:
+    expand("data/doublefiltered_assembly_{hostcode}/contigs.fasta",hostcode=HOSTCODES)
 
 ## analyses rules
 rule fastqc_raw_data:
@@ -156,7 +159,6 @@ rule filter_for_host_rename:
   shell:
     "mv {input.s1} {output.s1} && mv {input.s2} {output.s2}"
 
-
 rule spades_hammer:
   input:
     reads=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=DIRECTIONS),
@@ -179,13 +181,11 @@ rule spades_first_assembly:
     reads=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=DIRECTIONS),
     s1=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1),
     s2=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
-
   params:
     "--meta"
   output:
     basedir="data/hostfiltered_assembly_{hostcode}",
     contigs="data/hostfiltered_assembly_{hostcode}/contigs.fasta"
-
   threads: 100
   resources:
     mem_mb=400
@@ -195,3 +195,112 @@ rule spades_first_assembly:
   shell:
     "spades.py {params} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
 
+## process first assembly for second filter
+rule CAT_first_spades_assembly:
+  input:
+    contigs="data/hostfiltered_assembly_{hostcode}/contigs.fasta",
+    db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
+    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy"
+  params:
+  output:
+    "data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}",
+    i="data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}.contig2classification.txt"
+  threads: 12
+  log:
+    stdout="logs/CAT_first_assembly_taxonomy{hostcode}.stdout",
+    stderr="logs/CAT_first_assembly_taxonomy{hostcode}.stderr" 
+  shell:
+    "CAT contigs -c {input.contigs} -d {input.db} -t {input.tf} --out_prefix {output} -n {threads} 2> {log.stderr} > {log.stdout}"
+
+rule CAT_add_names_first_spades_assembly:
+  input:
+    i="data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}.contig2classification.txt",
+    t="references/CAT_prepare_20190108/2019-01-08_taxonomy"
+  output:
+     "data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}_contig_taxonomy.tab"
+  log: 
+    stdout="logs/CAT_first_assembly_taxonomy_{hostcode}.stdout",
+    stderr="logs/CAT_first_assembly_taxonomy_{hostcode}.stderr"
+  threads: 1
+  shell:
+    "CAT add_names -i {input.i} -t {input.t} -o {output} > {log.stdout} 2> {log.stderr}"
+
+rule CAT_filter_contignames_first_spades_assembly:
+  input:
+     "data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}_contig_taxonomy.tab"
+  output:
+    "data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}_contig_filterlist.txt"
+  threads: 1
+  log:
+    "logs/CAT_first_assembly_taxonomy_{hostcode}_contigfilterlist.stderr"
+  shell:
+    "cat {input} | grep -v Bacteria | grep -v Fungi | grep -v Opisthokonta | grep -v Alveolata | grep Eukaryota | cut -f 1  > {output} 2> {log}"
+
+rule create_filter_fasta_first_spades_assembly:
+  input:
+    n="data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}_contig_filterlist.txt",
+    f="data/hostfiltered_assembly_{hostcode}/contigs.fasta"
+  output:
+    "data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}_filter.fasta"
+  threads: 1
+  log: 
+    stdout="logs/CAT_create_{hostcode}_first_filter.stdout",
+    stderr="logs/CAT_create_{hostcode}_first_filter.stderr"
+  shell:
+    "samtools faidx {input.f} -o {output} -r {input.n} > {log.stdout} 2> {log.stderr}"
+
+rule create_first_spades_assembly_filter_bt2_index:
+  input:
+    "data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}_filter.fasta"
+  params:
+    "data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}_filter_bt2index/{hostcode}_filter"
+  output:
+    expand("data/hostfiltered_assembly_taxonomy_{{hostcode}}/CAT_{{hostcode}}_filter_bt2index/{{hostcode}}_filter.{i}.bt2",i=range(1,4)),
+    expand("data/hostfiltered_assembly_taxonomy_{{hostcode}}/CAT_{{hostcode}}_filter_bt2index/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2)),
+  threads: 12
+  log:
+    stdout="logs/CAT_create_{hostcode}_filterbt2index.stdout",
+    stderr="logs/CAT_create_{hostcode}_filterbt2index.stderr"
+  shell:
+    "bowtie2-build --threads {threads} {input} {params} > {log.stdout} 2> {log.stderr}"
+
+rule all:
+  input:
+    expand("data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}_filter.fasta",hostcode=HOSTCODES)
+
+rule filter_for_assembly:
+  input:
+    expand("data/hostfiltered_assembly_taxonomy_{{hostcode}}/CAT_{{hostcode}}_filter_bt2index/{{hostcode}}_filter.{i}.bt2",i=range(1,4)),
+    expand("data/hostfiltered_assembly_taxonomy_{{hostcode}}/CAT_{{hostcode}}_filter_bt2index/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2)),
+    s1="data/hostfiltered_assembly_{hostcode}/corrected/{hostcode}.R1.00.0_0.fastq.gz",
+    s2="data/hostfiltered_assembly_{hostcode}/corrected/{hostcode}.R2.00.0_0.fastq.gz"
+  params:
+    opts="--very-fast",
+    i="data/hostfiltered_assembly_taxonomy_{hostcode}/CAT_{hostcode}_filter_bt2index/{hostcode}_filter",
+    outbase="data/assemblyfiltered_reads/{hostcode}"
+  output:
+       expand("data/assemblyfiltered_reads/{{hostcode}}.{PE}",PE=DIRECTIONS)
+  threads: 12
+  log:
+    stderr="logs/bowtie2filterforfirstassembly{hostcode}.stderr"
+  shell:
+    "bowtie2 {params.opts} --threads {threads} --un-conc-gz {params.outbase} -x {params.i} -1 {input.s1} -2 {input.s2}   > /dev/null 2> {log.stderr}"
+
+rule spades_second_assembly:
+  input:
+    reads=expand("data/assemblyfiltered_reads/{{hostcode}}.{PE}",PE=DIRECTIONS),
+    s1=expand("data/assemblyfiltered_reads/{{hostcode}}.{PE}",PE=1),
+    s2=expand("data/assemblyfiltered_reads/{{hostcode}}.{PE}",PE=2)
+  params:
+    "--meta --no-correction"
+  output:
+    basedir="data/doublefiltered_assembly_{hostcode}",
+    contigs="data/doublefiltered_assembly_{hostcode}/contigs.fasta"
+  threads: 12
+  resources:
+    mem_mb=450000
+  log:
+    stdout="logs/SPADES_second_assembly_{hostcode}.stdout",
+    stderr="logs/SPADES_second_assembly_{hostcode}.stderr" 
+  shell:
+    "spades.py {params} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
