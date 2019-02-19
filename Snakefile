@@ -130,7 +130,7 @@ rule filter_for_host:
     s1=expand("data/sequencing_genomic_trimmed/{{hostcode}}_{PE}.fastq.gz",PE=1),
     s2=expand("data/sequencing_genomic_trimmed/{{hostcode}}_{PE}.fastq.gz",PE=2)
   params:
-    opts="--very-sensitive -N 1",
+    opts="--very-fast",
     i="references/host_genome/host_filter_bt2index/host_filter",
     outbase="data/sequencing_genomic_trimmed_filtered/{hostcode}"
   output:
