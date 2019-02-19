@@ -10,14 +10,17 @@ rule allfastqc_trimmed:
     expand("analyses/analyses_reads_trimmed/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
 rule allfiltered:
   input:
-    expand("data/sequencing_genomic_trimmed_filtered/{hostcode}.{PE}",hostcode=HOSTCODES,PE=DIRECTIONS)
+    expand("data/sequencing_genomic_trimmed_filtered/{hostcode}.{PE}.fastq.gz",hostcode=HOSTCODES,PE=DIRECTIONS)
 rule allfirstassemblies:
   input:
     expand("data/hostfiltered_assembly_{hostcode}/contigs.fasta",hostcode=HOSTCODES)
+rule allreadscorrected:
+  input:
+    expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",hostcode=HOSTCODES, PE=DIRECTIONS)
 rule allsecondassemblies:
   input:
     expand("data/doublefiltered_assembly_{hostcode}/contigs.fasta",hostcode=HOSTCODES)
-    
+
 ## analyses rules
 rule fastqc_raw_data:
   input:
@@ -50,7 +53,7 @@ rule CAT_classify_host:
     tf="references/CAT_prepare_20190108/2019-01-08_taxonomy"
   output: 
     "references/host_genome/CAT/"
-  threads: 12
+  threads: 100
   log: 
     stdout="logs/CAT_classify_host.stdout",
     stderr="logs/CAT_classify_host.stderr"
@@ -103,7 +106,7 @@ rule create_host_filter_bt2_index:
   output:
     expand("references/host_genome/host_filter_bt2index/host_filter.{i}.bt2",i=range(1,4)),
     expand("references/host_genome/host_filter_bt2index/host_filter.rev.{i}.bt2",i=range(1,2))
-  threads: 12
+  threads: 100
   log:
     stdout="logs/CAT_createhostfilterbt2index.stdout",
     stderr="logs/CAT_createhostfilterbt2index.stderr"
@@ -133,32 +136,59 @@ rule filter_for_host:
     s1=expand("data/sequencing_genomic_trimmed/{{hostcode}}_{PE}.fastq.gz",PE=1),
     s2=expand("data/sequencing_genomic_trimmed/{{hostcode}}_{PE}.fastq.gz",PE=2)
   params:
-    opts="--very-sensitive -N 1",
+    opts="--very-fast",
     i="references/host_genome/host_filter_bt2index/host_filter",
     outbase="data/sequencing_genomic_trimmed_filtered/{hostcode}"
   output:
        expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS)
-  threads: 12
+  threads: 100
   log:
     stderr="logs/bowtie2filterforhost{hostcode}.stderr"
   shell:
     "bowtie2 {params.opts} --threads {threads} --un-conc-gz {params.outbase} -x {params.i} -1 {input.s1} -2 {input.s2}   > /dev/null 2> {log.stderr}"
 
-rule spades_first_assembly:
+rule filter_for_host_rename:
   input:
     reads=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS),
     s1=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=1),
     s2=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=2)
+  output:
+    reads=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=DIRECTIONS),
+    s1=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=2)
+  shell:
+    "mv {input.s1} {output.s1} && mv {input.s2} {output.s2}"
+
+rule spades_hammer:
+  input:
+    reads=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=DIRECTIONS),
+    s1=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=2)
+  params:
+    "--only-error-correction"
+  output:
+    basedir="data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/",
+    reads=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=DIRECTIONS)
+  threads: 100
+  log:
+    stdout="logs/SPAdes_correct_sequencing{hostcode}.stdout",
+    stderr="logs/SPAdes_correct_sequencing{hostcode}.stderr" 
+  shell:
+    "spades.py {params} -t {threads} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
+
+rule spades_first_assembly:
+  input:
+    reads=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=DIRECTIONS),
+    s1=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
   params:
     "--meta"
   output:
     basedir="data/hostfiltered_assembly_{hostcode}",
-    contigs="data/hostfiltered_assembly_{hostcode}/contigs.fasta",
-    r1="data/hostfiltered_assembly_{hostcode}/corrected/{hostcode}.R1.00.0_0.fastq.gz",
-    r2="data/hostfiltered_assembly_{hostcode}/corrected/{hostcode}.R2.00.0_0.fastq.gz"
-  threads: 12
+    contigs="data/hostfiltered_assembly_{hostcode}/contigs.fasta"
+  threads: 100
   resources:
-    mem_mb=450000
+    mem_mb=400
   log:
     stdout="logs/SPADES_first_assembly_{hostcode}.stdout",
     stderr="logs/SPADES_first_assembly_{hostcode}.stderr" 
