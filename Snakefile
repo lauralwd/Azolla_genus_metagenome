@@ -182,7 +182,7 @@ rule spades_first_assembly:
     s1=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1),
     s2=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
   params:
-    "--meta"
+    "--meta --only-assembler"
   output:
     basedir="data/assembly_singles_hostfiltered/{hostcode}/",
     contigs="data/assembly_singles_hostfiltered/{hostcode}/contigs.fasta"
