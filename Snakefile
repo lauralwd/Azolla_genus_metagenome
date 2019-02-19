@@ -133,7 +133,7 @@ rule filter_for_host:
     s1=expand("data/sequencing_genomic_trimmed/{{hostcode}}_{PE}.fastq.gz",PE=1),
     s2=expand("data/sequencing_genomic_trimmed/{{hostcode}}_{PE}.fastq.gz",PE=2)
   params:
-    opts="--very-sensitive -N 1",
+    opts="--very-fast",
     i="references/host_genome/host_filter_bt2index/host_filter",
     outbase="data/sequencing_genomic_trimmed_filtered/{hostcode}"
   output:
@@ -155,6 +155,7 @@ rule filter_for_host_rename:
     s2=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=2)
   shell:
     "mv {input.s1} {output.s1} && mv {input.s2} {output.s2}"
+
 
 rule spades_hammer:
   input:
@@ -178,14 +179,16 @@ rule spades_first_assembly:
     reads=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=DIRECTIONS),
     s1=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1),
     s2=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
+
   params:
     "--meta"
   output:
     basedir="data/hostfiltered_assembly_{hostcode}",
     contigs="data/hostfiltered_assembly_{hostcode}/contigs.fasta"
+
   threads: 100
   resources:
-    mem_mb=450000
+    mem_mb=400
   log:
     stdout="logs/SPADES_first_assembly_{hostcode}.stdout",
     stderr="logs/SPADES_first_assembly_{hostcode}.stderr" 
