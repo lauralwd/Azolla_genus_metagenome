@@ -188,7 +188,7 @@ rule spades_first_assembly:
     contigs="data/assembly_singles_hostfiltered/{hostcode}/contigs.fasta"
   threads: 100
   resources:
-    mem_mb=400
+    mem_mb=500
   log:
     stdout="logs/SPADES_assembly_singles_hostfiltered_{hostcode}.stdout",
     stderr="logs/SPADES_assembly_singles_hostfiltered_{hostcode}.stderr"
@@ -304,7 +304,7 @@ rule spades_second_assembly:
     contigs="data/assembly_singles_doublefiltered/{hostcode}/contigs.fasta"
   threads: 100
   resources:
-    mem_mb=450
+    mem_mb=500
   log:
     stdout="logs/SPADES_second_assembly_{hostcode}.stdout",
     stderr="logs/SPADES_second_assembly_{hostcode}.stderr"
