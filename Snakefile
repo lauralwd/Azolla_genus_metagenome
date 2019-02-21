@@ -7,6 +7,7 @@ BINNINGSIGNALSPE=['dijkhuizen2018.E.1', 'dijkhuizen2018.E.2', 'dijkhuizen2018.E.
 BINNINGSIGNALSSE=['ran2010.nostoc.SRR066216','ran2010.nostoc.SRR066217','ran2010.nostoc.SRR3923641','ran2010.nostoc.SRR3923645','ran2010.nostoc.SRR3923646']
 BINNINGSIGNALS=[BINNINGSIGNALSPE , BINNINGSIGNALSSE]
 
+BINNINGSIGNALS=['dijkhuizen2018.E.1', 'dijkhuizen2018.E.2', 'dijkhuizen2018.E.3', 'dijkhuizen2018.P.2', 'dijkhuizen2018.P.3', 'dijkhuizen2018.P.4','ran2010.nostoc.SRR066216','ran2010.nostoc.SRR066217','ran2010.nostoc.SRR3923641','ran2010.nostoc.SRR3923645','ran2010.nostoc.SRR3923646']
 
 ## 'All'-rules
 rule allfastqc:
@@ -192,7 +193,8 @@ rule spades_first_assembly:
     "--meta --only-assembler"
   output:
     basedir=expand("data/assembly_{assemblytype}/{{hostcode}}/",assemblytype='singles_hostfiltered'),
-    contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_hostfiltered')
+    contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_hostfiltered'),
+    scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/scaffolds.fasta",assemblytype='singles_hostfiltered')
   threads: 100
   resources:
     mem_mb=500
@@ -319,9 +321,17 @@ rule spades_second_assembly:
   shell:
     "spades.py {params} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
 
-rule bwa_index_assembly_scaffolds:
+rule shorten scaffold_names:
   input:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds.fasta"
+  output:
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta"
+  shell:
+    ""#shell("awk -F "_" '/>NODE/{$0=">NODE_"$2}1' {input} > {output}")
+
+rule bwa_index_assembly_scaffolds:
+  input:
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta"
   params:
     "data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds"
   output:
@@ -335,10 +345,21 @@ rule bwa_index_assembly_scaffolds:
 
 READTYPES= ['.trimmed_paired.R','.trimmed']
 
+import os.path
+def get_binning_reads(wildcards):
+    pathpe=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed_paired.R1.fastq.gz")
+    pathse=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed.fastq.gz")
+    if os.path.isfile(pathpe) == True :
+      return {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed_paired.R{PE}.fastq.gz", PE=[1,2],binningsignal=wildcards.binningsignal) }
+    elif os.path.isfile(pathse) == True :
+      return {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz", PE=[1,2],binningsignal=wildcards.binningsignal) }
+
+#reads=expand("data/sequencing_binning_signals/{{binningsignal}}.{type}{PE}.fastq.gz", PE=[1,2,''],type=type)
+
 rule backmap_bwa_mem:
   input:
     expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwa','pac','ann','sa','amb']),
-    reads=expand("data/sequencing_binning_signals/{{binningsignal}}{readtype}{PE}.fastq.gz",PE=[1,2,''],readtype=READTYPES)
+    unpack(get_binning_reads)
   params:
     "data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds"
   output:
