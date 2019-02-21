@@ -1,6 +1,13 @@
 HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
 DIRECTIONS=["1","2"]
 
+ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered']
+
+BINNINGSIGNALSPE=['dijkhuizen2018.E.1', 'dijkhuizen2018.E.2', 'dijkhuizen2018.E.3', 'dijkhuizen2018.P.2', 'dijkhuizen2018.P.3', 'dijkhuizen2018.P.4' ]
+BINNINGSIGNALSSE=['ran2010.nostoc.SRR066216','ran2010.nostoc.SRR066217','ran2010.nostoc.SRR3923641','ran2010.nostoc.SRR3923645','ran2010.nostoc.SRR3923646']
+BINNINGSIGNALS=[BINNINGSIGNALSPE , BINNINGSIGNALSSE]
+
+
 ## 'All'-rules
 rule allfastqc:
   input:
@@ -184,95 +191,95 @@ rule spades_first_assembly:
   params:
     "--meta --only-assembler"
   output:
-    basedir="data/assembly_singles_hostfiltered/{hostcode}/",
-    contigs="data/assembly_singles_hostfiltered/{hostcode}/contigs.fasta"
+    basedir=expand("data/assembly_{assemblytype}/{{hostcode}}/",assemblytype='singles_hostfiltered'),
+    contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_hostfiltered')
   threads: 100
   resources:
     mem_mb=500
   log:
-    stdout="logs/SPADES_assembly_singles_hostfiltered_{hostcode}.stdout",
-    stderr="logs/SPADES_assembly_singles_hostfiltered_{hostcode}.stderr"
+    stdout=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
+    stderr=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
   shell:
     "spades.py {params} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
 
 ## process first assembly for second filter
 rule CAT_first_spades_assembly:
   input:
-    contigs="data/assembly_singles_hostfiltered/{hostcode}/contigs.fasta",
+    contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_hostfiltered'),
     db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
     tf="references/CAT_prepare_20190108/2019-01-08_taxonomy"
   params:
   output:
-    "data/assembly_singles_hostfiltered/{hostcode}/CAT_{hostcode}",
-    i="data/assembly_singles_hostfiltered/{hostcode}/CAT_{hostcode}contig2classification.txt"
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}",assemblytype='singles_hostfiltered'),
+    i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}contig2classification.txt",assemblytype='singles_hostfiltered')
   threads: 100
   log:
-    stdout="logs/CAT_assembly_singles_hostfiltered_classification_{hostcode}.stdout",
-    stderr="logs/CAT_assembly_singles_hostfiltered_classification_{hostcode}.stderr"
+    stdout=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
+    stderr=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
   shell:
     "CAT contigs -c {input.contigs} -d {input.db} -t {input.tf} --out_prefix {output} -n {threads} 2> {log.stderr} > {log.stdout}"
 
 rule CAT_add_names_first_spades_assembly:
   input:
-    i="data/assembly_singles_hostfiltered/{hostcode}/CAT_{hostcode}contig2classification.txt",
+    i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}contig2classification.txt",assemblytype='singles_hostfiltered'),
     t="references/CAT_prepare_20190108/2019-01-08_taxonomy"
   output:
-     "data/assembly_singles_hostfiltered/{hostcode}/CAT_{hostcode}_contig_taxonomy.tab"
+     expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}_contig_taxonomy.tab",assemblytype='singles_hostfiltered')
   log:
-    stdout="logs/CAT_assembly_singles_hostfiltered_classification_taxonomy_{hostcode}.stdout",
-    stderr="logs/CAT_assembly_singles_hostfiltered_classification_taxonomy_{hostcode}.stderr"
+    stdout=expand("logs/CAT_assembly_{assemblytype}_classification_taxonomy_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
+    stderr=expand("logs/CAT_assembly_{assemblytype}_classification_taxonomy_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
   threads: 1
   shell:
     "CAT add_names -i {input.i} -t {input.t} -o {output} > {log.stdout} 2> {log.stderr}"
 
 rule CAT_filter_contignames_first_spades_assembly:
   input:
-    "data/assembly_singles_hostfiltered/{hostcode}/CAT_{hostcode}_contig_taxonomy.tab"
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}_contig_taxonomy.tab",assemblytype='singles_hostfiltered')
   output:
-    "data/assembly_singles_hostfiltered/{hostcode}/CAT_{hostcode}_contig_filterlist.txt"
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}_contig_filterlist.txt",assemblytype='singles_hostfiltered')
   threads: 1
   log:
-    "logs/CAT_assembly_singles_hostfiltered_contigfilterlist_{hostcode}.stderr"
+    expand("logs/CAT_assembly_{assemblytype}_contigfilterlist_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
   shell:
     "cat {input} | grep -v Bacteria | grep -v Fungi | grep -v Opisthokonta | grep -v Alveolata | grep Eukaryota | cut -f 1  > {output} 2> {log}"
 
 rule create_filter_fasta_first_spades_assembly:
   input:
-    n="data/assembly_singles_hostfiltered/{hostcode}/CAT_{hostcode}_contig_filterlist.txt",
-    f="data/assembly_singles_hostfiltered/{hostcode}/contigs.fasta"
+    n=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}_contig_filterlist.txt",assemblytype='singles_hostfiltered'),
+    f=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_hostfiltered')
   output:
-    "data/assembly_singles_hostfiltered/{hostcode}/CAT_filter_{hostcode}.fasta"
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_{{hostcode}}.fasta",assemblytype='singles_hostfiltered')
   threads: 1
   log:
-    stdout="logs/CAT_create_assembly_filter_{hostcode}.stdout",
-    stderr="logs/CAT_create_assembly_filter_{hostcode}.stderr"
+    stdout=expand("logs/CAT_create_assembly_{assemblytype}_filter_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
+    stderr=expand("logs/CAT_create_assembly_{assemblytype}_filter_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
   shell:
     "samtools faidx {input.f} -o {output} -r {input.n} > {log.stdout} 2> {log.stderr}"
 
 rule create_first_spades_assembly_filter_bt2_index:
   input:
-    "data/assembly_singles_hostfiltered/{hostcode}/CAT_filter_{hostcode}.fasta"
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_{{hostcode}}.fasta",assemblytype='singles_hostfiltered')
   params:
-    "data/assembly_singles_hostfiltered/{hostcode}/CAT_filter_bt2index_{hostcode}/{hostcode}_filter"
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter",assemblytype='singles_hostfiltered')
   output:
-    expand("data/assembly_singles_hostfiltered/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4)),
-    expand("data/assembly_singles_hostfiltered/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2)),
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4),assemblytype='singles_hostfiltered'),
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2),assemblytype='singles_hostfiltered'),
   threads: 12
   log:
-    stdout="logs/CAT_create_assembly_filter_filterbt2index_{hostcode}.stdout",
-    stderr="logs/CAT_create_assembly_filter_filterbt2index_{hostcode}.stderr"
+    stdout=expand("logs/CAT_create_assembly_filter_{assemblytype}_filterbt2index_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
+    stderr=expand("logs/CAT_create_assembly_filter_{assemblytype}_filterbt2index_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
   shell:
     "bowtie2-build --threads {threads} {input} {params} > {log.stdout} 2> {log.stderr}"
 
 rule filter_for_assembly:
   input:
-    expand("data/assembly_singles_hostfiltered/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4)),
-    expand("data/assembly_singles_hostfiltered/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2)),
-    s1=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1),
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4),assemblytype='singles_hostfiltered'),
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2),assemblytype='singles_hostfiltered'),
+    s1=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1,),
     s2=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
   params:
     opts="--very-fast",
-    i="data/assembly_singles_hostfiltered/{hostcode}/CAT_filter_bt2index_{hostcode}/{hostcode}_filter",
+    i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter",assemblytype='singles_hostfiltered'),
     outbase="data/sequencing_doublefiltered/{hostcode}/{hostcode}"
   output:
        expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}",PE=DIRECTIONS)
@@ -300,13 +307,53 @@ rule spades_second_assembly:
   params:
     "--meta --only-assembler --careful"
   output:
-    basedir="data/assembly_singles_doublefiltered/{hostcode}/",
-    contigs="data/assembly_singles_doublefiltered/{hostcode}/contigs.fasta"
+    basedir=expand("data/assembly_{assemblytype}/{{hostcode}}/",assemblytype='singles_doublefiltered'),
+    contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_doublefiltered'),
+    scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/scaffolds.fasta",assemblytype='singles_doublefiltered')
   threads: 100
   resources:
     mem_mb=500
   log:
-    stdout="logs/SPADES_second_assembly_{hostcode}.stdout",
-    stderr="logs/SPADES_second_assembly_{hostcode}.stderr"
+    stdout=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stdout",assemblytype='singles_doublefiltered'),
+    stderr=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stderr",assemblytype='singles_doublefiltered')
   shell:
     "spades.py {params} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
+
+rule bwa_index_assembly_scaffolds:
+  input:
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds.fasta"
+  params:
+    "data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds"
+  output:
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwa','pac','ann','sa','amb'])
+  threads: 1
+  log:
+    stdout="logs/bwa_index_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/bwa_index_{assemblytype}_{hostcode}.stderr"
+  shell:
+    "bwa index -p {params} {input} > {log.stdout} 2> {log.stderr}"
+
+READTYPES= ['.trimmed_paired.R','.trimmed']
+
+rule backmap_bwa_mem:
+  input:
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwa','pac','ann','sa','amb']),
+    reads=expand("data/sequencing_binning_signals/{{binningsignal}}{readtype}{PE}.fastq.gz",PE=[1,2,''],readtype=READTYPES)
+  params:
+    "data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds"
+  output:
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
+  threads: 100
+  log:
+    stdout="logs/bwa_backmap_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/bwa_backmap_{assemblytype}_{hostcode}.stderr"
+  shell:
+    "bwa mem -t {threads} -p {params} {input.reads} | samtools view -b -o {output}"
+
+rule allbackmapped:
+  input:
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+
+rule backmap_samtools_sort:
+  input:
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
