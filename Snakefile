@@ -223,8 +223,8 @@ rule CAT_first_spades_assembly:
     p=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs_predicted_proteins.fasta",assemblytype='singles_hostfiltered')
   output:
     i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.contig2classification.txt",assemblytype='singles_hostfiltered'),
-    g=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.gff",assemblytype='singles_hostfiltered'),
-    f=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.faa",assemblytype='singles_hostfiltered'),
+#    g=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.gff",assemblytype='singles_hostfiltered'),
+#    f=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.faa",assemblytype='singles_hostfiltered'),
     o=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.ORF2LCA.txt",assemblytype='singles_hostfiltered'),
     l=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.log",assemblytype='singles_hostfiltered')
   shadow: "shallow"
