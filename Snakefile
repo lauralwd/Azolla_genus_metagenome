@@ -200,16 +200,34 @@ rule spades_first_assembly:
     "spades.py {params} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
 
 ## process first assembly for second filter
+rule CAT_prepare_ORFS:
+  input:
+    contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_hostfiltered')
+  output: 
+    p=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs_predicted_proteins.fasta",assemblytype='singles_hostfiltered'),
+    g=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs_predicted_proteins.gff",assemblytype='singles_hostfiltered')
+  params:
+    "-p meta -g 11 -q -f gff"
+  threads: 1
+  log:
+    stdout=expand("logs/CAT_assembly_{assemblytype}_prodigal_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
+    stderr=expand("logs/CAT_assembly_{assemblytype}_prodigal_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
+  shell:
+    "prodigal -i {input.contigs} -a {output.p} -o {output.g} {params}"
+
 rule CAT_first_spades_assembly:
   input:
     contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_hostfiltered'),
     db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
-    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy"
+    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
+    p=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs_predicted_proteins.fasta",assemblytype='singles_hostfiltered')
   params:
   output:
     base=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}",assemblytype='singles_hostfiltered'),
     i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}contig2classification.txt",assemblytype='singles_hostfiltered')
-  threads: 100
+  threads: 30
+  resources:
+    mem_mb=500000
   log:
     stdout=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
     stderr=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
