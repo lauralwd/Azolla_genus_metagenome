@@ -226,9 +226,9 @@ rule CAT_first_spades_assembly:
     g=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.gff",assemblytype='singles_hostfiltered'),
     f=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.faa",assemblytype='singles_hostfiltered'),
     o=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.ORF2LCA.txt",assemblytype='singles_hostfiltered'),
-    l=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.log",assemblytype='singles_hostfiltered'),
-    b=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}",assemblytype='singles_hostfiltered')
+    l=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.log",assemblytype='singles_hostfiltered')
   shadow: "shallow"
+  params: b = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}",assemblytype='singles_hostfiltered',hostcode=w.hostcode)
   threads: 100
   resources:
     mem_mb=30000
@@ -236,7 +236,7 @@ rule CAT_first_spades_assembly:
     stdout=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
     stderr=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
   shell:
-    "CAT contigs -c {input.contigs} -d {input.db} -p {input.p} -t {input.tf} --out_prefix {output.b} -n {threads} 2> {log.stderr} > {log.stdout}"
+    "CAT contigs -c {input.contigs} -d {input.db} -p {input.p} -t {input.tf} --out_prefix {params.b} -n {threads} 2> {log.stderr} > {log.stdout}"
 
 rule CAT_add_names_first_spades_assembly:
   input:
@@ -329,10 +329,10 @@ rule spades_second_assembly:
     basedir=expand("data/assembly_{assemblytype}/{{hostcode}}/",assemblytype='singles_doublefiltered'),
     contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_doublefiltered'),
     scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/scaffolds.fasta",assemblytype='singles_doublefiltered'),
-    expand("data/assembly_{assemblytype}/{{hostcode}}/assembly_graph.fastg",assemblytype='singles_doublefiltered'),
-    expand("data/assembly_{assemblytype}/{{hostcode}}/assembly_graph_with_scaffolds.fastg",assemblytype='singles_doublefiltered'),
-    expand("data/assembly_{assemblytype}/{{hostcode}}/input_dataset.yaml",assemblytype='singles_doublefiltered'),
-    expand("data/assembly_{assemblytype}/{{hostcode}}/params.txt",assemblytype='singles_doublefiltered')
+    graph=expand("data/assembly_{assemblytype}/{{hostcode}}/assembly_graph.fastg",assemblytype='singles_doublefiltered'),
+    graph_scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/assembly_graph_with_scaffolds.fastg",assemblytype='singles_doublefiltered'),
+    datasetyaml=expand("data/assembly_{assemblytype}/{{hostcode}}/input_dataset.yaml",assemblytype='singles_doublefiltered'),
+    paramfile=expand("data/assembly_{assemblytype}/{{hostcode}}/params.txt",assemblytype='singles_doublefiltered')
   threads: 100
   shadow: "shallow"
   resources:
