@@ -225,14 +225,14 @@ rule CAT_first_spades_assembly:
   output:
     base=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}",assemblytype='singles_hostfiltered'),
     i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}contig2classification.txt",assemblytype='singles_hostfiltered')
-  threads: 30
+  threads: 16
   resources:
     mem_mb=500000
   log:
     stdout=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
     stderr=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
   shell:
-    "CAT contigs -c {input.contigs} -d {input.db} -t {input.tf} --out_prefix {output.base} -n {threads} 2> {log.stderr} > {log.stdout}"
+    "CAT contigs -c {input.contigs} -d {input.db} -p {input.p} -t {input.tf} --out_prefix {output.base} -n {threads} 2> {log.stderr} > {log.stdout}"
 
 rule CAT_add_names_first_spades_assembly:
   input:
