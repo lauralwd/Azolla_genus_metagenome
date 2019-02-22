@@ -221,15 +221,13 @@ rule CAT_first_spades_assembly:
     db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
     tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
     p=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs_predicted_proteins.fasta",assemblytype='singles_hostfiltered')
-  params:
-#    b=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}"                         ,assemblytype='singles_hostfiltered')
-    b="data/assembly_singles_hostfiltered/{hostcode}/CAT_{hostcode}"
   output:
     i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.contig2classification.txt",assemblytype='singles_hostfiltered'),
     g=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.gff",assemblytype='singles_hostfiltered'),
     f=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.faa",assemblytype='singles_hostfiltered'),
     o=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.ORF2LCA.txt",assemblytype='singles_hostfiltered'),
-    l=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.log",assemblytype='singles_hostfiltered')
+    l=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.log",assemblytype='singles_hostfiltered'),
+    b=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}",assemblytype='singles_hostfiltered')
   shadow: "shallow"
   threads: 100
   resources:
@@ -238,7 +236,7 @@ rule CAT_first_spades_assembly:
     stdout=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
     stderr=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
   shell:
-    "CAT contigs -c {input.contigs} -d {input.db} -p {input.p} -t {input.tf} --out_prefix {params.b} -n {threads} 2> {log.stderr} > {log.stdout}"
+    "CAT contigs -c {input.contigs} -d {input.db} -p {input.p} -t {input.tf} --out_prefix {output.b} -n {threads} 2> {log.stderr} > {log.stdout}"
 
 rule CAT_add_names_first_spades_assembly:
   input:
