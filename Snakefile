@@ -222,21 +222,27 @@ rule CAT_first_spades_assembly:
     tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
     p=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs_predicted_proteins.fasta",assemblytype='singles_hostfiltered')
   params:
+#    b=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}"                         ,assemblytype='singles_hostfiltered')
+    b="data/assembly_singles_hostfiltered/{hostcode}/CAT_{hostcode}"
   output:
-    base=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}",assemblytype='singles_hostfiltered'),
-    i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}contig2classification.txt",assemblytype='singles_hostfiltered')
+    i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.contig2classification.txt",assemblytype='singles_hostfiltered'),
+    g=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.gff",assemblytype='singles_hostfiltered'),
+    f=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.faa",assemblytype='singles_hostfiltered'),
+    o=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.ORF2LCA.txt",assemblytype='singles_hostfiltered'),
+    l=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.log",assemblytype='singles_hostfiltered')
+  shadow: "shallow"
   threads: 100
   resources:
-    mem_mb=500000
+    mem_mb=30000
   log:
     stdout=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
     stderr=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
   shell:
-    "CAT contigs -c {input.contigs} -d {input.db} -p {input.p} -t {input.tf} --out_prefix {output.base} -n {threads} 2> {log.stderr} > {log.stdout}"
+    "CAT contigs -c {input.contigs} -d {input.db} -p {input.p} -t {input.tf} --out_prefix {params.b} -n {threads} 2> {log.stderr} > {log.stdout}"
 
 rule CAT_add_names_first_spades_assembly:
   input:
-    i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}contig2classification.txt",assemblytype='singles_hostfiltered'),
+    i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.contig2classification.txt",assemblytype='singles_hostfiltered'),
     t="references/CAT_prepare_20190108/2019-01-08_taxonomy"
   output:
      expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}_contig_taxonomy.tab",assemblytype='singles_hostfiltered')
