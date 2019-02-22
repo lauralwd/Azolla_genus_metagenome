@@ -225,7 +225,7 @@ rule CAT_first_spades_assembly:
   output:
     base=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}",assemblytype='singles_hostfiltered'),
     i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}contig2classification.txt",assemblytype='singles_hostfiltered')
-  threads: 16
+  threads: 100
   resources:
     mem_mb=500000
   log:
