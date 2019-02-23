@@ -279,7 +279,7 @@ rule create_first_spades_assembly_filter_bt2_index:
   input:
     expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_{{hostcode}}.fasta",assemblytype='singles_hostfiltered')
   params:
-    lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype='singles_hostfiltered', hostcode=w.hostcode)
+    filter = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype='singles_hostfiltered', hostcode=w.hostcode)
   output:
     expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4),assemblytype='singles_hostfiltered'),
     expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2),assemblytype='singles_hostfiltered'),
@@ -288,7 +288,7 @@ rule create_first_spades_assembly_filter_bt2_index:
     stdout=expand("logs/CAT_create_assembly_filter_{assemblytype}_filterbt2index_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
     stderr=expand("logs/CAT_create_assembly_filter_{assemblytype}_filterbt2index_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
   shell:
-    "bowtie2-build --threads {threads} {input} {params} > {log.stdout} 2> {log.stderr}"
+    "bowtie2-build --threads {threads} {input} {params.filter} > {log.stdout} 2> {log.stderr}"
 
 rule filter_for_assembly:
   input:
