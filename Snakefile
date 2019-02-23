@@ -316,7 +316,7 @@ rule rename_filtered_sequencing_files:
     b1=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=1),
     b2=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=2)
   shell:
-    "mv a1 b1 && mb a2 b2"
+    "mv {input.a1} {output.b1} && mv {input.a2} {output.b2}"
 
 rule spades_second_assembly:
   input:
@@ -324,7 +324,7 @@ rule spades_second_assembly:
     s1=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=1),
     s2=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=2)
   params:
-    "--meta --only-assembler --careful"
+    "--meta --only-assembler"
   output:
     basedir=expand("data/assembly_{assemblytype}/{{hostcode}}/",assemblytype='singles_doublefiltered'),
     contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_doublefiltered'),
