@@ -330,7 +330,7 @@ rule spades_second_assembly:
     contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_doublefiltered'),
     scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/scaffolds.fasta",assemblytype='singles_doublefiltered'),
     graph=expand("data/assembly_{assemblytype}/{{hostcode}}/assembly_graph.fastg",assemblytype='singles_doublefiltered'),
-    graph_scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/assembly_graph_with_scaffolds.fastg",assemblytype='singles_doublefiltered'),
+    graph_scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/assembly_graph_with_scaffolds.gfa",assemblytype='singles_doublefiltered'),
     datasetyaml=expand("data/assembly_{assemblytype}/{{hostcode}}/input_dataset.yaml",assemblytype='singles_doublefiltered'),
     paramfile=expand("data/assembly_{assemblytype}/{{hostcode}}/params.txt",assemblytype='singles_doublefiltered')
   threads: 100
