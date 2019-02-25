@@ -322,7 +322,7 @@ rule shorten scaffold_names:
   output:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta"
   shell:
-    ""#shell("awk -F "_" '/>NODE/{$0=">NODE_"$2}1' {input} > {output}")
+   """awk -F '_' '/>NODE/{{$0=">NODE_"$2}}1' {input} > {output}"""
 
 rule bwa_index_assembly_scaffolds:
   input:
