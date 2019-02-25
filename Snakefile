@@ -376,8 +376,6 @@ def get_binning_reads(wildcards):
     elif os.path.isfile(pathse) == True :
       return {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz", PE=[1,2],binningsignal=wildcards.binningsignal) }
 
-#reads=expand("data/sequencing_binning_signals/{{binningsignal}}.{type}{PE}.fastq.gz", PE=[1,2,''],type=type)
-
 rule backmap_bwa_mem:
   input:
     expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwa','pac','ann','sa','amb']),
