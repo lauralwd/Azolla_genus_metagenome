@@ -388,10 +388,10 @@ rule backmap_bwa_mem:
   threads: 100
   log:
     stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
-    stdsamerr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
+    samstderr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
     stderr="logs/bwa_backmap_{assemblytype}_{hostcode}.stderr"
   shell:
-    "bwa mem -t {threads} {params} {input.reads} 2> {log.stderr} | samtools view -b -o {output} 2> {log.samstderr} > {log.stdout}"
+    "bwa mem -t {threads} {params} {input.reads} 2> {log.stderr} | samtools view -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
 rule backmap_samtools_sort:
   input:
