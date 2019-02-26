@@ -357,7 +357,7 @@ rule bwa_index_assembly_scaffolds:
   params:
     "data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds"
   output:
-    expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwa']) #,'pac','ann','sa','amb'])
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
   threads: 1
   log:
     stdout="logs/bwa_index_{assemblytype}_{hostcode}.stdout",
@@ -380,7 +380,7 @@ def get_binning_reads(wildcards):
 rule backmap_bwa_mem:
   input:
     unpack(get_binning_reads),
-    index=expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwa'])#,'pac','ann','sa','amb'])
+    index=expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
   params:
     "data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds"
   output:
@@ -399,7 +399,7 @@ rule backmap_samtools_sort:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam"
   threads: 6
   resources:
-    mem_mb=500
+    mem_mb=5000
   shell:
     "samtools sort -@ {threads} -m {mem_mb}M -o {output} {input}"
 
