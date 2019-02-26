@@ -390,7 +390,7 @@ rule backmap_bwa_mem:
     stdout="logs/bwa_backmap_{assemblytype}_{hostcode}.stdout",
     stderr="logs/bwa_backmap_{assemblytype}_{hostcode}.stderr"
   shell:
-    "bwa mem -t {threads} -p {params} {input.reads} | samtools view -b -o {output}"
+    "bwa mem -t {threads} {params} {input.reads} | samtools view -b -o {output} 2> {log.stderr} > {log.stdout}"
 
 rule backmap_samtools_sort:
   input:
