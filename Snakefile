@@ -5,6 +5,9 @@ ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doubl
 BINNINGSIGNALS=['dijkhuizen2018.E.1', 'dijkhuizen2018.E.2', 'dijkhuizen2018.E.3', 'dijkhuizen2018.P.2', 'dijkhuizen2018.P.3', 'dijkhuizen2018.P.4','ran2010.nostoc.SRR066216','ran2010.nostoc.SRR066217','ran2010.nostoc.SRR3923641','ran2010.nostoc.SRR3923645','ran2010.nostoc.SRR3923646']
 
 ## 'All'-rules
+rule allsecondcat:
+  input:
+    expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_contig_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES)
 rule allfastqc:
   input:
     expand("analyses/analyses_reads/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
@@ -202,51 +205,51 @@ rule spades_first_assembly:
 ## process first assembly for second filter
 rule CAT_prepare_ORFS:
   input:
-    contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_hostfiltered')
+    contigs="data/assembly_{assemblytype}/{hostcode}/contigs.fasta"
   output: 
-    p=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs_predicted_proteins.fasta",assemblytype='singles_hostfiltered'),
-    g=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs_predicted_proteins.gff",assemblytype='singles_hostfiltered')
+    p="data/assembly_{assemblytype}/{hostcode}/contigs_predicted_proteins.fasta",
+    g="data/assembly_{assemblytype}/{hostcode}/contigs_predicted_proteins.gff"
   params:
     "-p meta -g 11 -q -f gff"
   threads: 1
   log:
-    stdout=expand("logs/CAT_assembly_{assemblytype}_prodigal_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
-    stderr=expand("logs/CAT_assembly_{assemblytype}_prodigal_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
+    stdout="logs/CAT_assembly_{assemblytype}_prodigal_{hostcode}.stdout",
+    stderr="logs/CAT_assembly_{assemblytype}_prodigal_{hostcode}.stderr"
   shell:
-    "prodigal -i {input.contigs} -a {output.p} -o {output.g} {params}"
+    "prodigal -i {input.contigs} -a {output.p} -o {output.g} {params} 2> {log.stderr} > {log.stdout}"
 
 rule CAT_first_spades_assembly:
   input:
-    contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_hostfiltered'),
+    contigs="data/assembly_{assemblytype}/{hostcode}/contigs.fasta",
     db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
     tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
-    p=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs_predicted_proteins.fasta",assemblytype='singles_hostfiltered')
+    p="data/assembly_{assemblytype}/{hostcode}/contigs_predicted_proteins.fasta"
   output:
-    i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.contig2classification.txt",assemblytype='singles_hostfiltered'),
+    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.contig2classification.txt",
 #    g=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.gff",assemblytype='singles_hostfiltered'),
 #    f=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.faa",assemblytype='singles_hostfiltered'),
-    o=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.ORF2LCA.txt",assemblytype='singles_hostfiltered'),
-    l=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.log",assemblytype='singles_hostfiltered')
+    o="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.ORF2LCA.txt",
+    l="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.log"
   shadow: "shallow"
-  params: b = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}",assemblytype='singles_hostfiltered',hostcode=w.hostcode)
+  params: b = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}", assemblytype=w.assemblytype, hostcode=w.hostcode)
   threads: 100
   resources:
     mem_mb=30000
   log:
-    stdout=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
-    stderr=expand("logs/CAT_assembly_{assemblytype}_classification_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
+    stdout="logs/CAT_assembly_{assemblytype}_classification_{hostcode}.stdout",
+    stderr="logs/CAT_assembly_{assemblytype}_classification_{hostcode}.stderr"
   shell:
     "CAT contigs -c {input.contigs} -d {input.db} -p {input.p} -t {input.tf} --out_prefix {params.b} -n {threads} 2> {log.stderr} > {log.stdout}"
 
 rule CAT_add_names_first_spades_assembly:
   input:
-    i=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.contig2classification.txt",assemblytype='singles_hostfiltered'),
+    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.contig2classification.txt",
     t="references/CAT_prepare_20190108/2019-01-08_taxonomy"
   output:
-     expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}_contig_taxonomy.tab",assemblytype='singles_hostfiltered')
+     "data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_contig_taxonomy.tab"
   log:
-    stdout=expand("logs/CAT_assembly_{assemblytype}_classification_taxonomy_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
-    stderr=expand("logs/CAT_assembly_{assemblytype}_classification_taxonomy_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
+    stdout="logs/CAT_assembly_{assemblytype}_classification_taxonomy_{hostcode}.stdout",
+    stderr="logs/CAT_assembly_{assemblytype}_classification_taxonomy_{hostcode}.stderr"
   threads: 1
   shell:
     "CAT add_names -i {input.i} -t {input.t} -o {output} > {log.stdout} 2> {log.stderr}"
