@@ -34,7 +34,7 @@ rule allsecondassemblies:
 ## analyses rules
 rule fastqc_raw_data:
   input:
-    "data/sequencing_genomic/{hostcode}_{PE}.fastq.gz"
+    "data/sequencing_genomic/{hostcode}.{PE}.fastq.gz"
   output:
     "analyses/analyses_reads/{hostcode}_{PE}"
   shell:
@@ -44,7 +44,7 @@ rule fastqc_trimmed_data:
   input:
     "data/sequencing_genomic_trimmed/{hostcode}_{PE}.fastq.gz"
   output:
-    "analyses/analyses_genomic_trimmed/{hostcode}_{PE}"
+    "analyses/analyses_reads_trimmed/{hostcode}_{PE}"
   shell:
     "mkdir {output} 2> /dev/null && fastqc -o {output} {input}"
 
@@ -126,7 +126,7 @@ rule create_host_filter_bt2_index:
 ## data processing rules
 rule trimmomatic_genomic_sequencing:
   input:
-    expand("data/sequencing_genomic/{{hostcode}}_{PE}.fastq.gz", PE=DIRECTIONS)
+    expand("data/sequencing_genomic/{{hostcode}}.{PE}.fastq.gz", PE=DIRECTIONS)
   params:
     "LEADING:5 TRAILING:5 SLIDINGWINDOW:4:15 MINLEN:36"
   output:
