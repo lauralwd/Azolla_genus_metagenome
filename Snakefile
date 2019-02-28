@@ -1,10 +1,17 @@
-HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
+#HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
+HOSTCODES= ['Azfil.lab.250', 'Azfil.lab.500', 'Azfil.lab.800', 'Azfil.minuscyano.170', 'Azfil.minuscyano.350', 'Azfil.minuscyano_HIC', 'Azfil.wild.galgw_E_1', 'Azfil.wild.galgw_E_2', 'Azfil.wild.galgw_E_3', 'Azfil.wild.galgw_P_2', 'Azfil.wild.galgw_P_3', 'Azfil.wild.galgw_P_4', 'Azmex.IRRI.486', 'Azmic.IRRI.456', 'Aznil.IRRI.479', 'Azrub.IRRI.479', 'Azspnov.IRRI_1.472', 'Azspnov.IRRI_2.489'] 
 DIRECTIONS=["1","2"]
 
 ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered']
 BINNINGSIGNALS=['dijkhuizen2018.E.1', 'dijkhuizen2018.E.2', 'dijkhuizen2018.E.3', 'dijkhuizen2018.P.2', 'dijkhuizen2018.P.3', 'dijkhuizen2018.P.4','ran2010.nostoc.SRR066216','ran2010.nostoc.SRR066217','ran2010.nostoc.SRR3923641','ran2010.nostoc.SRR3923645','ran2010.nostoc.SRR3923646']
 
 ## 'All'-rules
+rule all:
+  input:
+    expand("analyses/analyses_reads/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS),
+    expand("data/assembly_singles_doublefiltered/{hostcode}/contigs.fasta",hostcode=HOSTCODES),
+    expand("analyses/analyses_reads_trimmed/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
+
 rule allfastqc:
   input:
     expand("analyses/analyses_reads/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
