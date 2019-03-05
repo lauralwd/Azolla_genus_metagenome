@@ -7,8 +7,7 @@ ASSEMBLYFILES=['contigs','scaffolds']
 ## 'All'-rules
 rule allsecondcat:
   input:
-    expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES),
-    expand("data/assembly_singles_doublefiltered/{hostcode}/contigs.fasta",hostcode=HOSTCODES)
+    expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
 rule allfastqc:
   input:
     expand("analyses/analyses_reads/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
@@ -27,6 +26,11 @@ rule allreadscorrected:
 rule allsecondassemblies:
   input:
     expand("data/assembly_singles_doublefiltered/{hostcode}/contigs.fasta",hostcode=HOSTCODES)
+rule allbackmapped:
+  input:
+#    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam",       binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+
 
 ## analyses rules
 rule fastqc_raw_data:
@@ -404,8 +408,3 @@ rule backmap_samtools_sort:
     mem_mb=5000
   shell:
     "samtools sort -@ {threads} -m {mem_mb}M -o {output} {input}"
-
-rule allbackmapped:
-  input:
-#    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
-    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam",       binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
