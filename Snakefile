@@ -207,7 +207,7 @@ rule spades_first_assembly:
   shell:
     "spades.py {params} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
 
-## process first assembly for second filter
+## process assembly for taxonomy including a taxonomy based second filter
 rule CAT_prepare_ORFS:
   input:
     assembly="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta"
@@ -326,6 +326,7 @@ rule rename_filtered_sequencing_files:
   shell:
     "mv {input.a1} {output.b1} && mv {input.a2} {output.b2}"
 
+## double filtered assemblies
 rule spades_second_assembly:
   input:
     reads=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=DIRECTIONS),
@@ -351,6 +352,8 @@ rule spades_second_assembly:
   shell:
     "spades.py {params} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
 
+
+## assembly processing for binning an Anvi'o
 rule shorten scaffold_names:
   input:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds.fasta"
