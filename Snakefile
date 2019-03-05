@@ -352,9 +352,18 @@ rule spades_second_assembly:
   shell:
     "spades.py {params} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
 
-
+## assembly analyses and diagnostigs
+rule collect_assembly_stats:
+  input:
+    expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
+  output:
+    "analyses/assembly_stats_and_taxonomy.tab.gz"
+  shell:
+    """
+    cat {input} | grep -v '#' | tr '_' "\t" | cut -f 2- | sort -k1n | sed  "s/^/$a\t$h\t/g" | cut -f 1,2,3,5,7,8,13- | cut -f 1-17 | pigz  -c > .{output}
+    """
 ## assembly processing for binning an Anvi'o
-rule shorten scaffold_names:
+rule shorten_scaffold_names:
   input:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds.fasta"
   output:
