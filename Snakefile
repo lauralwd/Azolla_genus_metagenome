@@ -218,7 +218,7 @@ rule CAT_prepare_ORFS:
   shell:
     "prodigal -i {input.contigs} -a {output.p} -o {output.g} {params} 2> {log.stderr} > {log.stdout}"
 
-rule CAT_first_spades_assembly:
+rule CAT_classify_contigs_assembly:
   input:
     contigs="data/assembly_{assemblytype}/{hostcode}/contigs.fasta",
     db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
@@ -241,7 +241,7 @@ rule CAT_first_spades_assembly:
   shell:
     "CAT contigs -c {input.contigs} -d {input.db} -p {input.p} -t {input.tf} --out_prefix {params.b} -n {threads} 2> {log.stderr} > {log.stdout}"
 
-rule CAT_add_names_first_spades_assembly:
+rule CAT_add_names_assembly:
   input:
     i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.contig2classification.txt",
     t="references/CAT_prepare_20190108/2019-01-08_taxonomy"
