@@ -359,14 +359,17 @@ rule collect_assembly_stats:
   params:
     assemblytype= lambda w : expand("{assemblytype}",assemblytype=ASSEMBLYTYPES),
     hostcode= lambda w : expand("{hostcode}",hostcode=HOSTCODES),
-    assemblyfile= lambda w : expand("{assemblyfile}",assemblyfile=ASSEMBLYTYPES)
+    assemblyfile= lambda w : expand("{assemblyfile}",assemblyfile=ASSEMBLYFILES)
   output:
     "analyses/assembly_stats_and_taxonomy.tab.gz"
+  threads: 12
+  resources:
+    mem_mb=1000
   shell:
     """
-    scripts/make_assembly_stats_and_taxonomy.bash "{params.assemblytype}" "{params.hostcode}" "{params.assemblyfile}" {output}
+    scripts/make_assembly_stats_and_taxonomy.bash "{params.assemblytype}" "{params.hostcode}" "{params.assemblyfile}" {threads} {resources.mem_mb} {output}
     """
-    #cat {input} | grep -v '#' | tr '_' "\t" | cut -f 2- | sort -k1n | sed  "s/^/$a\t$h\t/g" | cut -f 1,2,3,5,7,8,13- | cut -f 1-17 | pigz  -c > .{output}
+
 ## assembly processing for binning an Anvi'o
 rule shorten_scaffold_names:
   input:
