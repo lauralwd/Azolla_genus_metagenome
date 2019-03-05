@@ -1,5 +1,5 @@
 #HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
-HOSTCODES= ['Azfil.lab.250', 'Azfil.lab.500', 'Azfil.lab.800', 'Azfil.minuscyano.170', 'Azfil.minuscyano.350', 'Azfil.minuscyano_HIC', 'Azfil.wild.galgw_E_1', 'Azfil.wild.galgw_E_2', 'Azfil.wild.galgw_E_3', 'Azfil.wild.galgw_P_2', 'Azfil.wild.galgw_P_3', 'Azfil.wild.galgw_P_4', 'Azmex.IRRI.486', 'Azmic.IRRI.456', 'Aznil.IRRI.479', 'Azrub.IRRI.479', 'Azspnov.IRRI_1.472', 'Azspnov.IRRI_2.489'] 
+HOSTCODES= ['Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 'Azfil_minuscyano_170', 'Azfil_minuscyano_350', 'Azfil_minuscyano_HIC', 'Azfil_wild_galgw_E_1', 'Azfil_wild_galgw_E_2', 'Azfil_wild_galgw_E_3', 'Azfil_wild_galgw_P_2', 'Azfil_wild_galgw_P_3', 'Azfil_wild_galgw_P_4', 'Azmex_IRRI_486', 'Azmic_IRRI_456', 'Aznil_IRRI_479', 'Azrub_IRRI_479', 'Azspnov_IRRI_1_472', 'Azspnov_IRRI_2_489'] 
 DIRECTIONS=["1","2"]
 
 ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered']
@@ -34,7 +34,7 @@ rule allsecondassemblies:
 ## analyses rules
 rule fastqc_raw_data:
   input:
-    "data/sequencing_genomic/{hostcode}.{PE}.fastq.gz"
+    "data/sequencing_genomic/{hostcode}_{PE}.fastq.gz"
   output:
     "analyses/analyses_reads/{hostcode}_{PE}"
   shell:
@@ -126,13 +126,14 @@ rule create_host_filter_bt2_index:
 ## data processing rules
 rule trimmomatic_genomic_sequencing:
   input:
-    expand("data/sequencing_genomic/{{hostcode}}.{PE}.fastq.gz", PE=DIRECTIONS)
+    expand("data/sequencing_genomic/{{hostcode}}_{PE}.fastq.gz", PE=DIRECTIONS)
   params:
     "LEADING:5 TRAILING:5 SLIDINGWINDOW:4:15 MINLEN:36"
   output:
     p1="data/sequencing_genomic_trimmed/{hostcode}_1.fastq.gz",
     p2="data/sequencing_genomic_trimmed/{hostcode}_2.fastq.gz",
-  threads: 2
+  threads: 4
+  resources: io=1
   log:
     log="logs/trimmomatic_genomicsequencing.{hostcode}.log",
     summary="logs/trimmomatic_genomicsequencing_summary{hostcode}.log"
