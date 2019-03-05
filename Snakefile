@@ -1,10 +1,12 @@
-HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
+#HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
+HOSTCODES= ['Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 'Azfil_minuscyano_170', 'Azfil_minuscyano_350', 'Azfil_minuscyano_HIC', 'Azfil_wild_galgw_E_1', 'Azfil_wild_galgw_E_2', 'Azfil_wild_galgw_E_3', 'Azfil_wild_galgw_P_2', 'Azfil_wild_galgw_P_3', 'Azfil_wild_galgw_P_4', 'Azmex_IRRI_486', 'Azmic_IRRI_456', 'Aznil_IRRI_479', 'Azrub_IRRI_479', 'Azspnov_IRRI_1_472', 'Azspnov_IRRI_2_489'] 
 DIRECTIONS=["1","2"]
 
 ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered']
 BINNINGSIGNALS=['dijkhuizen2018.E.1', 'dijkhuizen2018.E.2', 'dijkhuizen2018.E.3', 'dijkhuizen2018.P.2', 'dijkhuizen2018.P.3', 'dijkhuizen2018.P.4','ran2010.nostoc.SRR066216','ran2010.nostoc.SRR066217','ran2010.nostoc.SRR3923641','ran2010.nostoc.SRR3923645','ran2010.nostoc.SRR3923646']
 ASSEMBLYFILES=['contigs','scaffolds']
 ## 'All'-rules
+
 rule allsecondcat:
   input:
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
@@ -45,7 +47,7 @@ rule fastqc_trimmed_data:
   input:
     "data/sequencing_genomic_trimmed/{hostcode}_{PE}.fastq.gz"
   output:
-    "analyses/analyses_genomic_trimmed/{hostcode}_{PE}"
+    "analyses/analyses_reads_trimmed/{hostcode}_{PE}"
   shell:
     "mkdir {output} 2> /dev/null && fastqc -o {output} {input}"
 
@@ -133,7 +135,8 @@ rule trimmomatic_genomic_sequencing:
   output:
     p1="data/sequencing_genomic_trimmed/{hostcode}_1.fastq.gz",
     p2="data/sequencing_genomic_trimmed/{hostcode}_2.fastq.gz",
-  threads: 2
+  threads: 4
+  resources: io=1
   log:
     log="logs/trimmomatic_genomicsequencing.{hostcode}.log",
     summary="logs/trimmomatic_genomicsequencing_summary{hostcode}.log"
