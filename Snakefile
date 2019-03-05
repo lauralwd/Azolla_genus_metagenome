@@ -368,8 +368,6 @@ rule bwa_index_assembly_scaffolds:
   shell:
     "bwa index -p {params} {input} > {log.stdout} 2> {log.stderr}"
 
-READTYPES= ['.trimmed_paired.R','.trimmed']
-
 import os.path
 def get_binning_reads(wildcards):
     pathpe=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed_paired.R1.fastq.gz")
@@ -377,15 +375,14 @@ def get_binning_reads(wildcards):
     if os.path.isfile(pathpe) == True :
       return {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed_paired.R{PE}.fastq.gz", PE=[1,2],binningsignal=wildcards.binningsignal) }
     elif os.path.isfile(pathse) == True :
-      return {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz",binningsignal=wildcards.binningsignal) }
-
+      return {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz", binningsignal=wildcards.binningsignal) }
 
 rule backmap_bwa_mem:
   input:
     unpack(get_binning_reads),
     index=expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
   params:
-    "data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds"
+    lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
   threads: 100
@@ -409,5 +406,5 @@ rule backmap_samtools_sort:
 
 rule allbackmapped:
   input:
-    #expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
-    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+#    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam",       binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
