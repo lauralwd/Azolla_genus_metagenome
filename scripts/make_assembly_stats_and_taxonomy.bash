@@ -13,10 +13,15 @@ CPU=$4
 MEM=$5
 output=$6
 
+echo "running assemblytypes $assemblytype for hostcodes $hostcodes"
+echo "Considering assembly files: $files"
+echo "Using $CPU CPUs and $MEM RAM and writing to $output"
+
 # run a loop over the input variables given to this script by snakemake wildcards
 for   a in ${assemblytype[@]}
 do    for   h in ${hostcodes[@]}
       do    for   f in ${files[@]}
-            do    grep -v '#' "./data/$a/$h/"CAT_"$h"_"$f"_taxonomy.tab | tr '_' "\t" | cut -f 2-  | sort -k1n --parallel $CPU -s $mem | sed  "s/^/$a\t$h\t$f\t/g"
+            do    grep -v '#' ./data/assembly_"$a"/"$h"/CAT_"$h"_"$f"_taxonomy.tab | tr '_' "\t" | cut -f 2-  | sort -k1n --parallel $CPU -s $mem | sed  "s/^/$a\t$h\t$f\t/g"
+	    done
       done
-done | cut -f 1,2,3,5,7,8,13- | cut -f 1-17 | pigz -c -p {threads} -R > ""$output"
+done | pigz -c -p $CPU -R > "$output"
