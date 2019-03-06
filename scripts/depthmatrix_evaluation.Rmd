@@ -1,0 +1,119 @@
+---
+title: "Visualise depth of coverage matrix for binning the Azolla genus metagenome"
+author: "Laura Dijkhuizen"
+date: "06/03/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE,root.dir="/stor/azolla_metagenome/Azolla_genus_metagenome/"}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/stor/azolla_metagenome/Azolla_genus_metagenome/")
+```
+
+Setting up R environment, data.table for efficient reading of big matrices, pheatmap for convenient plotting of heatmaps, and ggplot2 for nice plotting of depth frequencies.
+```{r,}
+setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/")
+library(data.table)
+library(pheatmap)
+library(ggplot2)
+```
+
+Now read and sumarise the data
+```{r}
+dm <- fread(input = "./data/assembly_singles_hostfiltered_binningsignals/azca1_SRR6480231/azca1_SRR6480231.hostfiltered.depthmatrix",
+            sep = '\t',
+            header = T,
+            stringsAsFactors = F,
+            data.table = T,
+            select=c(1,2,3,4,6,8,10,12,14,16,18,20,22,24)
+            )
+summary(dm)
+```
+Note that the numbers are quite unbalanced due to a high number of short contigs, and a high number of low coverage contigs. That's why I first discard all contigs lower than 5kbase
+```{r}
+dm5000 <- dm[contigLen > 5000]
+summary(dm5000)
+```
+
+Now I select only depth columns for plotting and transform the matrix to log10
+```{r}
+# drop non-depthmatrix columns
+mat <- dm5000[,4:length(dm5000)]
+# tranform to log10 for better visualisation
+mat <- log10(mat+1)
+# Differential abundance is better in log10
+pheatmap::pheatmap(mat = mat,angle_col = 45)
+rm(mat)
+```
+
+There is a duality in the depth, presumably the main symbiont N.azollae and other bacteria. Alternativelly this could be plant contamination vs bacterial contigs. I want to investigate this further by plotting the frequencies of depths found in the matrix. Therefore I first melt the matrix in a tidy data.table.
+
+```{r}
+dm_melt <- melt(data = dm5000,
+                id.vars = colnames(dm5000)[1:3],
+                measure.vars = colnames(dm5000)[4:length(dm5000)],
+                value.name = 'depth',
+                variable.name = 'binsignal',
+                variable.factor = T
+                )
+summary(dm_melt)
+
+```
+
+And then I use ggplot2 to plot the frequencies of depths found in the matrix, and colour the lines by the original binning signal.
+```{r}
+dm_prep <- dm_melt
+dm_prep$depth <- dm_prep$depth + 1
+freqplot <- ggplot(dm_melt,aes(x=depth,col=binsignal))
+freqplot <- freqplot + geom_freqpoly()
+freqplot <- freqplot + scale_y_log10()
+#freqplot <- freqplot + scale_x_log10()
+freqplot <- freqplot + theme_classic()
+freqplot <- freqplot + labs(y='frequency',x='depth of coverage per binsignal')
+freqplot
+rm(dm_prep)
+```
+And repeat for a log10 x axis
+```{r}
+dm_prep <- dm_melt
+dm_prep$depth <- dm_prep$depth + 1
+freqplot <- ggplot(dm_melt,aes(x=depth,col=binsignal))
+freqplot <- freqplot + geom_freqpoly()
+freqplot <- freqplot + scale_y_log10()
+freqplot <- freqplot + scale_x_log10()
+freqplot <- freqplot + theme_classic()
+freqplot <- freqplot + labs(y='frequency',x='depth of coverage per binsignal')
+freqplot
+rm(dm_prep)
+```
+
+```{r}
+# now filter for everything lower than 10
+dm_melt_subset <- dm_melt[depth < 10]
+dm_low <- data.table::dcast(data = dm_melt_subset, contigName ~ binsignal,value.var= 'depth')
+rm(dm_melt_subset)
+summary(dm_low)
+```
+
+```{r}
+# prep for heatmap
+mat <- dm_low[,2:length(dm_low)]
+mat <- log10(mat+1)
+pheatmap::pheatmap(mat = mat,angle_col = 45)
+```
+
+
+```{r}
+# do the same for high dpeth contigs
+dm_melt_subset <- dm_melt[depth > 10]
+dm_high <- data.table::dcast(data = dm_melt_subset, contigName ~ binsignal,value.var= 'depth')
+rm(dm_melt_subset)
+summary(dm_high)
+```
+```{r}
+# prep for heatmap
+mat <- dm_high[,2:length(dm_high)]
+mat <- log10(mat+1)
+pheatmap::pheatmap(mat = mat,angle_col = 45)
+```
+
