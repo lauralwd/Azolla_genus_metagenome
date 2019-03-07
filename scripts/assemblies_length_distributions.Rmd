@@ -2,7 +2,7 @@
 title: "Assembly statistics"
 author: "Laura Dijkhuizen"
 date: "07/03/2019"
-output: html_notebook
+output: rmarkdown::github_document
 ---
 
 ```{r setup, include=FALSE}
