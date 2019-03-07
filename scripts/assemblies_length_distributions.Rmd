@@ -1,0 +1,106 @@
+---
+title: "Assembly statistics"
+author: "Laura Dijkhuizen"
+date: "07/03/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
+```
+ 
+# import libraries and data
+```{r}
+#setwd
+setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
+library(data.table)
+library(ggplot2)
+header <-  c('assembly', 'sample', 'scaffolded', 'node',    'length',  'coverage', 'ORFs',    'ORFs_classified', 'superkingdom', 'phylum', 'class',  'order',  'family', 'genus', 'species')
+classes <- c('factor',   'factor', 'factor',     'numeric', 'numeric', 'numeric',  'numeric', 'numeric',         'factor',       'factor', 'factor', 'factor', 'factor', 'factor', 'factor')
+metrics <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly_stats_and_taxonomy.tab",
+                 sep = '\t',
+                 fill = TRUE,
+                 header = F,
+                 stringsAsFactors = T,
+                 data.table = T,
+                 col.names = header,
+                 colClasses = classes
+)
+rm(classes,header)
+```
+
+A quick summary shows that most assemblies are dominated by a lot of short contigs and scaffolds.
+```{r}
+summary(metrics)
+```
+ 
+# Assembly length
+Now let's plot the length distribution for the scaffolds and contigs assembled in the different assemblies. Contigs or scaffolds shorter than 2.5kbp are discarded by default in metabat2, the red vertical line indicates this separation.
+```{r}
+lengthplot <- ggplot (metrics,aes(x=length,col=scaffolded,alpha=.4))
+lengthplot <- lengthplot + geom_freqpoly(bins=50)
+lengthplot <- lengthplot + facet_grid(assembly ~ sample)
+lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
+lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
+lengthplot <- lengthplot + theme_classic()
+lengthplot <- lengthplot + labs(y='count',x='sequence length')
+lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
+lengthplot
+```
+
+A summary of sequences longer than 2.5kbp paints a more balanced picture, even though statics gravitate towards short sequences with few ORFs.
+```{r}
+summary(metrics[length > 2500])
+```
+
+the double log10 axis slightly exagerates the amount of sequencing lost, ploted in a linear x-axis it is more fair to judge.
+```{r}
+lengthplot <- ggplot(metrics,aes(x=length,col=scaffolded,alpha=.4))
+lengthplot <- lengthplot + geom_freqpoly(bins=50)
+lengthplot <- lengthplot + facet_grid(assembly ~ sample)
+lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
+#lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
+lengthplot <- lengthplot + theme_classic()
+lengthplot <- lengthplot + labs(y='count',x='sequence length')
+lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
+lengthplot
+```
+
+The difference between length distributions of scaffolds and contigs is minimal and distributed as expected. Plotting the lengths as boxplots however shows that the Azolla filiculoides samples, those filtered for host DNA most efficiently, clearly have a better length distribution than the other samples do. Here I show only sequences longer than 2500bp
+
+```{r}
+lenghtbox <- ggplot(metrics2500,aes(y=length,x=sample,col=scaffolded,alpha=.4))
+lenghtbox <- lenghtbox + geom_boxplot()
+lenghtbox <- lenghtbox + facet_grid(assembly ~ . )
+lenghtbox <- lenghtbox + theme_classic()
+lenghtbox <- lenghtbox + scale_y_log10()
+lenghtbox
+```
+
+I wonder if scaffolds after the double filter are longer than if they are only filtered for host DNA.
+```{r}
+lengthplot <- ggplot (metrics[scaffolded == 'scaffolds'],aes(x=length,col=assembly,alpha=.4))
+lengthplot <- lengthplot + geom_freqpoly(bins=50)
+lengthplot <- lengthplot + facet_grid(~ sample)
+lengthplot <- lengthplot + scale_y_log10()
+lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
+lengthplot <- lengthplot + theme_classic()
+lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
+lengthplot
+```
+Plotting these as boxplots again
+```{r}
+lenghtbox <- ggplot(metrics2500[scaffolded == 'scaffolds'],aes(y=length,x=sample,col=assembly,alpha=.4))
+#lenghtbox <- lenghtbox + geom_violin()
+lenghtbox <- lenghtbox + geom_boxplot()
+lenghtbox <- lenghtbox + theme_classic()
+lenghtbox <- lenghtbox + scale_y_log10()
+lenghtbox
+```
+
+Further plots, we do not plot the many sequences sherter than 2.5kbp unless specified otherwise.
+```{r}
+# subsets
+metrics2500 <- metrics[length > 2500]
+```
