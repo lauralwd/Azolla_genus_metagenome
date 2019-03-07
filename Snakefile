@@ -240,13 +240,13 @@ rule CAT_classify_contigs_assembly:
     tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
     p="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_predicted_proteins.fasta"
   output:
-    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.{assemblyfile}2classification.txt",
+    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}2classification.txt",
 #    g=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.gff",assemblytype='singles_hostfiltered'),
 #    f=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.faa",assemblytype='singles_hostfiltered'),
-    o="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.{assemblyfile}.ORF2LCA.txt",
-    l="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.{assemblyfile}.log"
+    o="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.ORF2LCA.txt",
+    l="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.log"
   shadow: "shallow"
-  params: b = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_{assemblyfile}_{hostcode}", assemblytype=w.assemblytype, hostcode=w.hostcode, assemblyfile=w.assemblyfile)
+  params: b = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}", assemblytype=w.assemblytype, hostcode=w.hostcode, assemblyfile=w.assemblyfile)
   threads: 100
   resources:
     mem_mb=30000
