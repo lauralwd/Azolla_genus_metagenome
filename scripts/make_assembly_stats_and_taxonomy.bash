@@ -28,5 +28,6 @@ do    for   h in ${hostcodes[@]}
 			| sed  "s/^/$a\t$h\t$f\t/g"
 	    done
       done
-done | cut -f 1,2,3,4,6,8,10,11,14-20 \
+done | cut -f 1,2,3,4,6,8,10,11,14-20 		\
+     | sed -i 's/\:\ [01]\.[0-9][0-9]//g'	\
 	> "$output"
