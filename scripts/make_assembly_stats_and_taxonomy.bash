@@ -24,4 +24,4 @@ do    for   h in ${hostcodes[@]}
             do    grep -v '#' ./data/assembly_"$a"/"$h"/CAT_"$h"_"$f"_taxonomy.tab | tr '_' "\t" | cut -f 2-  | sort -k1n --parallel $CPU -s $mem | sed  "s/^/$a\t$h\t$f\t/g"
 	    done
       done
-done | cut -f 1,2,3,4,6,8,9,14- | cut -f 1-18  > "$output"
+done | cut -f 1,2,3,4,6,8,10,11,14-20 > "$output"
