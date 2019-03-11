@@ -27,7 +27,12 @@ Given
 (1) the transfer mechanism of (cyano)bacteria over _Azolla_ generations, 
 (2) the high level of specialisation of the Cyanobacteria and the host leaf pocket, and 
 (3) the reproducible presence of other bacteria of similar genomic content in the _Azolla_ leaf pockets, 
-I theorise that these third parties in the symbiosis have some fittness benefit to the plant-microbe consortium. 
+I theorise that these third parties in the symbiosis have some fittness benefit to the plant-microbe consortium.
+Previous work and past student projects suggest that these microbes are endophytic (i.e. living inside the plant) and may share an evolutionary origin (Dijkhuizen 2018). 
+A metagenomic approach like the one that is under construction here, may answer questions of similarity of microbes in genome sequence or pathways encoded. 
+Some microbes may be passengers, some may be persistent endophytes. 
+This approach may shed light on the evolutionary history of these microbes and if these are shared or not.
+Finally it could indicate conserved types of functions encoded in these genomes.
 Their function however remains elusive.
 
 ## Technical context
@@ -35,7 +40,6 @@ Recently, a wealth of data was made available to the community including WGS seq
 Here I aim to repurpose this data to assemble the individual metagenomes of the host plants, specifically those hypothetical third partners in the symbiosis. 
 Figures and results may be included at a later stage when confidence of their correctness allows so. 
 These metagenomes may elucidate what, if any, microbes from the different host plants share similarity, origin, and/or functions.
-
 
 ### Reproducibility
 This study aims to achieve full reproducibility by using the anaconda and snakemake frameworks for reproducible science. 
