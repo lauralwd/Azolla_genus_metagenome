@@ -33,6 +33,7 @@ Their function however remains elusive.
 ## Technical context
 Recently, a wealth of data was made available to the community including WGS sequencing of multiple _Azolla_ species, the genome of _Azolla filiculoides_, and genomes of several strains of _N. azollae_; strains which are symbionts to different species of host plant (Li et al. 2018). 
 Here I aim to repurpose this data to assemble the individual metagenomes of the host plants, specifically those hypothetical third partners in the symbiosis. 
+Figures and results may be included at a later stage when confidence of their correctness allows so. 
 These metagenomes may elucidate what, if any, microbes from the different host plants share similarity, origin, and/or functions.
 
 
