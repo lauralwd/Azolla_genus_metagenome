@@ -18,10 +18,10 @@ Please find my contact details on my [personel page](https://www.uu.nl/medewerke
 ## Biological context
 Floating ferns of the genus _Azolla_ are known for their productive symbiosis with cyanobacterium _Nostoc azollae_. 
 Residing inside specialised _Azolla sp._ leaf pockets, _N. azollae_ fixes N<sub>2</sub> using energy of its own photosynthesis thereby providing the host fern with sufficient nitrogen to maintain optimum growth rates in absence of any nitrogen fertilisation. 
-The symbiosis is unique to the _Azolla_ genus dating back to 90M years (Metzgar); the only other genus within this family of ferns lacks the symbiosis. 
+The symbiosis is unique to the _Azolla_ genus dating back to 90M years [(Metzgar,2007)](http://doi.org/doi.org/10.1086/519007); the only other genus within this family of ferns lacks the symbiosis. 
 The symbiotic cyanobacteria are systematically transfered through generations of ferns via their megaspores and have eroded genomes; Ran et al. (2010) therefore argued that the boundary between symbiotic partner and plant organelle is thin or even absent in the case of Azolla. 
-Co-speciation patterns of the fern (chloroplast) and _N. azollae_ support the close association between the symbiotic partners (Li et al 2018). While early research indicated that _Azolla sp._ has only one symbiont, electron microscopy (Carrapico 1990) revealed bacterial cells accompany the cyanobacteria both in the hosts leaf pockets and megaspores. 
-My own study (Dijkhuizen 2018) describes one of several bacterial genomes which were found as an efficient by-product of the _Azolla_ genome project and confirmed in plants taken from the environment. 
+Co-speciation patterns of the fern (chloroplast) and _N. azollae_ support the close association between the symbiotic partners (Li et al 2018). While early research indicated that _Azolla sp._ has only one symbiont, electron microscopy [(Carrapico 1990)](http://doi.org/10.1007/BF02187448) revealed bacterial cells accompany the cyanobacteria both in the hosts leaf pockets and megaspores. 
+My own study [(Dijkhuizen 2018)](https://doi.org/10.1111/nph.14843) describes one of several bacterial genomes which were found as an efficient by-product of the _Azolla_ genome project and confirmed in plants taken from the environment. 
 The paper shows that similar bactera are likely present in other _Azolla_ species as well albeit in lower relative abundances than the cyanobacteria. 
 Given 
 (1) the transfer mechanism of (cyano)bacteria over _Azolla_ generations, 
@@ -42,7 +42,7 @@ Figures and results may be included at a later stage when confidence of their co
 These metagenomes may elucidate what, if any, microbes from the different host plants share similarity, origin, and/or functions.
 
 ### Reproducibility
-This study aims to achieve full reproducibility by using the anaconda and snakemake frameworks for reproducible science. 
+This study aims to achieve full reproducibility by using the [anaconda](https://anaconda.org/) and [snakemake](https://snakemake.readthedocs.io/en/stable/) frameworks for reproducible science. 
 All versions of the workflow will be version controlled, here on github. 
 Data used in the study is already freely available in the Sequencing Read Archive. 
 Accesion numbers are detailed in the respository.
