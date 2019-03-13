@@ -58,6 +58,18 @@ rule fastqc_trimmed_data:
     "mkdir {output} 2> /dev/null && fastqc -o {output} {input}"
 
 ## reference rules
+rule download_azolla_genome:
+  output:
+    "references/host_genome/host_genome.fasta"
+  shell:
+    "wget ftp://ftp.fernbase.org/Azolla_filiculoides/Azolla_asm_v1.1/Azolla_filiculoides.genome_v1.2.fasta -o {output}"
+
+rule download_azolla_proteins:
+  output:
+    "references/host_genome/host_proteins.fasta"
+  shell:
+    "wget ftp://ftp.fernbase.org/Azolla_filiculoides/Azolla_asm_v1.1/Azolla_filiculoides.protein.highconfidence_v1.1.fasta -o {output}"
+
 rule CAT_download:
   output:
     db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
@@ -65,9 +77,25 @@ rule CAT_download:
   shell:
     "cd ./references && wget -qO - http://tbb.bio.uu.nl/bastiaan/CAT_prepare/CAT_prepare_20190108.tar.gz | tar -xz "
 
+rule CAT_customise:
+  input:
+    db="references/CAT_prepare_20190108/2019-01-08_CAT_database/2019-01-08.nr.gz",
+    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
+    custom_proteins="references/host_genome/host_proteins.fasta"
+  output:
+    db="references/CAT_customised_20190108/CAT_database_customised/nr_with_host.gz",
+    tf="references/CAT_customised_20190108/taxonomy_customised/2019-01-08.prot.accession2taxid.gz"
+  shell:
+    """
+    cp {input.db} {output.db}
+    cp {input.tf} {output.tf}
+    pigz -c {input.custom_proteins} >> {output.db}
+    grep '>' {input.custom_proteins} | tr -d '>' | awk -v OFS='\t' '{print $0,  $0, 84609, 0}' | pigz -c  >> {output.taxnomy}
+    """
+
 rule CAT_classify_host:
   input:
-    c="references/host_genome/Azolla_filiculoides.genome_v1.2.fasta",
+    c="references/host_genome/host_genome.fasta",
     db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
     tf="references/CAT_prepare_20190108/2019-01-08_taxonomy"
   output:
