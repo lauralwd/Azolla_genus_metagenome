@@ -84,13 +84,14 @@ rule CAT_customise:
     custom_proteins="references/host_genome/host_proteins.fasta"
   output:
     db="references/CAT_customised_20190108/CAT_database_customised/nr_with_host.gz",
-    tf="references/CAT_customised_20190108/taxonomy_customised/2019-01-08.prot.accession2taxid.gz"
+    tf="references/CAT_customised_20190108/taxonomy_customised"
+    tf_id="references/CAT_customised_20190108/taxonomy_customised/2019-01-08.prot.accession2taxid.gz"
   shell:
     """
     cp {input.db} {output.db}
     cp {input.tf} {output.tf}
-    pigz -c {input.custom_proteins} >> {output.db}
-    grep '>' {input.custom_proteins} | tr -d '>' | awk -v OFS='\t' '{print $0,  $0, 84609, 0}' | pigz -c  >> {output.taxnomy}
+    pigz -c  {input.custom_proteins} >> {output.db}
+    grep '>' {input.custom_proteins} | tr -d '>' | awk -v OFS='\t' '{print $0,  $0, 84609, 0}' | pigz -c  >> {output.tf_id}
     """
 
 rule CAT_classify_host:
