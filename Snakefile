@@ -81,19 +81,33 @@ rule CAT_download:
 rule CAT_customise:
   input:
     db="references/CAT_prepare_20190108/2019-01-08_CAT_database/2019-01-08.nr.gz",
-    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
+    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy/",
     custom_proteins="references/host_genome/host_proteins.fasta"
   output:
-    db="references/CAT_customised_20190108/CAT_database_customised/nr_with_host.gz",
-    tf="references/CAT_customised_20190108/taxonomy_customised",
+    nr="references/CAT_customised_20190108/CAT_database_customised/2019-1-08.nr.gz",
+    db="references/CAT_customised_20190108/CAT_database_customised",
+    tf=   "references/CAT_customised_20190108/taxonomy_customised",
     tf_id="references/CAT_customised_20190108/taxonomy_customised/2019-01-08.prot.accession2taxid.gz"
   shell:
     """
-    cp {input.db} {output.db}
-    cp {input.tf} {output.tf}
-    pigz -c  {input.custom_proteins} >> {output.db}
+    cp	{input.db} {output.nr}
+    cp -r {input.tf}/* {output.tf}
+    pigz -c  {input.custom_proteins} >> {output.nr}
     grep '>' {input.custom_proteins} | tr -d '>' | awk -v OFS='\t' '{{print $0,  $0, 84609, 0}}' | pigz -c  >> {output.tf_id}
     """
+
+rule CAT_build:
+  input:
+    db="references/CAT_customised_20190108/CAT_database_customised",
+    tf="references/CAT_customised_20190108/taxonomy_customised"
+  output:
+    "references/CAT_customised_20190108/CAT_database_customised/nr_with_host.dmnd"
+  log:
+    stdout="logs/CAT_build_nr+host.stdout",
+    stderr="logs/CAT_build_nr+host.stderr"
+  threads: 100
+  shell:
+    "CAT prepare --existing -d {input.db} -t {input.tf} -n {threads} > {log.stdout} 2> {log.stderr}"
 
 rule CAT_classify_host:
   input:
