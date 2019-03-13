@@ -73,7 +73,8 @@ rule download_azolla_proteins:
 rule CAT_download:
   output:
     db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
-    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy"
+    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
+    nr="references/CAT_prepare_20190108/2019-01-08_CAT_database/2019-01-08.nr.gz"
   shell:
     "cd ./references && wget -qO - http://tbb.bio.uu.nl/bastiaan/CAT_prepare/CAT_prepare_20190108.tar.gz | tar -xz "
 
@@ -84,14 +85,14 @@ rule CAT_customise:
     custom_proteins="references/host_genome/host_proteins.fasta"
   output:
     db="references/CAT_customised_20190108/CAT_database_customised/nr_with_host.gz",
-    tf="references/CAT_customised_20190108/taxonomy_customised"
+    tf="references/CAT_customised_20190108/taxonomy_customised",
     tf_id="references/CAT_customised_20190108/taxonomy_customised/2019-01-08.prot.accession2taxid.gz"
   shell:
     """
     cp {input.db} {output.db}
     cp {input.tf} {output.tf}
     pigz -c  {input.custom_proteins} >> {output.db}
-    grep '>' {input.custom_proteins} | tr -d '>' | awk -v OFS='\t' '{print $0,  $0, 84609, 0}' | pigz -c  >> {output.tf_id}
+    grep '>' {input.custom_proteins} | tr -d '>' | awk -v OFS='\t' '{{print $0,  $0, 84609, 0}}' | pigz -c  >> {output.tf_id}
     """
 
 rule CAT_classify_host:
