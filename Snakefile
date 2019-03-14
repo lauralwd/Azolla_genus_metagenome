@@ -375,16 +375,16 @@ rule create_filter_fasta_first_spades_assembly:
 
 rule create_first_spades_assembly_filter_bt2_index:
   input:
-    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_{{hostcode}}.fasta",assemblytype='singles_hostfiltered')
+    "data/assembly_{assemblytype}/{hostcode}/CAT_filter_{hostcode}.fasta"
   params:
-    filter = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype='singles_hostfiltered', hostcode=w.hostcode)
+    filter = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype=w.assemblytype, hostcode=w.hostcode)
   output:
-    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4),assemblytype='singles_hostfiltered'),
-    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2),assemblytype='singles_hostfiltered'),
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4)),
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2))
   threads: 12
   log:
-    stdout=expand("logs/CAT_create_assembly_filter_{assemblytype}_filterbt2index_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
-    stderr=expand("logs/CAT_create_assembly_filter_{assemblytype}_filterbt2index_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
+    stdout="logs/CAT_create_assembly_filter_{assemblytype}_filterbt2index_{hostcode}.stdout",
+    stderr="logs/CAT_create_assembly_filter_{assemblytype}_filterbt2index_{hostcode}.stderr"
   shell:
     "bowtie2-build --threads {threads} {input} {params.filter} > {log.stdout} 2> {log.stderr}"
 
