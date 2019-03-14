@@ -116,12 +116,14 @@ rule CAT_classify_host:
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
     i="references/host_genome/CAT/host.contig2classification.txt"
+  params:
+    "-r 5"
   threads: 100
   log:
     stdout="logs/CAT_classify_host.stdout",
     stderr="logs/CAT_classify_host.stderr"
   shell:
-    "CAT contigs -c {input.c} -d {input.db} -t {input.tf} --out_prefix 'host' -n {threads} 2> {log.stderr} > {log.stdout} && mv host.* references/host_genome/CAT/"
+    "CAT contigs {params} -c {input.c} -d {input.db} -t {input.tf} --out_prefix 'host' -n {threads} 2> {log.stderr} > {log.stdout} && mv host.* references/host_genome/CAT/"
 # shall I remove host.alignment.diamond, it's huge and does not serve a purpose further on.
 
 rule CAT_add_names:
