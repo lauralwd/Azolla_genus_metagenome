@@ -351,9 +351,9 @@ rule CAT_add_names_assembly:
 
 rule CAT_filter_contignames_first_spades_assembly:
   input:
-    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_taxonomy.tab",assemblytype='singles_hostfiltered',assemblyfile='contigs')
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_taxonomy.tab",assemblyfile='contigs')
   output:
-    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblytype='singles_hostfiltered',assemblyfile='contigs')
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='contigs')
   threads: 1
   log:
     expand("logs/CAT_assembly_{assemblytype}_{assemblyfile}filterlist_{{hostcode}}.stderr",assemblytype='singles_hostfiltered',assemblyfile='contigs')
