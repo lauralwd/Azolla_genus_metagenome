@@ -115,7 +115,7 @@ rule CAT_classify_host:
     db="references/CAT_customised_20190108/CAT_database_customised",
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
-    "references/host_genome/CAT/"
+    i="references/host_genome/CAT/host.contig2classification.txt"
   threads: 100
   log:
     stdout="logs/CAT_classify_host.stdout",
