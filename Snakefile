@@ -362,14 +362,14 @@ rule CAT_filter_contignames_first_spades_assembly:
 
 rule create_filter_fasta_first_spades_assembly:
   input:
-    n=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblytype='singles_hostfiltered',assemblyfile='contigs'),
-    f=expand("data/assembly_{assemblytype}/{{hostcode}}/{assemblyfile}.fasta",assemblytype='singles_hostfiltered',assemblyfile='contigs')
+    n=expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='contigs'),
+    f=expand("data/assembly_{{assemblytype}}/{{hostcode}}/{assemblyfile}.fasta",assemblyfile='contigs')
   output:
-    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_{{hostcode}}.fasta",assemblytype='singles_hostfiltered')
+    "data/assembly_{assemblytype}/{hostcode}/CAT_filter_{hostcode}.fasta"
   threads: 1
   log:
-    stdout=expand("logs/CAT_create_assembly_{assemblytype}_filter_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
-    stderr=expand("logs/CAT_create_assembly_{assemblytype}_filter_{{hostcode}}.stderr",assemblytype='singles_hostfiltered')
+    stdout="logs/CAT_create_assembly_{assemblytype}_filter_{hostcode}.stdout",
+    stderr="logs/CAT_create_assembly_{assemblytype}_filter_{hostcode}.stderr"
   shell:
     "samtools faidx {input.f} -o {output} -r {input.n} > {log.stdout} 2> {log.stderr}"
 
