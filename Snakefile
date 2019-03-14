@@ -62,13 +62,13 @@ rule download_azolla_genome:
   output:
     "references/host_genome/host_genome.fasta"
   shell:
-    "wget ftp://ftp.fernbase.org/Azolla_filiculoides/Azolla_asm_v1.1/Azolla_filiculoides.genome_v1.2.fasta -o {output}"
+    "wget ftp://ftp.fernbase.org/Azolla_filiculoides/Azolla_asm_v1.1/Azolla_filiculoides.genome_v1.2.fasta -O {output}"
 
 rule download_azolla_proteins:
   output:
     "references/host_genome/host_proteins.fasta"
   shell:
-    "wget ftp://ftp.fernbase.org/Azolla_filiculoides/Azolla_asm_v1.1/Azolla_filiculoides.protein.highconfidence_v1.1.fasta -o {output}"
+    "wget ftp://ftp.fernbase.org/Azolla_filiculoides/Azolla_asm_v1.1/Azolla_filiculoides.protein.highconfidence_v1.1.fasta -O {output}"
 
 rule CAT_download:
   output:
@@ -101,7 +101,7 @@ rule CAT_build:
     db="references/CAT_customised_20190108/CAT_database_customised",
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
-    "references/CAT_customised_20190108/CAT_database_customised/nr_with_host.dmnd"
+    "references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd"
   log:
     stdout="logs/CAT_build_nr+host.stdout",
     stderr="logs/CAT_build_nr+host.stderr"
