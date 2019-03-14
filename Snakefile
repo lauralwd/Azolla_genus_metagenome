@@ -135,7 +135,7 @@ rule CAT_add_names:
     stderr="logs/CAT_addnames_host.stderr"
   threads: 1
   shell:
-    "CAT add_names -i {input.i} -t {input.t} -o {output} > {log.stdout} 2> {log.stderr}"
+    "CAT add_names -i {input.i} -t {input.tf} -o {output} > {log.stdout} 2> {log.stderr}"
 
 rule CAT_filter_contignames:
   input:
