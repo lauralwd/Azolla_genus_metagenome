@@ -1,5 +1,5 @@
 HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
-#HOSTCODES= ['Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 'Azfil_minuscyano_170', 'Azfil_minuscyano_350', 'Azfil_minuscyano_HIC', 'Azfil_wild_galgw_E_1', 'Azfil_wild_galgw_E_2', 'Azfil_wild_galgw_E_3', 'Azfil_wild_galgw_P_2', 'Azfil_wild_galgw_P_3', 'Azfil_wild_galgw_P_4', 'Azmex_IRRI_486', 'Azmic_IRRI_456', 'Aznil_IRRI_479', 'Azrub_IRRI_479', 'Azspnov_IRRI_1_472', 'Azspnov_IRRI_2_489'] 
+#HOSTCODES= ['Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 'Azfil_minuscyano_170', 'Azfil_minuscyano_350', 'Azfil_minuscyano_HIC', 'Azfil_wild_galgw_E_1', 'Azfil_wild_galgw_E_2', 'Azfil_wild_galgw_E_3', 'Azfil_wild_galgw_P_2', 'Azfil_wild_galgw_P_3', 'Azfil_wild_galgw_P_4', 'Azmex_IRRI_486', 'Azmic_IRRI_456', 'Aznil_IRRI_479', 'Azrub_IRRI_479', 'Azspnov_IRRI_1_472', 'Azspnov_IRRI_2_489']
 DIRECTIONS=["1","2"]
 
 ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered']
@@ -95,7 +95,6 @@ rule CAT_customise:
     pigz -c  {input.custom_proteins} >> {output.nr}
     grep '>' {input.custom_proteins} | tr -d '>' | awk -v OFS='\t' '{{print $0,  $0, 84609, 0}}' | pigz -c  >> {output.tf_id}
     """
-
 rule CAT_build:
   input:
     db="references/CAT_customised_20190108/CAT_database_customised",
@@ -112,8 +111,9 @@ rule CAT_build:
 rule CAT_classify_host:
   input:
     c="references/host_genome/host_genome.fasta",
-    db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
-    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy"
+    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd",
+    db="references/CAT_customised_20190108/CAT_database_customised",
+    tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
     "references/host_genome/CAT/"
   threads: 100
@@ -127,7 +127,7 @@ rule CAT_classify_host:
 rule CAT_add_names:
   input:
     i="references/host_genome/CAT/host.contig2classification.txt",
-    t="references/CAT_prepare_20190108/2019-01-08_taxonomy"
+    tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
      "references/host_genome/contig_taxonomy.tab"
   log:
@@ -280,8 +280,9 @@ rule CAT_prepare_ORFS:
 rule CAT_classify_contigs_assembly:
   input:
     assembly="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta",
-    db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
-    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
+    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd",
+    db="references/CAT_customised_20190108/CAT_database_customised",
+    tf="references/CAT_customised_20190108/taxonomy_customised",
     p="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_predicted_proteins.fasta"
   output:
     i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}2classification.txt",
@@ -303,7 +304,7 @@ rule CAT_classify_contigs_assembly:
 rule CAT_add_names_assembly:
   input:
     i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.{assemblyfile}2classification.txt",
-    t="references/CAT_prepare_20190108/2019-01-08_taxonomy"
+    tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
      "data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab"
   params:
