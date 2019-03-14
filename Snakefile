@@ -151,7 +151,7 @@ rule CAT_filter_contignames:
 rule create_host_filter_fasta:
   input:
     n="references/host_genome/contig_filterlist.txt",
-    f="references/host_genome/Azolla_filiculoides.genome_v1.2.fasta"
+    f="references/host_genome/host_genome.fasta"
   output:
     "references/host_genome/host_filter.fasta"
   threads: 1
