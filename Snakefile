@@ -35,9 +35,13 @@ rule allsecondassemblies:
 rule allbackmapped:
   input:
     expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam",       binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+
 rule allsorted:
   input:
     expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+rule allsourcemapped:
+  input:
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
 
 
 ## analyses rules
@@ -414,27 +418,55 @@ def get_binning_reads(wildcards):
     elif os.path.isfile(pathse) == True :
       return {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz", binningsignal=wildcards.binningsignal) }
 
-rule backmap_bwa_mem:
+#rule backmap_bwa_mem:
+#  input:
+#    unpack(get_binning_reads),
+#    index=expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
+#  params:
+#    lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
+#  output:
+#    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
+#  threads: 100
+#  log:
+#    stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
+#    samstderr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
+#    stderr="logs/bwa_backmap_{assemblytype}_{hostcode}.stderr"
+#  shell:
+#    "bwa mem -t {threads} {params} {input.reads} 2> {log.stderr} | samtools view -@ 12 -b -o {output}  2> {log.samstderr} > {log.stdout}"
+
+#rule backmap_samtools_sort:
+#  input:
+#    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
+#  output:
+#    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam"
+#  threads: 6
+#  resources:
+#    mem_mb=5000
+#  shell:
+#    "samtools sort -@ {threads} -m {mem_mb}M -o {output} {input}"
+
+rule backmap_bwa_mem_assemblysource:
   input:
-    unpack(get_binning_reads),
+    s1=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=1),
+    s2=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=2),
     index=expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
   params:
     lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.bam"
   threads: 100
   log:
     stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
     samstderr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
     stderr="logs/bwa_backmap_{assemblytype}_{hostcode}.stderr"
   shell:
-    "bwa mem -t {threads} {params} {input.reads} 2> {log.stderr} | samtools view -@ 12 -b -o {output}  2> {log.samstderr} > {log.stdout}"
+    "bwa mem -t {threads} {params} {input.s1} {input.s2} 2> {log.stderr} | samtools view -@ 12 -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
-rule backmap_samtools_sort:
+rule backmap_samtools_sort_assemblysource:
   input:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.bam"
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.sorted.bam"
   threads: 6
   resources:
     mem_mb=5000
