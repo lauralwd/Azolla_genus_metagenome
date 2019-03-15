@@ -135,9 +135,10 @@ rule CAT_add_names:
   log:
     stdout="logs/CAT_addnames_host.stdout",
     stderr="logs/CAT_addnames_host.stderr"
+  params: "--only_official"
   threads: 1
   shell:
-    "CAT add_names -i {input.i} -t {input.tf} -o {output} > {log.stdout} 2> {log.stderr}"
+    "CAT add_names {params} -i {input.i} -t {input.tf} -o {output} > {log.stdout} 2> {log.stderr}"
 
 rule CAT_filter_contignames:
   input:
