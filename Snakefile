@@ -454,7 +454,7 @@ rule backmap_bwa_mem_assemblysource:
     s2=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=2),
     index=expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
   params:
-    lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
+    index=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.bam"
   threads: 100
@@ -463,7 +463,7 @@ rule backmap_bwa_mem_assemblysource:
     samstderr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
     stderr="logs/bwa_backmap_{assemblytype}_{hostcode}.stderr"
   shell:
-    "bwa mem -t {threads} {params} {input.s1} {input.s2} 2> {log.stderr} | samtools view -@ 12 -b -o {output}  2> {log.samstderr} > {log.stdout}"
+    "bwa mem -t {threads} {params.index} {input.s1} {input.s2} 2> {log.stderr} | samtools view -@ {threads} -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
 rule backmap_samtools_sort_assemblysource:
   input:
