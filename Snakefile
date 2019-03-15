@@ -474,4 +474,4 @@ rule backmap_samtools_sort_assemblysource:
   resources:
     mem_mb=5000
   shell:
-    "samtools sort -@ {threads} -m {mem_mb}M -o {output} {input}"
+    "samtools sort -@ {threads} -m {resources.mem_mb}M -o {output} {input}"
