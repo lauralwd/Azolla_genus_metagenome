@@ -108,12 +108,29 @@ rule CAT_build:
   shell:
     "CAT prepare --existing -d {input.db} -t {input.tf} -n {threads} > {log.stdout} 2> {log.stderr}"
 
+rule CAT_prepare_ORFS_host:
+  input:
+    "references/host_genome/host_genome.fasta"
+  output:
+    p="references/host_genome/host.predicted_proteins.faa",
+    g="references/host_genome/host.predicted_proteins.gff",
+  params:
+    "-p meta -g 11 -q -f gff"
+  threads: 1
+  log:
+    stdout="logs/CAT_host_prodigal.stdout",
+    stderr="logs/CAT_host_prodigal.stderr"
+  shell:
+    "prodigal -i {input} -a {output.p} -o {output.g} {params} 2> {log.stderr} > {log.stdout}"
+
 rule CAT_classify_host:
   input:
-    c="references/host_genome/host_genome.fasta",
+    prot="references/host_genome/host.predicted_proteins.faa",
     dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd",
     db="references/CAT_customised_20190108/CAT_database_customised",
     tf="references/CAT_customised_20190108/taxonomy_customised"
+  params:
+    prefix="references/host_genome/CAT/host"
   output:
     i="references/host_genome/CAT/host.contig2classification.txt"
   params:
@@ -123,7 +140,7 @@ rule CAT_classify_host:
     stdout="logs/CAT_classify_host.stdout",
     stderr="logs/CAT_classify_host.stderr"
   shell:
-    "CAT contigs {params} -c {input.c} -d {input.db} -t {input.tf} --out_prefix 'host' -n {threads} 2> {log.stderr} > {log.stdout} && mv host.* references/host_genome/CAT/"
+    "CAT contigs {params} -p {input.prot} -d {input.db} -t {input.tf} --out_prefix {params.prefix} -n {threads} 2> {log.stderr} > {log.stdout} && mv host.* references/host_genome/CAT/"
 # shall I remove host.alignment.diamond, it's huge and does not serve a purpose further on.
 
 rule CAT_add_names:
