@@ -136,6 +136,7 @@ rule CAT_classify_host:
   params:
     "-r 5"
   threads: 100
+  shadow: 'minimal'
   log:
     stdout="logs/CAT_classify_host.stdout",
     stderr="logs/CAT_classify_host.stderr"
@@ -310,7 +311,7 @@ rule CAT_classify_contigs_assembly:
 #    f=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.faa",assemblytype='singles_hostfiltered'),
     o="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.ORF2LCA.txt",
     l="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.log"
-  shadow: "shallow"
+  shadow: "minimal"
   params: b = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}", assemblytype=w.assemblytype, hostcode=w.hostcode, assemblyfile=w.assemblyfile)
   threads: 100
   resources:
