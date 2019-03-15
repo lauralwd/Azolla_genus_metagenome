@@ -42,6 +42,9 @@ rule allsorted:
 rule allsourcemapped:
   input:
     expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+rule allsourcesorted:
+  input:
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.sorted.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
 
 
 ## analyses rules
