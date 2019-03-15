@@ -21,7 +21,13 @@ echo "Using $CPU CPUs and $MEM RAM and writing to $output"
 for   a in ${assemblytype[@]}
 do    for   h in ${hostcodes[@]}
       do    for   f in ${files[@]}
-            do    grep -v '#' ./data/assembly_"$a"/"$h"/CAT_"$h"_"$f"_taxonomy.tab | tr '_' "\t" | cut -f 2-  | sort -k1n --parallel $CPU -s $mem | sed  "s/^/$a\t$h\t$f\t/g"
+            do    grep -v '#' ./data/assembly_"$a"/"$h"/CAT_"$h"_"$f"_taxonomy.tab 	\
+			| tr '_' "\t" 							\
+			| cut -f 2-  							\
+			| sort -k1n --parallel $CPU -s $mem 				\
+			| sed  "s/^/$a\t$h\t$f\t/g"
 	    done
       done
-done | pigz -c -p $CPU -R > "$output"
+done | cut -f 1,2,3,4,6,8,10,11,14-20 		\
+     | sed -i 's/\:\ [01]\.[0-9][0-9]//g'	\
+	> "$output"
