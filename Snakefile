@@ -1,5 +1,5 @@
 HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
-#HOSTCODES= ['Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 'Azfil_minuscyano_170', 'Azfil_minuscyano_350', 'Azfil_minuscyano_HIC', 'Azfil_wild_galgw_E_1', 'Azfil_wild_galgw_E_2', 'Azfil_wild_galgw_E_3', 'Azfil_wild_galgw_P_2', 'Azfil_wild_galgw_P_3', 'Azfil_wild_galgw_P_4', 'Azmex_IRRI_486', 'Azmic_IRRI_456', 'Aznil_IRRI_479', 'Azrub_IRRI_479', 'Azspnov_IRRI_1_472', 'Azspnov_IRRI_2_489'] 
+#HOSTCODES= ['Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 'Azfil_minuscyano_170', 'Azfil_minuscyano_350', 'Azfil_minuscyano_HIC', 'Azfil_wild_galgw_E_1', 'Azfil_wild_galgw_E_2', 'Azfil_wild_galgw_E_3', 'Azfil_wild_galgw_P_2', 'Azfil_wild_galgw_P_3', 'Azfil_wild_galgw_P_4', 'Azmex_IRRI_486', 'Azmic_IRRI_456', 'Aznil_IRRI_479', 'Azrub_IRRI_479', 'Azspnov_IRRI_1_472', 'Azspnov_IRRI_2_489']
 DIRECTIONS=["1","2"]
 
 ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered']
@@ -65,40 +65,105 @@ rule fastqc_trimmed_data:
     "mkdir {output} 2> /dev/null && fastqc -o {output} {input}"
 
 ## reference rules
+rule download_azolla_genome:
+  output:
+    "references/host_genome/host_genome.fasta"
+  shell:
+    "wget ftp://ftp.fernbase.org/Azolla_filiculoides/Azolla_asm_v1.1/Azolla_filiculoides.genome_v1.2.fasta -O {output}"
+
+rule download_azolla_proteins:
+  output:
+    "references/host_genome/host_proteins.fasta"
+  shell:
+    "wget ftp://ftp.fernbase.org/Azolla_filiculoides/Azolla_asm_v1.1/Azolla_filiculoides.protein.highconfidence_v1.1.fasta -O {output}"
+
 rule CAT_download:
   output:
     db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
-    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy"
+    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
+    nr="references/CAT_prepare_20190108/2019-01-08_CAT_database/2019-01-08.nr.gz"
   shell:
     "cd ./references && wget -qO - http://tbb.bio.uu.nl/bastiaan/CAT_prepare/CAT_prepare_20190108.tar.gz | tar -xz "
 
+rule CAT_customise:
+  input:
+    db="references/CAT_prepare_20190108/2019-01-08_CAT_database/2019-01-08.nr.gz",
+    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy/",
+    custom_proteins="references/host_genome/host_proteins.fasta"
+  output:
+    nr="references/CAT_customised_20190108/CAT_database_customised/2019-1-08.nr.gz",
+    db="references/CAT_customised_20190108/CAT_database_customised",
+    tf=   "references/CAT_customised_20190108/taxonomy_customised",
+    tf_id="references/CAT_customised_20190108/taxonomy_customised/2019-01-08.prot.accession2taxid.gz"
+  shell:
+    """
+    cp	{input.db} {output.nr}
+    cp -r {input.tf}/* {output.tf}
+    pigz -c  {input.custom_proteins} >> {output.nr}
+    grep '>' {input.custom_proteins} | tr -d '>' | awk -v OFS='\t' '{{print $0,  $0, 84609, 0}}' | pigz -c  >> {output.tf_id}
+    """
+rule CAT_build:
+  input:
+    db="references/CAT_customised_20190108/CAT_database_customised",
+    tf="references/CAT_customised_20190108/taxonomy_customised"
+  output:
+    "references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd"
+  log:
+    stdout="logs/CAT_build_nr+host.stdout",
+    stderr="logs/CAT_build_nr+host.stderr"
+  threads: 100
+  shell:
+    "CAT prepare --existing -d {input.db} -t {input.tf} -n {threads} > {log.stdout} 2> {log.stderr}"
+
+rule CAT_prepare_ORFS_host:
+  input:
+    "references/host_genome/host_genome.fasta"
+  output:
+    p="references/host_genome/host.predicted_proteins.faa",
+    g="references/host_genome/host.predicted_proteins.gff",
+  params:
+    "-p meta -g 11 -q -f gff"
+  threads: 1
+  log:
+    stdout="logs/CAT_host_prodigal.stdout",
+    stderr="logs/CAT_host_prodigal.stderr"
+  shell:
+    "prodigal -i {input} -a {output.p} -o {output.g} {params} 2> {log.stderr} > {log.stdout}"
+
 rule CAT_classify_host:
   input:
-    c="references/host_genome/Azolla_filiculoides.genome_v1.2.fasta",
-    db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
-    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy"
+    prot="references/host_genome/host.predicted_proteins.faa",
+    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd",
+    db="references/CAT_customised_20190108/CAT_database_customised",
+    tf="references/CAT_customised_20190108/taxonomy_customised"
+  params:
+    prefix="references/host_genome/CAT/host"
   output:
-    "references/host_genome/CAT/"
+    i="references/host_genome/CAT/host.contig2classification.txt"
+  params:
+    "-r 5"
   threads: 100
+  shadow: 'minimal'
   log:
     stdout="logs/CAT_classify_host.stdout",
     stderr="logs/CAT_classify_host.stderr"
   shell:
-    "CAT contigs -c {input.c} -d {input.db} -t {input.tf} --out_prefix 'host' -n {threads} 2> {log.stderr} > {log.stdout} && mv host.* references/host_genome/CAT/"
+    "CAT contigs {params} -p {input.prot} -d {input.db} -t {input.tf} --out_prefix {params.prefix} -n {threads} 2> {log.stderr} > {log.stdout} && mv host.* references/host_genome/CAT/"
 # shall I remove host.alignment.diamond, it's huge and does not serve a purpose further on.
 
 rule CAT_add_names:
   input:
     i="references/host_genome/CAT/host.contig2classification.txt",
-    t="references/CAT_prepare_20190108/2019-01-08_taxonomy"
+    tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
      "references/host_genome/contig_taxonomy.tab"
   log:
     stdout="logs/CAT_addnames_host.stdout",
     stderr="logs/CAT_addnames_host.stderr"
+  params: "--only_official"
   threads: 1
   shell:
-    "CAT add_names -i {input.i} -t {input.t} -o {output} > {log.stdout} 2> {log.stderr}"
+    "CAT add_names {params} -i {input.i} -t {input.tf} -o {output} > {log.stdout} 2> {log.stderr}"
 
 rule CAT_filter_contignames:
   input:
@@ -114,7 +179,7 @@ rule CAT_filter_contignames:
 rule create_host_filter_fasta:
   input:
     n="references/host_genome/contig_filterlist.txt",
-    f="references/host_genome/Azolla_filiculoides.genome_v1.2.fasta"
+    f="references/host_genome/host_genome.fasta"
   output:
     "references/host_genome/host_filter.fasta"
   threads: 1
@@ -243,8 +308,9 @@ rule CAT_prepare_ORFS:
 rule CAT_classify_contigs_assembly:
   input:
     assembly="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta",
-    db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
-    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
+    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd",
+    db="references/CAT_customised_20190108/CAT_database_customised",
+    tf="references/CAT_customised_20190108/taxonomy_customised",
     p="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_predicted_proteins.fasta"
   output:
     i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}2classification.txt",
@@ -252,7 +318,7 @@ rule CAT_classify_contigs_assembly:
 #    f=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.faa",assemblytype='singles_hostfiltered'),
     o="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.ORF2LCA.txt",
     l="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.log"
-  shadow: "shallow"
+  shadow: "minimal"
   params: b = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}", assemblytype=w.assemblytype, hostcode=w.hostcode, assemblyfile=w.assemblyfile)
   threads: 100
   resources:
@@ -266,7 +332,7 @@ rule CAT_classify_contigs_assembly:
 rule CAT_add_names_assembly:
   input:
     i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.{assemblyfile}2classification.txt",
-    t="references/CAT_prepare_20190108/2019-01-08_taxonomy"
+    tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
      "data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab"
   params:
