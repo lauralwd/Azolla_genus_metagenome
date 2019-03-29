@@ -156,7 +156,7 @@ rule CAT_add_names:
     i="references/host_genome/CAT/host.contig2classification.txt",
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
-    "references/host_genome/contig_taxonomy.tab"
+     "references/host_genome/contig_taxonomy.tab"
   log:
     stdout="logs/CAT_addnames_host.stdout",
     stderr="logs/CAT_addnames_host.stderr"
@@ -174,7 +174,7 @@ rule CAT_filter_contignames:
   log:
     "logs/CAT_contigfilterlist.stderr"
   shell:
-    "cat {input} | grep -v Bacteria | cut -f 1  > {output} 2> {log}"
+    "cat {input} | grep -v '#' | grep -v Bacteria | cut -f 1  > {output} 2> {log}"
 
 rule create_host_filter_fasta:
   input:
