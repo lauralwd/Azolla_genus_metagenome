@@ -107,7 +107,7 @@ rule CAT_build:
     db="references/CAT_customised_20190108/CAT_database_customised",
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
-    "references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd"
+    "references/CAT_customised_20190108/CAT_database_customised/2019-03-27.nr.dmnd"
   log:
     stdout="logs/CAT_build_nr+host.stdout",
     stderr="logs/CAT_build_nr+host.stderr"
@@ -156,7 +156,7 @@ rule CAT_add_names:
     i="references/host_genome/CAT/host.contig2classification.txt",
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
-     "references/host_genome/contig_taxonomy.tab"
+    "references/host_genome/contig_taxonomy.tab"
   log:
     stdout="logs/CAT_addnames_host.stdout",
     stderr="logs/CAT_addnames_host.stderr"
@@ -174,7 +174,7 @@ rule CAT_filter_contignames:
   log:
     "logs/CAT_contigfilterlist.stderr"
   shell:
-    "cat {input} | grep -v Bacteria | grep -v Fungi | grep -v Opisthokonta | grep -v Alveolata | grep Eukaryota | cut -f 1  > {output} 2> {log}"
+    "cat {input} | grep -v Bacteria | cut -f 1  > {output} 2> {log}"
 
 rule create_host_filter_fasta:
   input:
