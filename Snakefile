@@ -133,22 +133,22 @@ rule CAT_prepare_ORFS_host:
 rule CAT_classify_host:
   input:
     prot="references/host_genome/host.predicted_proteins.faa",
-    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd",
+    contigs="references/host_genome/host_genome.fasta",
+    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-27.nr.dmnd",
     db="references/CAT_customised_20190108/CAT_database_customised",
     tf="references/CAT_customised_20190108/taxonomy_customised"
   params:
-    prefix="references/host_genome/CAT/host"
+    prefix="references/host_genome/CAT/host",
+    options="-r 5"
   output:
     i="references/host_genome/CAT/host.contig2classification.txt"
-  params:
-    "-r 5"
   threads: 100
   shadow: 'shallow'
   log:
     stdout="logs/CAT_classify_host.stdout",
     stderr="logs/CAT_classify_host.stderr"
   shell:
-    "CAT contigs {params} -p {input.prot} -d {input.db} -t {input.tf} --out_prefix {params.prefix} -n {threads} 2> {log.stderr} > {log.stdout} && mv host.* references/host_genome/CAT/"
+    "CAT contigs {params.options} -p {input.prot} -c {input.contigs} -d {input.db} -t {input.tf} --out_prefix {params.prefix} -n {threads} 2> {log.stderr} > {log.stdout}"
 # shall I remove host.alignment.diamond, it's huge and does not serve a purpose further on.
 
 rule CAT_add_names:
