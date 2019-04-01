@@ -79,11 +79,11 @@ rule download_azolla_proteins:
 
 rule CAT_download:
   output:
-    db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
-    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
-    nr="references/CAT_prepare_20190108/2019-01-08_CAT_database/2019-01-08.nr.gz"
+    db=temp("references/CAT_prepare_20190108/2019-01-08_CAT_database"),
+    tf=temp("references/CAT_prepare_20190108/2019-01-08_taxonomy"),
+    nr=temp("references/CAT_prepare_20190108/2019-01-08_CAT_database/2019-01-08.nr.gz")
   shell:
-    "cd ./references && wget -qO - http://tbb.bio.uu.nl/bastiaan/CAT_prepare/CAT_prepare_20190108.tar.gz | tar -xz "
+    "cd ./references && wget -qO - http://tbb.bio.uu.nl/bastiaan/CAT_prepare/CAT_prepare_20190108.tar.gz | tar -xz"
 
 rule CAT_customise:
   input:
@@ -211,8 +211,8 @@ rule trimmomatic_genomic_sequencing:
   params:
     "LEADING:5 TRAILING:5 SLIDINGWINDOW:4:15 MINLEN:36"
   output:
-    p1="data/sequencing_genomic_trimmed/{hostcode}_1.fastq.gz",
-    p2="data/sequencing_genomic_trimmed/{hostcode}_2.fastq.gz",
+    p1=temp("data/sequencing_genomic_trimmed/{hostcode}_1.fastq.gz"),
+    p2=temp("data/sequencing_genomic_trimmed/{hostcode}_2.fastq.gz")
   threads: 4
   resources: io=1
   log:
@@ -232,7 +232,7 @@ rule filter_for_host:
     i="references/host_genome/host_filter_bt2index/host_filter",
     outbase="data/sequencing_genomic_trimmed_filtered/{hostcode}"
   output:
-       expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS)
+    temp(expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS))
   threads: 100
   log:
     stderr="logs/bowtie2filterforhost{hostcode}.stderr"
