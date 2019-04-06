@@ -96,8 +96,8 @@ rule rename_subset_filtered_sequencing_files:
     a1=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}",PE=1),
     a2=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}",PE=2)
   output:
-    b1=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.gz",PE=1),
-    b2=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.gz",PE=2)
+    b1=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1),
+    b2=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
   shell:
     "mv {input.a1} {output.b1} && mv {input.a2} {output.b2}"
 
