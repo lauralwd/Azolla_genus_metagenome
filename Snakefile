@@ -82,7 +82,7 @@ rule filter_for_subset_assembly:
   params:
     opts="--very-fast",
     i = lambda w : expand("data/assembly_{assemblytype}/{hostcode}/CAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype='singles_hostfiltered_subset', hostcode = w.hostcode),
-    outbase= lambda w : expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}", hostcode=w.hostcode)
+    outbase= lambda w : expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{hostcode}/corrected/{hostcode}", hostcode=w.hostcode)
   output:
        expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}",PE=DIRECTIONS)
   threads: 36
@@ -341,12 +341,12 @@ rule CAT_prepare_ORFS:
 rule CAT_classify_contigs_assembly:
   input:
     assembly="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta",
-    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd",
+    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-27.nr.dmnd",
     db="references/CAT_customised_20190108/CAT_database_customised",
     tf="references/CAT_customised_20190108/taxonomy_customised",
     p="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_predicted_proteins.fasta"
   output:
-    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.{assemblyfile}2classification.txt",
+    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.contig2classification.txt",
 #    g=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.gff",assemblytype='singles_hostfiltered'),
 #    f=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.faa",assemblytype='singles_hostfiltered'),
     o="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.ORF2LCA.txt",
@@ -364,7 +364,7 @@ rule CAT_classify_contigs_assembly:
 
 rule CAT_add_names_assembly:
   input:
-    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.{assemblyfile}2classification.txt",
+    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.contig2classification.txt",
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
      "data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab"
