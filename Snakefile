@@ -1,5 +1,5 @@
-HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
-#HOSTCODES= ['Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 'Azfil_minuscyano_170', 'Azfil_minuscyano_350', 'Azfil_minuscyano_HIC', 'Azfil_wild_galgw_E_1', 'Azfil_wild_galgw_E_2', 'Azfil_wild_galgw_E_3', 'Azfil_wild_galgw_P_2', 'Azfil_wild_galgw_P_3', 'Azfil_wild_galgw_P_4', 'Azmex_IRRI_486', 'Azmic_IRRI_456', 'Aznil_IRRI_479', 'Azrub_IRRI_479', 'Azspnov_IRRI_1_472', 'Azspnov_IRRI_2_489']
+#HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
+HOSTCODES= ['Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 'Azfil_minuscyano_170', 'Azfil_minuscyano_350', 'Azfil_minuscyano_HIC', 'Azfil_wild_galgw_E_1', 'Azfil_wild_galgw_E_2', 'Azfil_wild_galgw_E_3', 'Azfil_wild_galgw_P_2', 'Azfil_wild_galgw_P_3', 'Azfil_wild_galgw_P_4', 'Azmex_IRRI_486', 'Azmic_IRRI_456', 'Aznil_IRRI_479', 'Azrub_IRRI_479', 'Azspnov_IRRI_1_472', 'Azspnov_IRRI_2_489']
 DIRECTIONS=["1","2"]
 
 ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered']
@@ -35,9 +35,16 @@ rule allsecondassemblies:
 rule allbackmapped:
   input:
     expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam",       binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+
 rule allsorted:
   input:
     expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+rule allsourcemapped:
+  input:
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+rule allsourcesorted:
+  input:
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.sorted.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
 
 ## rules for handling too big assemblies
 rule half_fastq_file:
@@ -133,11 +140,11 @@ rule download_azolla_proteins:
 
 rule CAT_download:
   output:
-    db="references/CAT_prepare_20190108/2019-01-08_CAT_database",
-    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
-    nr="references/CAT_prepare_20190108/2019-01-08_CAT_database/2019-01-08.nr.gz"
+    db=temp("references/CAT_prepare_20190108/2019-01-08_CAT_database"),
+    tf=temp("references/CAT_prepare_20190108/2019-01-08_taxonomy"),
+    nr=temp("references/CAT_prepare_20190108/2019-01-08_CAT_database/2019-01-08.nr.gz")
   shell:
-    "cd ./references && wget -qO - http://tbb.bio.uu.nl/bastiaan/CAT_prepare/CAT_prepare_20190108.tar.gz | tar -xz "
+    "cd ./references && wget -qO - http://tbb.bio.uu.nl/bastiaan/CAT_prepare/CAT_prepare_20190108.tar.gz | tar -xz"
 
 rule CAT_customise:
   input:
@@ -161,7 +168,7 @@ rule CAT_build:
     db="references/CAT_customised_20190108/CAT_database_customised",
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
-    "references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd"
+    "references/CAT_customised_20190108/CAT_database_customised/2019-03-27.nr.dmnd"
   log:
     stdout="logs/CAT_build_nr+host.stdout",
     stderr="logs/CAT_build_nr+host.stderr"
@@ -169,20 +176,40 @@ rule CAT_build:
   shell:
     "CAT prepare --existing -d {input.db} -t {input.tf} -n {threads} > {log.stdout} 2> {log.stderr}"
 
+rule CAT_prepare_ORFS_host:
+  input:
+    "references/host_genome/host_genome.fasta"
+  output:
+    p="references/host_genome/host.predicted_proteins.faa",
+    g="references/host_genome/host.predicted_proteins.gff",
+  params:
+    "-p meta -g 11 -q -f gff"
+  threads: 1
+  log:
+    stdout="logs/CAT_host_prodigal.stdout",
+    stderr="logs/CAT_host_prodigal.stderr"
+  shell:
+    "prodigal -i {input} -a {output.p} -o {output.g} {params} 2> {log.stderr} > {log.stdout}"
+
 rule CAT_classify_host:
   input:
-    c="references/host_genome/host_genome.fasta",
-    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd",
+    prot="references/host_genome/host.predicted_proteins.faa",
+    contigs="references/host_genome/host_genome.fasta",
+    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-27.nr.dmnd",
     db="references/CAT_customised_20190108/CAT_database_customised",
     tf="references/CAT_customised_20190108/taxonomy_customised"
+  params:
+    prefix="references/host_genome/CAT/host",
+    options="-r 5"
   output:
     i="references/host_genome/CAT/host.contig2classification.txt"
   threads: 100
+  shadow: 'shallow'
   log:
     stdout="logs/CAT_classify_host.stdout",
     stderr="logs/CAT_classify_host.stderr"
   shell:
-    "CAT contigs -c {input.c} -d {input.db} -t {input.tf} --out_prefix 'host' -n {threads} 2> {log.stderr} > {log.stdout} && mv host.* references/host_genome/CAT/"
+    "CAT contigs {params.options} -p {input.prot} -c {input.contigs} -d {input.db} -t {input.tf} --out_prefix {params.prefix} -n {threads} 2> {log.stderr} > {log.stdout}"
 # shall I remove host.alignment.diamond, it's huge and does not serve a purpose further on.
 
 rule CAT_add_names:
@@ -194,9 +221,10 @@ rule CAT_add_names:
   log:
     stdout="logs/CAT_addnames_host.stdout",
     stderr="logs/CAT_addnames_host.stderr"
+  params: "--only_official"
   threads: 1
   shell:
-    "CAT add_names -i {input.i} -t {input.tf} -o {output} > {log.stdout} 2> {log.stderr}"
+    "CAT add_names {params} -i {input.i} -t {input.tf} -o {output} > {log.stdout} 2> {log.stderr}"
 
 rule CAT_filter_contignames:
   input:
@@ -207,7 +235,7 @@ rule CAT_filter_contignames:
   log:
     "logs/CAT_contigfilterlist.stderr"
   shell:
-    "cat {input} | grep -v Bacteria | grep -v Fungi | grep -v Opisthokonta | grep -v Alveolata | grep Eukaryota | cut -f 1  > {output} 2> {log}"
+    "cat {input} | grep -v '#' | grep -v Bacteria | cut -f 1  > {output} 2> {log}"
 
 rule create_host_filter_fasta:
   input:
@@ -244,8 +272,8 @@ rule trimmomatic_genomic_sequencing:
   params:
     "LEADING:5 TRAILING:5 SLIDINGWINDOW:4:15 MINLEN:36"
   output:
-    p1="data/sequencing_genomic_trimmed/{hostcode}_1.fastq.gz",
-    p2="data/sequencing_genomic_trimmed/{hostcode}_2.fastq.gz",
+    p1=temp("data/sequencing_genomic_trimmed/{hostcode}_1.fastq.gz"),
+    p2=temp("data/sequencing_genomic_trimmed/{hostcode}_2.fastq.gz")
   threads: 4
   resources: io=1
   log:
@@ -265,7 +293,7 @@ rule filter_for_host:
     i="references/host_genome/host_filter_bt2index/host_filter",
     outbase="data/sequencing_genomic_trimmed_filtered/{hostcode}"
   output:
-       expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS)
+    temp(expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}",PE=DIRECTIONS))
   threads: 100
   log:
     stderr="logs/bowtie2filterforhost{hostcode}.stderr"
@@ -351,7 +379,7 @@ rule CAT_classify_contigs_assembly:
 #    f=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.faa",assemblytype='singles_hostfiltered'),
     o="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.ORF2LCA.txt",
     l="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.log"
-  shadow: "shallow"
+  shadow: 'shallow'
   params: b = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}", assemblytype=w.assemblytype, hostcode=w.hostcode, assemblyfile=w.assemblyfile)
   threads: 100
   resources:
@@ -520,29 +548,57 @@ def get_binning_reads(wildcards):
     elif os.path.isfile(pathse) == True :
       return {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz", binningsignal=wildcards.binningsignal) }
 
-rule backmap_bwa_mem:
+#rule backmap_bwa_mem:
+#  input:
+#    unpack(get_binning_reads),
+#    index=expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
+#  params:
+#    lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
+#  output:
+#    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
+#  threads: 100
+#  log:
+#    stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
+#    samstderr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
+#    stderr="logs/bwa_backmap_{assemblytype}_{hostcode}.stderr"
+#  shell:
+#    "bwa mem -t {threads} {params} {input.reads} 2> {log.stderr} | samtools view -@ 12 -b -o {output}  2> {log.samstderr} > {log.stdout}"
+
+#rule backmap_samtools_sort:
+#  input:
+#    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
+#  output:
+#    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam"
+#  threads: 6
+#  resources:
+#    mem_mb=5000
+#  shell:
+#    "samtools sort -@ {threads} -m {mem_mb}M -o {output} {input}"
+
+rule backmap_bwa_mem_assemblysource:
   input:
-    unpack(get_binning_reads),
+    s1=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=1),
+    s2=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=2),
     index=expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
   params:
-    lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
+    index=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.bam"
   threads: 100
   log:
     stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
     samstderr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
     stderr="logs/bwa_backmap_{assemblytype}_{hostcode}.stderr"
   shell:
-    "bwa mem -t {threads} {params} {input.reads} 2> {log.stderr} | samtools view -@ 12 -b -o {output}  2> {log.samstderr} > {log.stdout}"
+    "bwa mem -t {threads} {params.index} {input.s1} {input.s2} 2> {log.stderr} | samtools view -@ {threads} -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
-rule backmap_samtools_sort:
+rule backmap_samtools_sort_assemblysource:
   input:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.bam"
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.sorted.bam"
   threads: 6
   resources:
     mem_mb=5000
   shell:
-    "samtools sort -@ {threads} -m {mem_mb}M -o {output} {input}"
+    "samtools sort -@ {threads} -m {resources.mem_mb}M -o {output} {input}"
