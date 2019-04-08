@@ -57,7 +57,7 @@ rule half_fastq_file:
   shell:
     """
     set +o pipefail
-    zcat {input} | head -n $( echo "$(zcat {input} | wc -l) /2" / 2 | bc ) |  pigz -p 18 -c > {output}
+    zcat {input} | head -n $( echo "$(zcat {input} | wc -l) * ( 3 / 4 )" | bc ) |  pigz -p 18 -c > {output}
     """
 
 rule spades_subset_assembly:
