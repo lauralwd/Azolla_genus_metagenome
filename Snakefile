@@ -47,17 +47,17 @@ rule allsourcesorted:
     expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.sorted.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
 
 ## rules for handling too big assemblies
-rule half_fastq_file:
+rule subset_fastq_file:
   input:
     "data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz"
   output:
     "data/sequencing_genomic_trimmed_filtered_corrected_subset/subset_{hostcode}.{PE}.fastq.gz"
-  threads: 5
+  threads: 20
   resources: io=1
   shell:
     """
     set +o pipefail
-    zcat {input} | head -n $( echo "$(zcat {input} | wc -l) * ( 3 / 4 )" | bc ) |  pigz -p 18 -c > {output}
+    zcat {input} | head -n $( echo "$(zcat {input} | wc -l) * 3 / 4" | bc ) |  pigz -p {threads} -c > {output}
     """
 
 rule spades_subset_assembly:
