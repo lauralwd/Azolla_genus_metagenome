@@ -416,7 +416,7 @@ rule CAT_filter_contignames_first_spades_assembly:
   log:
     expand("logs/CAT_assembly_{assemblytype}_{assemblyfile}filterlist_{{hostcode}}.stderr",assemblytype='singles_hostfiltered',assemblyfile='contigs')
   shell:
-    "cat {input} grep Eukaryota | cut -f 1  > {output} 2> {log}"
+    "cat {input} | grep Eukaryota | cut -f 1  > {output} 2> {log}"
 
 rule create_filter_fasta_first_spades_assembly:
   input:
