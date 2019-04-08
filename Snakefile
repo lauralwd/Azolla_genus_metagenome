@@ -380,7 +380,9 @@ rule CAT_classify_contigs_assembly:
     o="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.ORF2LCA.txt",
     l="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.log"
   shadow: 'shallow'
-  params: b = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}", assemblytype=w.assemblytype, hostcode=w.hostcode, assemblyfile=w.assemblyfile)
+  params:
+    b = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}", assemblytype=w.assemblytype, hostcode=w.hostcode, assemblyfile=w.assemblyfile),
+    options = '-r 5'
   threads: 100
   resources:
     mem_mb=30000
@@ -388,7 +390,7 @@ rule CAT_classify_contigs_assembly:
     stdout="logs/CAT_assembly_{assemblytype}_{assemblyfile}_classification_{hostcode}.stdout",
     stderr="logs/CAT_assembly_{assemblytype}_{assemblyfile}_classification_{hostcode}.stderr"
   shell:
-    "CAT contigs -c {input.assembly} -d {input.db} -p {input.p} -t {input.tf} --out_prefix {params.b} -n {threads} 2> {log.stderr} > {log.stdout}"
+    "CAT contigs {params.options} -c {input.assembly} -d {input.db} -p {input.p} -t {input.tf} --out_prefix {params.b} -n {threads} 2> {log.stderr} > {log.stdout}"
 
 rule CAT_add_names_assembly:
   input:
