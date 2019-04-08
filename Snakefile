@@ -57,7 +57,9 @@ rule subset_fastq_file:
   shell:
     """
     set +o pipefail
-    zcat {input} | head -n $( echo "$(zcat {input} | wc -l) * 3 / 4" | bc ) |  pigz -p {threads} -c > {output}
+    reads=$( echo "$(zcat {input} | wc -l) * 3 / 4 / 4" | bc | cut -d '.' -f 1 )
+    lines=$(echo "$reads * 4" | bc )
+    zcat {input} | head -n $lines |  pigz -p {threads} -c > {output}
     """
 
 rule spades_subset_assembly:
