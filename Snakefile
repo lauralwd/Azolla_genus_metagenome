@@ -12,7 +12,8 @@ rule alltaxtab:
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
 rule allcheckm:
   input:
-    expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype='singles_doublefiltered',hostcode=HOSTCODES)
+    expand("data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+
 rule allsecondcat:
   input:
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
@@ -40,13 +41,15 @@ rule allbackmapped:
 
 rule allsorted:
   input:
-    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+
 rule allsourcemapped:
   input:
-    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
 rule allsourcesorted:
   input:
-    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.sorted.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
 
 
 ## analyses rules
@@ -536,6 +539,8 @@ rule backmap_bwa_mem_assemblysource:
   shell:
     "bwa mem -t {threads} {params.index} {input.s1} {input.s2} 2> {log.stderr} | samtools view -@ {threads} -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
+ruleorder: backmap_samtools_sort  > backmap_samtools_sort_assemblysource
+
 rule backmap_samtools_sort_assemblysource:
   input:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.bam"
@@ -549,7 +554,7 @@ rule backmap_samtools_sort_assemblysource:
 
 rule jgi_summarize_script:
   input:
-    "data/assembly_{{assemblytype}}_binningsignals/{{hostcode}}/{{hostcode}}_{{hostcode}}.sorted.bam",
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",
     expand("data/assembly_{{assemblytype}}_binningsignals/{{hostcode}}/{{hostcode}}_{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS)
   output:
     "data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab"
@@ -581,18 +586,17 @@ checkpoint dummy_metabat2:
   output:
     "data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa"
 
-
 rule checkm:
   input:
     "data/bins_{assemblytype}/{hostcode}"
   output:
-    dir=directory("data/bins_{assemblytype}_checkm/{hostcode}"),
     table="data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out"
   params:
-    options="-x fa --pplacer_threads=12 --tab_table"
+    options="-x fa --pplacer_threads=12 --tab_table",
+    dir=lambda w:expand("data/bins_{assemblytype}_checkm/{hostcode}",assemblytype=w.assemblytype,hostcode=w.hostcode)
   threads: 72
   log:
     stdout="logs/checkm_{assemblytype}_{hostcode}.stdout",
     stderr="logs/checkm_{assemblytype}_{hostcode}.stdout"
   shell:
-    "checkm lineage_wf -t {threads} {params.options} {input} {output.dir} -f {output.table}"
+    "checkm lineage_wf -t {threads} {params.options} {input} {params.dir} -f {output.table}"
