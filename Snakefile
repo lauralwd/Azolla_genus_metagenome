@@ -560,3 +560,15 @@ rule jgi_summarize_script:
 
 rule metabat2:
   input:
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta",
+    depthmatrix="data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab"
+  output:
+    dynamic("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa")
+  params:
+    prefix=lambda w: expand("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin",assemblytype=w.assemblytype,hostcode=w.hostcode)
+  threads: 72
+  log:
+    stdout="logs/metabat2_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/metabat2_{assemblytype}_{hostcode}.stdout"
+  shell:
+    "metabat2 -t {threads} -i {input.scaffolds} -a {input.depthmatrix} -o {params.prefix}"
