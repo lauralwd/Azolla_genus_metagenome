@@ -497,7 +497,7 @@ rule backmap_bwa_mem:
   params:
     lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam"
   threads: 100
   log:
     stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
@@ -508,9 +508,9 @@ rule backmap_bwa_mem:
 
 rule backmap_samtools_sort:
   input:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam"
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam"
   threads: 6
   resources:
     mem_mb=5000
@@ -525,7 +525,7 @@ rule backmap_bwa_mem_assemblysource:
   params:
     index=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.bam"
   threads: 100
   log:
     stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
@@ -536,11 +536,27 @@ rule backmap_bwa_mem_assemblysource:
 
 rule backmap_samtools_sort_assemblysource:
   input:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.bam"
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.sorted.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam"
   threads: 6
   resources:
     mem_mb=5000
   shell:
     "samtools sort -@ {threads} -m {resources.mem_mb}M -o {output} {input}"
+
+rule jgi_summarize_script:
+  input:
+    "data/assembly_{{assemblytype}}_binningsignals/{{hostcode}}/{{hostcode}}_{{hostcode}}.sorted.bam",
+    expand("data/assembly_{{assemblytype}}_binningsignals/{{hostcode}}/{[hostcode}}_{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS)
+  output:
+    "data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab"
+  log:
+    stdout="logs/jgi_summarize_script_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/jgi_summarize_script_{assemblytype}_{hostcode}.stdout"
+  threads: 32
+  shell:
+    "jgi_summarize_bam_contig_depths --minContigLength 2500 --percentIdentity 80 --outputDepth {output} {input}"
+
+rule metabat2:
+  input:
