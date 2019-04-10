@@ -308,7 +308,7 @@ rule CAT_prepare_ORFS:
 rule CAT_classify_contigs_assembly:
   input:
     assembly="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta",
-    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-13.nr.dmnd",
+    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-27.nr.dmnd",
     db="references/CAT_customised_20190108/CAT_database_customised",
     tf="references/CAT_customised_20190108/taxonomy_customised",
     p="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_predicted_proteins.fasta"
@@ -332,7 +332,7 @@ rule CAT_classify_contigs_assembly:
 rule CAT_add_names_assembly:
   input:
     i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.contigs2classification.txt",
-    tf="references/CAT_customised_20190108/taxonomy_customised"
+    t="references/CAT_customised_20190108/taxonomy_customised"
   output:
      "data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab"
   params:
