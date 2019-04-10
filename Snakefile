@@ -15,7 +15,8 @@ rule allcheckm:
     expand("data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
 rule allbat:
   input:
-    expand("data/bins_{assemblytype}/{hostcode}/{hostcode}.BAT.bin2classification.txt",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+    expand("data/bins_{assemblytype}/{hostcode}.BAT.bin2classification.txt",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+
 rule allsecondcat:
   input:
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
@@ -610,7 +611,7 @@ checkpoint CAT_bins:
     db="references/CAT_customised_20190108/CAT_database_customised",
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
-    "data/bins_{assemblytype}/{hostcode}/{hostcode}.BAT.bin2classification.txt"
+    "data/bins_{assemblytype}/{hostcode}.BAT.bin2classification.txt"
   shadow: 'shallow'
   params:
     options= " -s '.fa' ",
