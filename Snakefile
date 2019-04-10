@@ -313,7 +313,7 @@ rule CAT_classify_contigs_assembly:
     tf="references/CAT_customised_20190108/taxonomy_customised",
     p="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_predicted_proteins.fasta"
   output:
-    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}2classification.txt",
+    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.contigs2classification.txt",
 #    g=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.gff",assemblytype='singles_hostfiltered'),
 #    f=expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_{{hostcode}}.predicted_proteins.faa",assemblytype='singles_hostfiltered'),
     o="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.ORF2LCA.txt",
@@ -331,7 +331,7 @@ rule CAT_classify_contigs_assembly:
 
 rule CAT_add_names_assembly:
   input:
-    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}.{assemblyfile}2classification.txt",
+    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.contig2sclassification.txt",
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
      "data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab"
