@@ -259,16 +259,16 @@ rule spades_hammer:
     s1=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=1),
     s2=expand("data/sequencing_genomic_trimmed_filtered/{{hostcode}}.{PE}.fastq.gz",PE=2)
   params:
-    "--only-error-correction"
+    options="--only-error-correction",
+    basedir=lambda w: expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/",hostcode=w.hostcode)
   output:
-    basedir="data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/",
     reads=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=DIRECTIONS)
   threads: 100
   log:
     stdout="logs/SPAdes_correct_sequencing{hostcode}.stdout",
     stderr="logs/SPAdes_correct_sequencing{hostcode}.stderr"
   shell:
-    "spades.py {params} -t {threads} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
+    "spades.py {params.options} -t {threads} -1 {input.s1} -2 {input.s2} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
 
 rule spades_first_assembly:
   input:
