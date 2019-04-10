@@ -10,7 +10,9 @@ ASSEMBLYFILES=['contigs','scaffolds']
 rule alltaxtab:
   input:
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
-
+rule allcheckm:
+  input:
+    expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype='singles_doublefiltered',hostcode=HOSTCODES)
 rule allsecondcat:
   input:
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
@@ -500,9 +502,9 @@ rule backmap_bwa_mem:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam"
   threads: 100
   log:
-    stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
-    samstderr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
-    stderr="logs/bwa_backmap_{assemblytype}_{hostcode}.stderr"
+    stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}_{binningsignal}.stdout",
+    samstderr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}_{binningsignal}.stdout",
+    stderr="logs/bwa_backmap_{assemblytype}_{hostcode}_{binningsignal}.stderr"
   shell:
     "bwa mem -t {threads} {params} {input.reads} 2> {log.stderr} | samtools view -@ 12 -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
@@ -548,7 +550,7 @@ rule backmap_samtools_sort_assemblysource:
 rule jgi_summarize_script:
   input:
     "data/assembly_{{assemblytype}}_binningsignals/{{hostcode}}/{{hostcode}}_{{hostcode}}.sorted.bam",
-    expand("data/assembly_{{assemblytype}}_binningsignals/{{hostcode}}/{[hostcode}}_{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS)
+    expand("data/assembly_{{assemblytype}}_binningsignals/{{hostcode}}/{{hostcode}}_{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS)
   output:
     "data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab"
   log:
@@ -563,8 +565,7 @@ rule metabat2:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta",
     depthmatrix="data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab"
   output:
-    dynamic("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa"),
-    directory("data/bins_{assemblytype}/{hostcode}/")
+    dir=directory("data/bins_{assemblytype}/{hostcode}")
   params:
     prefix=lambda w: expand("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin",assemblytype=w.assemblytype,hostcode=w.hostcode)
   threads: 72
@@ -574,16 +575,23 @@ rule metabat2:
   shell:
     "metabat2 -t {threads} -i {input.scaffolds} -a {input.depthmatrix} -o {params.prefix}"
 
+rule dummy_metabat2:
+  input:
+    "data/bins_{assemblytype}/{hostcode}"
+  output:
+    dynamic("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa")
+
 rule checkm:
   input:
     "data/bins_{assemblytype}/{hostcode}"
   output:
-    dir=directory("data/bins_{assemblytype}_checkm/{hostcode}),
+    dir=directory("data/bins_{assemblytype}_checkm/{hostcode}"),
     table="data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out"
   params:
-    options="-x fa",
-  logs:
+    options="-x fa --pplacer_threads=12 --tab_table"
+  threads: 72
+  log:
     stdout="logs/checkm_{assemblytype}_{hostcode}.stdout",
     stderr="logs/checkm_{assemblytype}_{hostcode}.stdout"
   shell:
-    "checkm lineage_wf -t {threads} {params.options} {input} {output.dir} -f {output.table}
+    "checkm lineage_wf -t {threads} {params.options} {input} {output.dir} -f {output.table}"
