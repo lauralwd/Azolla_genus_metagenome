@@ -13,7 +13,9 @@ rule alltaxtab:
 rule allcheckm:
   input:
     expand("data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
-
+rule allbat:
+  input:
+    expand("data/bins_{assemblytype}/{hostcode}/{hostcode}.BAT.bin2classification.txt",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
 rule allsecondcat:
   input:
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
@@ -600,3 +602,19 @@ rule checkm:
     stderr="logs/checkm_{assemblytype}_{hostcode}.stdout"
   shell:
     "checkm lineage_wf -t {threads} {params.options} {input} {params.dir} -f {output.table}"
+
+checkpoint CAT_bins:
+  input:
+    bindir="data/bins_{assemblytype}/{hostcode}",
+    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-27.nr.dmnd",
+    db="references/CAT_customised_20190108/CAT_database_customised",
+    tf="references/CAT_customised_20190108/taxonomy_customised"
+  output:
+    "data/bins_{assemblytype}/{hostcode}/{hostcode}.BAT.bin2classification.txt"
+  shadow: 'shallow'
+  params:
+    options= " -s '.fa' ",
+    prefix=lambda w : expand( "data/bins_{assemblytype}/{hostcode}/{hostcode}.BAT" , assemblytype=w.assemblytype , hostcode=w.hostcode )
+  threads: 72
+  shell:
+    "CAT bins -n {threads} -b {input.bindir} -d {input.db} -t {input.tf} {params.options} -o {params.prefix}"
