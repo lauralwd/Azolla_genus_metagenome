@@ -6,7 +6,7 @@ Current workflow specifically filters plant DNA out of a specific set of Azolla 
 
 A consise visual summary of the snakemake workflow would look like this:
 
-![Snakemake rule graph](https://github.com/lauralwd/Azolla_genus_metagenome/blob/binning/rulegraph.svg)
+![Snakemake rule graph](https://github.com/lauralwd/Azolla_genus_metagenome/blob/master/rulegraph.svg)
 
 ## Students
 Students willing to travel to-, or currently studying at Utrecht University are most welcome to discuss starting an internship for ECTS as part of this project. Naturally, at least some skills in coding and knowledge of metagenomics are required. Please find my contact details on my [personel page](https://www.uu.nl/medewerkers/LWDijkhuizen).
