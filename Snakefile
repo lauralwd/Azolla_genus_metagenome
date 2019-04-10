@@ -57,7 +57,7 @@ rule subset_fastq_file:
   shell:
     """
     set +o pipefail
-    reads=$( echo "$(zcat {input} | wc -l) * 3 / 4 / 4" | bc | cut -d '.' -f 1 )
+    reads=$( echo "$(zcat {input} | wc -l) * 6 / 10 / 4" | bc | cut -d '.' -f 1 )
     lines=$(echo "$reads * 4" | bc )
     zcat {input} | head -n $lines |  pigz -p {threads} -c > {output}
     """
