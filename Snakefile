@@ -504,7 +504,7 @@ rule backmap_bwa_mem:
     samstderr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
     stderr="logs/bwa_backmap_{assemblytype}_{hostcode}.stderr"
   shell:
-    "bwa mem -t {threads} {params} {input.reads} 2> {log.stderr} | samtools view -@ 12 -b -o {output}  2> {log.samstderr} > {log.stdout}"
+    "bwa mem -t {threads} {params} {input} 2> {log.stderr} | samtools view -@ 12 -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
 rule backmap_samtools_sort:
   input:
