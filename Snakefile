@@ -1,5 +1,5 @@
 #HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
-HOSTCODES= ['Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 'Azfil_minuscyano_170', 'Azfil_minuscyano_350', 'Azfil_minuscyano_HIC', 'Azfil_wild_galgw_E_1', 'Azfil_wild_galgw_E_2', 'Azfil_wild_galgw_E_3', 'Azfil_wild_galgw_P_2', 'Azfil_wild_galgw_P_3', 'Azfil_wild_galgw_P_4', 'Azmex_IRRI_486', 'Azmic_IRRI_456', 'Aznil_IRRI_479', 'Azrub_IRRI_479', 'Azspnov_IRRI_1_472', 'Azspnov_IRRI_2_489']
+HOSTCODES= ['Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 'Azfil_minuscyano_170', 'Azfil_minuscyano_350', 'Azfil_wild_galgw_E_1', 'Azfil_wild_galgw_E_2', 'Azfil_wild_galgw_E_3', 'Azfil_wild_galgw_P_2', 'Azfil_wild_galgw_P_3', 'Azfil_wild_galgw_P_4', 'Azmex_IRRI_486', 'Azmic_IRRI_456', 'Aznil_IRRI_479', 'Azrub_IRRI_479', 'Azspnov_IRRI_1_472', 'Azspnov_IRRI_2_489']
 DIRECTIONS=["1","2"]
 
 ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered']
@@ -361,7 +361,7 @@ rule CAT_filter_contignames_first_spades_assembly:
   log:
     expand("logs/CAT_assembly_{assemblytype}_{assemblyfile}filterlist_{{hostcode}}.stderr",assemblytype='singles_hostfiltered',assemblyfile='contigs')
   shell:
-    "cat {input} | grep -v Bacteria | grep -v Fungi | grep -v Opisthokonta | grep -v Alveolata | grep Eukaryota | cut -f 1  > {output} 2> {log}"
+    "cat {input} | grep Eukaryota | cut -f 1  > {output} 2> {log}"
 
 rule create_filter_fasta_first_spades_assembly:
   input:
