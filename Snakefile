@@ -36,11 +36,11 @@ rule allsecondassemblies:
     expand("data/assembly_singles_doublefiltered/{hostcode}/contigs.fasta",hostcode=HOSTCODES)
 rule allbackmapped:
   input:
-    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.bam",       binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam",       binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
 
 rule allsorted:
   input:
-    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
+    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
 rule allsourcemapped:
   input:
     expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
@@ -261,15 +261,14 @@ rule spades_hammer:
   params:
     "--only-error-correction"
   output:
+    basedir="data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/",
     reads=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=DIRECTIONS)
   threads: 100
-  params: 
-    basedir=lambda w: expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/", hostcode=w.hostcode)
   log:
     stdout="logs/SPAdes_correct_sequencing{hostcode}.stdout",
     stderr="logs/SPAdes_correct_sequencing{hostcode}.stderr"
   shell:
-    "spades.py {params} -t {threads} -1 {input.s1} -2 {input.s2} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
+    "spades.py {params} -t {threads} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
 
 rule spades_first_assembly:
   input:
@@ -421,9 +420,9 @@ rule spades_second_assembly:
     s1=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=1),
     s2=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=2)
   params:
-    basedir = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/",assemblytype='singles_doublefiltered', hostcode = w.hostcode),
-    options = "--meta --only-assembler"
+    "--meta --only-assembler"
   output:
+    basedir=expand("data/assembly_{assemblytype}/{{hostcode}}/",assemblytype='singles_doublefiltered'),
     contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_doublefiltered'),
     scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/scaffolds.fasta",assemblytype='singles_doublefiltered'),
     graph=expand("data/assembly_{assemblytype}/{{hostcode}}/assembly_graph.fastg",assemblytype='singles_doublefiltered'),
@@ -438,7 +437,7 @@ rule spades_second_assembly:
     stdout=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stdout",assemblytype='singles_doublefiltered'),
     stderr=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stderr",assemblytype='singles_doublefiltered')
   shell:
-    "spades.py {params.options} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
+    "spades.py {params} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {output.basedir} > {log.stdout} 2> {log.stderr}"
 
 ## assembly analyses and diagnostigs
 rule collect_assembly_stats:
@@ -581,6 +580,7 @@ checkpoint dummy_metabat2:
     "data/bins_{assemblytype}/{hostcode}"
   output:
     "data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa"
+
 
 rule checkm:
   input:
