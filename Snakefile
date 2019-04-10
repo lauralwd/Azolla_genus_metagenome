@@ -331,7 +331,7 @@ rule CAT_classify_contigs_assembly:
 
 rule CAT_add_names_assembly:
   input:
-    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.contigs2sclassification.txt",
+    i="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}.contigs2classification.txt",
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
      "data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab"
