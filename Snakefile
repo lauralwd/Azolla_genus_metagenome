@@ -575,11 +575,11 @@ rule metabat2:
   shell:
     "metabat2 -t {threads} -i {input.scaffolds} -a {input.depthmatrix} -o {params.prefix}"
 
-rule dummy_metabat2:
+checkpoint dummy_metabat2:
   input:
     "data/bins_{assemblytype}/{hostcode}"
   output:
-    dynamic("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa")
+    "data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa"
 
 rule checkm:
   input:
