@@ -563,7 +563,8 @@ rule metabat2:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta",
     depthmatrix="data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab"
   output:
-    dynamic("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa")
+    dynamic("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa"),
+    directory("data/bins_{assemblytype}/{hostcode}/")
   params:
     prefix=lambda w: expand("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin",assemblytype=w.assemblytype,hostcode=w.hostcode)
   threads: 72
@@ -572,3 +573,17 @@ rule metabat2:
     stderr="logs/metabat2_{assemblytype}_{hostcode}.stdout"
   shell:
     "metabat2 -t {threads} -i {input.scaffolds} -a {input.depthmatrix} -o {params.prefix}"
+
+rule checkm:
+  input:
+    "data/bins_{assemblytype}/{hostcode}"
+  output:
+    dir=directory("data/bins_{assemblytype}_checkm/{hostcode}),
+    table="data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out"
+  params:
+    options="-x fa",
+  logs:
+    stdout="logs/checkm_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/checkm_{assemblytype}_{hostcode}.stdout"
+  shell:
+    "checkm lineage_wf -t {threads} {params.options} {input} {output.dir} -f {output.table}
