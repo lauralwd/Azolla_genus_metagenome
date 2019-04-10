@@ -478,14 +478,17 @@ rule bwa_index_assembly_scaffolds:
   shell:
     "bwa index -p {params} {input} > {log.stdout} 2> {log.stderr}"
 
+
 import os.path
 def get_binning_reads(wildcards):
     pathpe=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed_paired.R1.fastq.gz")
     pathse=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed.fastq.gz")
-    if os.path.isfile(pathpe) == True :
-      return {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed_paired.R{PE}.fastq.gz", PE=[1,2],binningsignal=wildcards.binningsignal) }
+    if os.path.isfile(pathpe) ==  True :
+      path =  expand("data/sequencing_binning_signals/{binningsignal}.trimmed_paired.R{PE}.fastq.gz", PE=[1,2],binningsignal=wildcards.binningsignal)
     elif os.path.isfile(pathse) == True :
-      return {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz", binningsignal=wildcards.binningsignal) }
+       dict = {'reads': expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz", binningsignal=wildcards.binningsignal) }
+    return path
+    return {'reads': path }
 
 #rule backmap_bwa_mem:
 #  input:
