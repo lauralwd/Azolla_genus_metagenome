@@ -492,11 +492,10 @@ def get_binning_reads(wildcards):
     pathpe=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed_paired.R1.fastq.gz")
     pathse=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed.fastq.gz")
     if os.path.isfile(pathpe) ==  True :
-      path = expand("data/sequencing_binning_signals/{binningsignal}.trimmed_paired.R{PE}.fastq.gz", PE=[1,2],binningsignal=wildcards.binningsignal)
+      dict = {'reads' :  expand("data/sequencing_binning_signals/{binningsignal}.trimmed_paired.R{PE}.fastq.gz", PE=[1,2],binningsignal=wildcards.binningsignal) }
     elif os.path.isfile(pathse) == True :
-      path = expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz", binningsignal=wildcards.binningsignal)
-    return path
-    dict = { 'reads' : path }
+      dict = {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz", binningsignal=wildcards.binningsignal) }
+    return dict
     return dict
 
 rule backmap_bwa_mem:
@@ -513,7 +512,7 @@ rule backmap_bwa_mem:
     samstderr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}_{binningsignal}.stdout",
     stderr="logs/bwa_backmap_{assemblytype}_{hostcode}_{binningsignal}.stderr"
   shell:
-    "bwa mem -t {threads} {params.index} {input} 2> {log.stderr} | samtools view -@ {threads} -b -o {output}  2> {log.samstderr} > {log.stdout}"
+    "bwa mem -t {threads} {params.index} {input.reads} 2> {log.stderr} | samtools view -@ {threads} -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
 rule backmap_samtools_sort:
   input:
