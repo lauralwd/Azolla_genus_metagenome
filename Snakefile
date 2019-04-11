@@ -460,9 +460,32 @@ rule CAT_filter_contignames_first_spades_assembly:
   shell:
     "cat {input} | grep Eukaryota | cut -f 1  > {output} 2> {log}"
 
+rule BAT_filter_contignames_bins:
+  input:
+    "data/bins_{assemblytype}/{hostcode}.BAT.bin2classification.txt"
+  output:
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/BAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='contigs')
+  params:
+    binfolder = "data/assembly_{assemblytype}/{hostcode}"
+  shell:
+    """
+    for f in  $(cat {input} | grep Eukaryota | cut -f 1) )
+    do  grep '>' {params.binfolder}/$f
+    done  > {output} 2> {log}
+    """
+
+rule combine_filter_contignames:
+  input:
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/BAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='contigs'),
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_taxonomy.tab",assemblyfile='contigs')
+  output:
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/combined_filterlist_{{hostcode}}_{assemblyfile}.tab",assemblyfile='contigs')
+  shell:
+    "cat {input} > {output}"
+
 rule create_filter_fasta_first_spades_assembly:
   input:
-    n=expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='contigs'),
+    n=expand("data/assembly_{{assemblytype}}/{{hostcode}}/combined_filterlist_{{hostcode}}_{assemblyfile}.tab",assemblyfile='contigs'),
     f=expand("data/assembly_{{assemblytype}}/{{hostcode}}/{assemblyfile}.fasta",assemblyfile='contigs')
   output:
     "data/assembly_{assemblytype}/{hostcode}/CAT_filter_{hostcode}.fasta"
