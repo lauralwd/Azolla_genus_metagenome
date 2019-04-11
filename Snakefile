@@ -59,6 +59,8 @@ rule allsourcesorted:
 def get_subset_samples(wildcards):
   if wildcards.hostcode in SUBSETHOSTCODES :
     fastq = expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",hostcode=wildcards.hostcode,PE=DIRECTIONS) 
+  else:
+    fastq = ''
   return fastq
   return fastq
 
@@ -346,7 +348,7 @@ rule spades_hammer:
   shell:
     "spades.py {params.options} -t {threads} -1 {input.s1} -2 {input.s2} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
 
-ruleorder: spades_first_assembly > spades_first_assembly_subsetreads
+ruleorder: spades_first_assembly_subsetreads > spades_first_assembly
 
 rule spades_first_assembly:
   input:
