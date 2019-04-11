@@ -505,14 +505,14 @@ rule backmap_bwa_mem:
   params:
     index=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam"
+    temp("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam")
   threads: 100
   log:
     stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}_{binningsignal}.stdout",
     samstderr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}_{binningsignal}.stdout",
     stderr="logs/bwa_backmap_{assemblytype}_{hostcode}_{binningsignal}.stderr"
   shell:
-    "bwa mem -t {threads} {params.index} {input.reads} 2> {log.stderr} | samtools view -@ {threads} -b -o {output}  2> {log.samstderr} > {log.stdout}"
+    "bwa mem -t {threads} {params.index} {input.reads} 2> {log.stderr} | samtools view -F 4 -@ {threads} -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
 rule backmap_samtools_sort:
   input:
@@ -536,14 +536,14 @@ rule backmap_bwa_mem_assemblysource:
   params:
     index=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.bam"
+    temp("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.bam")
   threads: 100
   log:
     stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
     samstderr="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
     stderr="logs/bwa_backmap_{assemblytype}_{hostcode}.stderr"
   shell:
-    "bwa mem -t {threads} {params.index} {input.s1} {input.s2} 2> {log.stderr} | samtools view -@ {threads} -b -o {output}  2> {log.samstderr} > {log.stdout}"
+    "bwa mem -t {threads} {params.index} {input.s1} {input.s2} 2> {log.stderr} | samtools view -F 4 -@ {threads} -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
 ruleorder: backmap_samtools_sort  > backmap_samtools_sort_assemblysource
 
