@@ -458,20 +458,22 @@ rule CAT_filter_contignames_first_spades_assembly:
   log:
     expand("logs/CAT_assembly_{{assemblytype}}_{assemblyfile}filterlist_{{hostcode}}.stderr",assemblyfile='contigs')
   shell:
-    "cat {input} | grep Eukaryota | cut -f 1  > {output} 2> {log}"
+    "cat {input} | grep Eukaryota | cut -f 1 | cut -f 1,2 -d '_'  > {output} 2> {log}"
 
 rule BAT_filter_contignames_bins:
   input:
-    "data/bins_{assemblytype}/{hostcode}.BAT.bin2classification.txt"
+    "data/bins_{assemblytype}/{hostcode}.BAT.names.txt"
   output:
     expand("data/assembly_{{assemblytype}}/{{hostcode}}/BAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='contigs')
   params:
-    binfolder = "data/assembly_{assemblytype}/{hostcode}"
+    binfolder = "data/bins_{assemblytype}/{hostcode}"
+  log:
+    "logs/BAT_filter_contignames_bins_{assemblytype}_{hostcode}"
   shell:
     """
-    for f in  $(cat {input} | grep Eukaryota | cut -f 1) )
-    do  grep '>' {params.binfolder}/$f
-    done  > {output} 2> {log}
+    for f in  $(cat {input} | grep Eukaryota | cut -f 1)
+    do  grep '>' {params.binfolder}/$f.fa
+    done | tr -d '>' | cut -f 1 > {output} 2> {log}
     """
 
 rule combine_filter_contignames:
@@ -481,7 +483,7 @@ rule combine_filter_contignames:
   output:
     expand("data/assembly_{{assemblytype}}/{{hostcode}}/combined_filterlist_{{hostcode}}_{assemblyfile}.tab",assemblyfile='contigs')
   shell:
-    "cat {input} > {output}"
+    "cat {input} | sort | uniq > {output}"
 
 rule create_filter_fasta_first_spades_assembly:
   input:
@@ -747,3 +749,18 @@ checkpoint CAT_bins:
     stderr="logs/BAT_{assemblytype}_{hostcode}.stdout"
   shell:
     "CAT bins -n {threads} -b {input.bindir} -d {input.db} -t {input.tf} {params.options} -o {params.prefix} > {log.stdout} 2> {log.stderr}"
+
+rule BAT_add_names:
+  input:
+    i="data/bins_{assemblytype}/{hostcode}.BAT.bin2classification.txt",
+    tf="references/CAT_customised_20190108/taxonomy_customised"
+  output:
+    "data/bins_{assemblytype}/{hostcode}.BAT.names.txt",
+  params:
+    "--only_official"
+  log:
+    stdout="logs/BAT_assembly_{assemblytype}_classification_taxonomy_{hostcode}.stdout",
+    stderr="logs/BAT_assembly_{assemblytype}_classification_taxonomy_{hostcode}.stderr"
+  threads: 1
+  shell:
+    "CAT add_names {params} -i {input.i} -t {input.tf} -o {output} > {log.stdout} 2> {log.stderr}"
