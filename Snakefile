@@ -526,7 +526,7 @@ rule backmap_samtools_sort:
     stdout="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{binningsignal}.stdout",
     stderr="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{binningsignal}.stderr"
   shell:
-    "samtools sort -@ {threads} -m {resources.mem_mb}M -o {output} {input} > {log.stdour} 2> {log.stderr}"
+    "samtools sort -@ {threads} -m {resources.mem_mb}M -o {output} {input} > {log.stdout} 2> {log.stderr}"
 
 rule backmap_bwa_mem_assemblysource:
   input:
@@ -555,8 +555,11 @@ rule backmap_samtools_sort_assemblysource:
   threads: 6
   resources:
     mem_mb=5000
+  log:
+    stdout="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{hostcode}.stdout",
+    stderr="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{hostcode}.stderr"
   shell:
-    "samtools sort -@ {threads} -m {resources.mem_mb}M -o {output} {input}"
+    "samtools sort -@ {threads} -m {resources.mem_mb}M -o {output} {input} > {log.stdout} 2> {log.stderr}"
 
 rule jgi_summarize_script:
   input:
