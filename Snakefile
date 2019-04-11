@@ -519,7 +519,7 @@ rule backmap_samtools_sort:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam"
   output:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam"
-  threads: 6
+  threads: 100
   resources:
     mem_mb=5000
   shell:
