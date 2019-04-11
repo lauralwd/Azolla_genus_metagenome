@@ -713,11 +713,11 @@ checkpoint CAT_bins:
     db="references/CAT_customised_20190108/CAT_database_customised",
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
-    "data/bins_{assemblytype}/{hostcode}/{hostcode}.BAT.bin2classification.txt"
+    "data/bins_{assemblytype}/{hostcode}.BAT.bin2classification.txt"
   shadow: 'shallow'
   params:
     options= " -s '.fa' ",
-    prefix=lambda w : expand( "data/bins_{assemblytype}/{hostcode}/{hostcode}.BAT" , assemblytype=w.assemblytype , hostcode=w.hostcode )
+    prefix=lambda w : expand( "data/bins_{assemblytype}/{hostcode}.BAT" , assemblytype=w.assemblytype , hostcode=w.hostcode )
   threads: 72
   log:
     stdout="logs/BAT_{assemblytype}_{hostcode}.stdout",
