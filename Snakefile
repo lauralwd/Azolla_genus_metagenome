@@ -479,16 +479,16 @@ rule BAT_filter_contignames_bins:
 rule combine_filter_contignames:
   input:
     expand("data/assembly_{{assemblytype}}/{{hostcode}}/BAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='contigs'),
-    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_taxonomy.tab",assemblyfile='contigs')
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='contigs')
   output:
     expand("data/assembly_{{assemblytype}}/{{hostcode}}/combined_filterlist_{{hostcode}}_{assemblyfile}.tab",assemblyfile='contigs')
   shell:
-    "cat {input} | sort | uniq > {output}"
+    "cat {input} | cut -f 1 | sort | uniq > {output}"
 
 rule create_filter_fasta_first_spades_assembly:
   input:
     n=expand("data/assembly_{{assemblytype}}/{{hostcode}}/combined_filterlist_{{hostcode}}_{assemblyfile}.tab",assemblyfile='contigs'),
-    f=expand("data/assembly_{{assemblytype}}/{{hostcode}}/{assemblyfile}.fasta",assemblyfile='contigs')
+    f=expand("data/assembly_{{assemblytype}}/{{hostcode}}/{assemblyfile}_short_names.fasta",assemblyfile='scaffolds')
   output:
     "data/assembly_{assemblytype}/{hostcode}/CAT_filter_{hostcode}.fasta"
   threads: 1
@@ -588,17 +588,17 @@ rule collect_assembly_stats:
 ## assembly processing for binning an Anvi'o
 rule shorten_scaffold_names:
   input:
-    scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds.fasta"
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta"
   output:
-    scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta"
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_short_names.fasta"
   shell:
    """awk -F '_' '/>NODE/{{$0=">NODE_"$2}}1' {input} > {output}"""
 
 rule bwa_index_assembly_scaffolds:
   input:
-    scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta"
+    scaffolds=expand("data/assembly_{{assemblytype}}/{{hostcode}}/{assemblyfile}_short_names.fasta",assemblyfile='scaffolds')
   params:
-    "data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds"
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/{assemblyfile}",assemblyfile='scaffolds')
   output:
     expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
   threads: 1
