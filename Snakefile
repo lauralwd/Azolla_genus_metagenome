@@ -296,10 +296,12 @@ rule trimmomatic_genomic_sequencing:
   threads: 4
   resources: io=1
   log:
+    stdout="logs/trimmomatic_genomicsequencing.{hostcode}.stdout",
+    stderr="logs/trimmomatic_genomicsequencing.{hostcode}.stderr",
     log="logs/trimmomatic_genomicsequencing.{hostcode}.log",
     summary="logs/trimmomatic_genomicsequencing_summary{hostcode}.log"
   shell:
-    "trimmomatic PE -threads {threads} -trimlog {log.log} -summary {log.summary} {input} {output.p1} /dev/null {output.p2} /dev/null {params}"
+    "trimmomatic PE -threads {threads} -trimlog {log.log} -summary {log.summary} {input} {output.p1} /dev/null {output.p2} /dev/null {params} > {log.stdout} 2> {log.stderr}"
 
 rule filter_for_host:
   input:
