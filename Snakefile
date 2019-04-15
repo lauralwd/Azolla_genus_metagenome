@@ -526,22 +526,28 @@ rule filter_for_assembly:
     i = lambda w : expand("data/assembly_{assemblytype}/{hostcode}/CAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype='singles_hostfiltered', hostcode = w.hostcode),
     outbase= lambda w : expand("data/sequencing_doublefiltered/{hostcode}/{hostcode}", hostcode=w.hostcode)
   output:
-       expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}",PE=DIRECTIONS)
-  threads: 36
-  log:
-    stderr="logs/bowtie2_filter_for_first_assembly_{hostcode}.stderr"
-  shell:
-    "bowtie2 {params.opts} --threads {threads} --un-conc-gz {params.outbase} -x {params.i} -1 {input.s1} -2 {input.s2}   > /dev/null 2> {log.stderr}"
-
-rule rename_filtered_sequencing_files:
-  input:
-    a1=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}",PE=1),
-    a2=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}",PE=2)
-  output:
     b1=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=1),
     b2=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=2)
+  threads: 36
+  log:
+    stderr="logs/bowtie2_filter_for_assembly_{assemblytype}_{hostcode}.stderr",
+    samstderr="logs/bowtie2_filter_for_assembly_{assemblytype}_{hostcode}_samtoolsfastq.stderr",
+    samstdout="logs/bowtie2_filter_for_assembly_{assemblytype}_{hostcode}_samtoolsfastq.stdout"
   shell:
-    "mv {input.a1} {output.b1} && mv {input.a2} {output.b2}"
+    """
+    bowtie2 {params.opts} --threads {threads}	\
+	-x {params.i}	\
+	-1 {input.s1}	\
+	-2 {input.s2}	\
+		2> {log.stderr}	\
+		| samtools view -f 4	\
+			-@ {threads}	\
+			-n -c 9		\
+			-1 {output.b1}	\
+			-2 {output.b2}	\
+			2> {log.samstderr}	\
+			> {log.samstdout}
+    """
 
 ## double filtered assemblies
 rule spades_second_assembly:
