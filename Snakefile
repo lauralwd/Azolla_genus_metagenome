@@ -731,7 +731,7 @@ rule checkm:
   shell:
     "checkm lineage_wf -t {threads} {params.options} {input} {params.dir} -f {output.table} > {log.stdout} 2> {log.stderr}"
 
-checkpoint CAT_bins:
+rule CAT_bins:
   input:
     bindir="data/bins_{assemblytype}/{hostcode}",
     dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-27.nr.dmnd",
