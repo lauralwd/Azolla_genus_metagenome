@@ -451,12 +451,12 @@ rule CAT_add_names_assembly:
 
 rule CAT_filter_contignames_first_spades_assembly:
   input:
-    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_taxonomy.tab",assemblyfile='contigs')
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_taxonomy.tab",assemblyfile='scaffolds')
   output:
-    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='contigs')
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='scaffolds')
   threads: 1
   log:
-    expand("logs/CAT_assembly_{{assemblytype}}_{assemblyfile}filterlist_{{hostcode}}.stderr",assemblyfile='contigs')
+    expand("logs/CAT_assembly_{{assemblytype}}_{assemblyfile}filterlist_{{hostcode}}.stderr",assemblyfile='scaffolds')
   shell:
     "cat {input} | grep Eukaryota | cut -f 1 | cut -f 1,2 -d '_'  > {output} 2> {log}"
 
@@ -464,7 +464,7 @@ rule BAT_filter_contignames_bins:
   input:
     "data/bins_{assemblytype}/{hostcode}.BAT.names.txt"
   output:
-    expand("data/assembly_{{assemblytype}}/{{hostcode}}/BAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='contigs')
+    "data/assembly_{assemblytype}/{hostcode}/BAT_{hostcode}_filterlist.txt"
   params:
     binfolder = "data/bins_{assemblytype}/{hostcode}"
   log:
@@ -478,16 +478,16 @@ rule BAT_filter_contignames_bins:
 
 rule combine_filter_contignames:
   input:
-    expand("data/assembly_{{assemblytype}}/{{hostcode}}/BAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='contigs'),
-    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='contigs')
+    "data/assembly_{{assemblytype}}/{{hostcode}}/BAT_{{hostcode}}_filterlist.txt",
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='scaffolds')
   output:
-    expand("data/assembly_{{assemblytype}}/{{hostcode}}/combined_filterlist_{{hostcode}}_{assemblyfile}.tab",assemblyfile='contigs')
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/combined_filterlist_{{hostcode}}_{assemblyfile}.tab",assemblyfile='scaffolds')
   shell:
     "cat {input} | cut -f 1 | sort | uniq > {output}"
 
 rule create_filter_fasta_first_spades_assembly:
   input:
-    n=expand("data/assembly_{{assemblytype}}/{{hostcode}}/combined_filterlist_{{hostcode}}_{assemblyfile}.tab",assemblyfile='contigs'),
+    n=expand("data/assembly_{{assemblytype}}/{{hostcode}}/combined_filterlist_{{hostcode}}_{assemblyfile}.tab",assemblyfile='scaffolds'),
     f=expand("data/assembly_{{assemblytype}}/{{hostcode}}/{assemblyfile}_short_names.fasta",assemblyfile='scaffolds')
   output:
     "data/assembly_{assemblytype}/{hostcode}/CAT_BAT_filter_{hostcode}.fasta"
