@@ -101,13 +101,13 @@ rule spades_subset_assembly:
 
 rule filter_for_subset_assembly:
   input:
-    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4),assemblytype='singles_hostfiltered_subset'),
-    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2),assemblytype='singles_hostfiltered_subset'),
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_BAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4),assemblytype='singles_hostfiltered_subset'),
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_BAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2),assemblytype='singles_hostfiltered_subset'),
     s1=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1,),
     s2=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
   params:
     opts="--very-fast",
-    i = lambda w : expand("data/assembly_{assemblytype}/{hostcode}/CAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype='singles_hostfiltered_subset', hostcode = w.hostcode),
+    i = lambda w : expand("data/assembly_{assemblytype}/{hostcode}/CAT_BAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype='singles_hostfiltered_subset', hostcode = w.hostcode),
     outbase= lambda w : expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{hostcode}/corrected/{hostcode}", hostcode=w.hostcode)
   output:
        expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}",PE=DIRECTIONS)
@@ -492,7 +492,7 @@ rule create_filter_fasta_first_spades_assembly:
     n=expand("data/assembly_{{assemblytype}}/{{hostcode}}/combined_filterlist_{{hostcode}}_{assemblyfile}.tab",assemblyfile='contigs'),
     f=expand("data/assembly_{{assemblytype}}/{{hostcode}}/{assemblyfile}_short_names.fasta",assemblyfile='scaffolds')
   output:
-    "data/assembly_{assemblytype}/{hostcode}/CAT_filter_{hostcode}.fasta"
+    "data/assembly_{assemblytype}/{hostcode}/CAT_BAT_filter_{hostcode}.fasta"
   threads: 1
   log:
     stdout="logs/CAT_create_assembly_{assemblytype}_filter_{hostcode}.stdout",
@@ -502,12 +502,12 @@ rule create_filter_fasta_first_spades_assembly:
 
 rule create_first_spades_assembly_filter_bt2_index:
   input:
-    "data/assembly_{assemblytype}/{hostcode}/CAT_filter_{hostcode}.fasta"
+    "data/assembly_{assemblytype}/{hostcode}/CAT_BAT_filter_{hostcode}.fasta"
   params:
-    filter = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype=w.assemblytype, hostcode=w.hostcode)
+    filter = lambda w: expand("data/assembly_{assemblytype}/{hostcode}/CAT_BAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype=w.assemblytype, hostcode=w.hostcode)
   output:
-    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4)),
-    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2))
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_BAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4)),
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_BAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2))
   threads: 12
   log:
     stdout="logs/CAT_create_assembly_filter_{assemblytype}_filterbt2index_{hostcode}.stdout",
@@ -517,13 +517,13 @@ rule create_first_spades_assembly_filter_bt2_index:
 
 rule filter_for_assembly:
   input:
-    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4),assemblytype='singles_hostfiltered'),
-    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2),assemblytype='singles_hostfiltered'),
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_BAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4),assemblytype='singles_hostfiltered'),
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_BAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2),assemblytype='singles_hostfiltered'),
     s1=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1,),
     s2=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
   params:
     opts="--very-fast",
-    i = lambda w : expand("data/assembly_{assemblytype}/{hostcode}/CAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype='singles_hostfiltered', hostcode = w.hostcode),
+    i = lambda w : expand("data/assembly_{assemblytype}/{hostcode}/CAT_BAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype='singles_hostfiltered', hostcode = w.hostcode),
     outbase= lambda w : expand("data/sequencing_doublefiltered/{hostcode}/{hostcode}", hostcode=w.hostcode)
   output:
     b1=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=1),
