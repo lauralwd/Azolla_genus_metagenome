@@ -38,7 +38,7 @@ rule allreadscorrected:
     expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",hostcode=HOSTCODES, PE=DIRECTIONS)
 rule allsecondassemblies:
   input:
-    expand("data/assembly_singles_doublefiltered/{hostcode}/contigs.fasta",hostcode=HOSTCODES)
+    expand("data/assembly_{assemblytype}/{hostcode}/contigs.fasta",hostcode=HOSTCODES,assemblytype='singles_doublefiltered')
 rule allbackmapped:
   input:
     expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam",       binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
