@@ -528,9 +528,9 @@ rule filter_for_assembly:
     b2=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=2)
   threads: 36
   log:
-    stderr="logs/bowtie2_filter_for_assembly_{assemblytype}_{hostcode}.stderr",
-    samstderr="logs/bowtie2_filter_for_assembly_{assemblytype}_{hostcode}_samtoolsfastq.stderr",
-    samstdout="logs/bowtie2_filter_for_assembly_{assemblytype}_{hostcode}_samtoolsfastq.stdout"
+    stderr="logs/bowtie2_filter_for_assembly_doublefilter_{hostcode}.stderr",
+    samstderr="logs/bowtie2_filter_for_assembly_doublefilter_{hostcode}_samtoolsfastq.stderr",
+    samstdout="logs/bowtie2_filter_for_assembly_doublefilter_{hostcode}_samtoolsfastq.stdout"
   shell:
     """
     bowtie2 {params.opts} --threads {threads}	\
