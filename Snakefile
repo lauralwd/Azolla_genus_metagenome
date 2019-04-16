@@ -21,6 +21,9 @@ rule allbat:
 rule allsecondcat:
   input:
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
+rule allfirstcat:
+  input:
+    expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_filterlist.txt",assemblyfile='scaffolds',hostcode=HOSTCODES,assemblytype='singles_hostfiltered')
 rule allfastqc:
   input:
     expand("analyses/analyses_reads/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
