@@ -542,7 +542,7 @@ rule filter_for_assembly:
 	-1 {input.s1}	\
 	-2 {input.s2}	\
 		2> {log.stderr}	\
-		| samtools view -f 4	\
+		| samtools fastq -f 4	\
 			-@ {threads}	\
 			-n -c 9		\
 			-1 {output.b1}	\
