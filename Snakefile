@@ -481,7 +481,7 @@ rule BAT_filter_contignames_bins:
 
 rule combine_filter_contignames:
   input:
-    "data/assembly_{{assemblytype}}/{{hostcode}}/BAT_{{hostcode}}_filterlist.txt",
+    "data/assembly_{assemblytype}/{hostcode}/BAT_{hostcode}_filterlist.txt",
     expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_filterlist.txt",assemblyfile='scaffolds')
   output:
     expand("data/assembly_{{assemblytype}}/{{hostcode}}/combined_filterlist_{{hostcode}}_{assemblyfile}.tab",assemblyfile='scaffolds')
