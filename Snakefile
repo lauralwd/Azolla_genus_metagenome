@@ -527,8 +527,9 @@ rule filter_for_assembly:
     i = lambda w : expand("data/assembly_{assemblytype}/{hostcode}/CAT_BAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype='singles_hostfiltered', hostcode = w.hostcode),
     outbase= lambda w : expand("data/sequencing_doublefiltered/{hostcode}/{hostcode}", hostcode=w.hostcode)
   output:
-    b1=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=1),
-    b2=expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=2)
+    b1= expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=1),
+    b2= expand("data/sequencing_doublefiltered/{{hostcode}}/{{hostcode}}.{PE}.fastq.gz",PE=2),
+    sin="data/sequencing_doublefiltered/{hostcode}/{hostcode}.singletons.fastq.gz"
   threads: 36
   log:
     stderr="logs/bowtie2_filter_for_assembly_doublefilter_{hostcode}.stderr",
@@ -546,6 +547,8 @@ rule filter_for_assembly:
 			-n -c 9		\
 			-1 {output.b1}	\
 			-2 {output.b2}	\
+			-s {output.sin}	\
+			-		\
 			2> {log.samstderr}	\
 			> {log.samstdout}
     """
