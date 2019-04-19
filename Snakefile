@@ -547,7 +547,7 @@ rule filter_for_assembly:
 			-n -c 9		\
 			-1 {output.b1}	\
 			-2 {output.b2}	\
-			-s {output.sin}	\
+			-0 {output.sin}	\
 			-		\
 			2> {log.samstderr}	\
 			> {log.samstdout}
