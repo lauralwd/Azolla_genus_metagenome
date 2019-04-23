@@ -603,7 +603,17 @@ rule collect_assembly_stats:
     """
 
 ## assembly processing for binning an Anvi'o
-rule shorten_scaffold_names:
+
+ruleorder: rule shorten_scaffold_names_awk > rule shorten_scaffold_names_anvi
+
+rule shorten_scaffold_names_awk:
+  input:
+    scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/{{assemblyfile}}.fasta",assemblytype='singles_hostfiltered')
+  output:
+    scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/{{assemblyfile}}_short_names.fasta",assemblytype='singles_hostfiltered')
+  shell:
+   """awk -F '_' '/>NODE/{{$0=">NODE_"$2}}1' {input} > {output}"""
+
   input:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta"
   output:
