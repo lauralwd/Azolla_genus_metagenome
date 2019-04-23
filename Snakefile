@@ -33,6 +33,9 @@ rule allfastqc_trimmed:
 rule allfiltered:
   input:
     expand("data/sequencing_genomic_trimmed_filtered/{hostcode}.{PE}.fastq.gz",hostcode=HOSTCODES,PE=DIRECTIONS)
+rule alldoublefiltered:
+  input:
+    expand("data/sequencing_doublefiltered/{hostcode}/{hostcode}.{PE}.fastq.gz",hostcode=HOSTCODES,PE=DIRECTIONS)
 rule allfirstassemblies:
   input:
     expand("data/assembly_singles_hostfiltered/{hostcode}/contigs.fasta",hostcode=HOSTCODES)
@@ -542,7 +545,7 @@ rule filter_for_assembly:
 	-1 {input.s1}	\
 	-2 {input.s2}	\
 		2> {log.stderr}	\
-		| samtools fastq -f 4	\
+		| samtools fastq -f 13	\
 			-@ {threads}	\
 			-n -c 9		\
 			-1 {output.b1}	\
