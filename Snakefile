@@ -714,6 +714,32 @@ rule backmap_samtools_sort_assemblysource:
   shell:
     "samtools sort -@ {threads} -m {resources.mem_mb}M -o {output} {input} > {log.stdout} 2> {log.stderr}"
 
+ruleorder: backmap_samtools_index > backmap_samtools_index_binningsignal
+
+rule backmap_samtools_index:
+  input:
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam"
+  output:
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam.bai"
+  log:
+    stdout="logs/bwa_backmap_samtools_index_{assemblytype}_{hostcode}_{hostcode}.stdout",
+    stderr="logs/bwa_backmap_samtools_index_{assemblytype}_{hostcode}_{hostcode}.stderr"
+  threads: 100
+  shell:
+    "samtools index -@ {threads} {input} > {log.stdout} 2> {log.stderr}"
+
+rule backmap_samtools_index_binningsignal:
+  input:
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam"
+  output:
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam.bai"
+  log:
+    stdout="logs/bwa_backmap_samtools_index_{assemblytype}_{hostcode}_{binningsignal}.stdout",
+    stderr="logs/bwa_backmap_samtools_index_{assemblytype}_{hostcode}_{binningsignal}.stderr"
+  threads: 100
+  shell:
+    "samtools index -@ {threads} {input} > {log.stdout} 2> {log.stderr}"
+
 rule jgi_summarize_script:
   input:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",
