@@ -852,8 +852,8 @@ ruleorder: anvi_profile_binningsignal > anvi_profile
 
 rule anvi_profile:
   input:
+    "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
-    touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done"),
     bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",
     bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam.bai"
   output:
@@ -869,8 +869,8 @@ rule anvi_profile:
 
 rule anvi_profile_binningsignal:
   input:
+    "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
-    touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done"),
     bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",
     bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam.bai"
   output:
