@@ -809,3 +809,15 @@ rule anvi-gen-contigs-databse:
     """
     anvi-gen-contigs-database -f {input} -o {output} -n 'sample {hostcode} assembly {assemblytype}' > {log.stdout} 2> {log.stderr}
     """
+
+rule anvi-run-hmms:
+  input:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db"
+  output:
+    touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done")
+  threads: 100
+  log:
+    stdout="logs/anvi-run-hmms_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-run-hmms_{assemblytype}_{hostcode}.stderr"
+  shell:
+    "anvi-run-hmms -c {input} -T {threads}"
