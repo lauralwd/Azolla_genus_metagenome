@@ -607,7 +607,7 @@ rule collect_assembly_stats:
 
 ## assembly processing for binning an Anvi'o
 
-ruleorder: rule shorten_scaffold_names_awk > rule shorten_scaffold_names_anvi
+ruleorder: shorten_scaffold_names_awk > shorten_scaffold_names_anvi
 
 rule shorten_scaffold_names_awk:
   input:
