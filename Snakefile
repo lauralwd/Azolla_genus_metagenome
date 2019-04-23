@@ -11,8 +11,8 @@ ASSEMBLYFILES=['contigs','scaffolds']
 rule all:
   input:
     expand("data/bins_{assemblytype}/{hostcode}.BAT.bin2classification.txt",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
-    expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype='singles_doublefiltered',hostcode=HOSTCODES)
-
+    expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
+    expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}/PROFILE.db",assemblytype='singles_doublefiltered',hostcode=HOSTCODES)
 rule alltaxtab:
   input:
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
