@@ -860,15 +860,16 @@ rule anvi_profile:
     bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",
     bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam.bai"
   output:
-    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}"),
-    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db"
+    profile= "data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db"
   params:
-    "--min-contig-length 2500"
+    "--min-contig-length 2500",
+    lambda w: expand(" -S 'assembly {assemblytype} sample {hostcode} binningsignal {hostcode}' ", assemblytype=w.assemblytype , hostcode=w.hostcode),
+    path= lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}", assemblytype=w.assemblytype , hostcode=w.hostcode)
   log:
     stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stdout",
     stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stderr"
   shell:
-    "anvi-profile -c {input.db} -i {input.bam} -o {output.path} -T {threads} {params} -S 'assembly {assemblytype} sample {hostcode} backmapped {hostcode}' > {log.stdout} 2> {log.stderr}"
+    "anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params} > {log.stdout} 2> {log.stderr}"
 
 rule anvi_profile_binningsignal:
   input:
@@ -877,15 +878,16 @@ rule anvi_profile_binningsignal:
     bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",
     bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam.bai"
   output:
-    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}"),
     profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}/PROFILE.db"
   params:
-    "--min-contig-length 2500"
+    "--min-contig-length 2500",
+    lambda w: expand(" -S 'assembly {assemblytype} sample {hostcode} binningsignal {binningsignal}' ", assemblytype=w.assemblytype , hostcode=w.binningsignal),
+    path=lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}", assemblytype=w.assemblytype , hostcode=w.hostcode)
   log:
     stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stdout",
     stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stderr"
   shell:
-    "anvi-profile -c {input.db} -i {input.bam} -o {output.path} -T {threads} {params} -S 'assembly {assemblytype} sample {hostcode} binningsignal {binningsignal}' > {log.stdout} 2> {log.stderr}"
+    "anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params} > {log.stdout} 2> {log.stderr}"
 
 rule anvi_merge:
   input:
@@ -893,15 +895,15 @@ rule anvi_merge:
     source="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db",
     signal=expand("data/assembly_{{assemblytype}}_binningsignals_anvio/{{hostcode}}_{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS)
   output:
-    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db",
-    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}")
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
   params:
-    "--enforce-hierarchical-clustering "
+    "--enforce-hierarchical-clustering ",
+    path=lambda w:expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}",assemblytype=w.assemblytype , hostcode=w.hostcode)
   log:
     stdout="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stdout",
     stderr="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stderr"
   shell:
-    "anvi-merge -c {input.db} -o {output.path} -S 'assembly {hostcode} with binningsignals' {params} {input.source} {input.signal} > {log.stdout} 2> {log.stderr}"
+    "anvi-merge -c {input.db} -o {params.path} -S 'assembly {hostcode} with binningsignals' {params} {input.source} {input.signal} > {log.stdout} 2> {log.stderr}"
 
 def get_all_bins(wildcards):
     bins=checkpoints.metabat2.get(assemblytype='singles_doublefiltered',hostcode=wildcards.hostcode).output
