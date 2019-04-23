@@ -899,3 +899,37 @@ rule anvi-merge:
     stderr="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stderr"
   shell:
     "anvi-merge -c {input.db} -o {output.path} -S 'assembly {hostcode} with binningsignals' {params} {input.source} {input.signal} > {log.stdout} 2> {log.stderr}"
+
+def get_all_bins(wildcards):
+    bins=checkpoints.metabat2.get(assemblytype='singles_doublefiltered',hostcode=wildcards.hostcode).output
+    return bins
+
+#rule prepare_anvi-import-metabat2:
+#  input:
+#    get_all_bins
+#  output:
+#    "data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab",
+#  log:
+#    "logs/prepare_anvi-import-metabat2.stderr
+#  shell:
+#    """
+#    echo -e "bin\theader" > {output.binlist}
+#    for   f in ( {input} )
+#    do    cat $f | grep '>' | sed "s/^/bin_{bin_nr}\t/g" >> {output.binlist} 2> {log}
+#    """
+
+rule anvi-import-metabat2:
+  input:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}/PROFILE.db",
+    binlist="data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab"
+  output:
+    touch(profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}/PROFILE_db_imported-metabat2.done")
+  params:
+    "-C 'metabat2' ",
+    "--contigs-mode"
+  log:
+    stdout="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stderr"
+  shell:
+    "anvi-import-collection {input.binlist} -c {input.db} {params} -p {input.profile} > {log.stdout} 2> {log.stderr}"
