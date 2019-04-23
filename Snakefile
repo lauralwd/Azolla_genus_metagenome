@@ -796,3 +796,16 @@ rule BAT_add_names:
   threads: 1
   shell:
     "CAT add_names {params} -i {input.i} -t {input.tf} -o {output} > {log.stdout} 2> {log.stderr}"
+
+rule anvi-gen-contigs-databse:
+  input:
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta"
+  output:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db"
+  log:
+    stdout="logs/anvi-gen-contigs-database_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-gen-contigs-database_{assemblytype}_{hostcode}.stderr"
+  shell:
+    """
+    anvi-gen-contigs-database -f {input} -o {output} -n 'sample {hostcode} assembly {assemblytype}' > {log.stdout} 2> {log.stderr}
+    """
