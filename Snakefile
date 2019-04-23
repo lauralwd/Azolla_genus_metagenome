@@ -8,6 +8,11 @@ BINNINGSIGNALS=['dijkhuizen2018.E.1', 'dijkhuizen2018.E.2', 'dijkhuizen2018.E.3'
 ASSEMBLYFILES=['contigs','scaffolds']
 ## 'All'-rules
 
+rule all:
+  input:
+    expand("data/bins_{assemblytype}/{hostcode}.BAT.bin2classification.txt",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
+    expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
+    expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}/PROFILE.db",assemblytype='singles_doublefiltered',hostcode=HOSTCODES)
 rule alltaxtab:
   input:
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
@@ -601,13 +606,28 @@ rule collect_assembly_stats:
     """
 
 ## assembly processing for binning an Anvi'o
-rule shorten_scaffold_names:
+
+ruleorder: rule shorten_scaffold_names_awk > rule shorten_scaffold_names_anvi
+
+rule shorten_scaffold_names_awk:
+  input:
+    scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/{{assemblyfile}}.fasta",assemblytype='singles_hostfiltered')
+  output:
+    scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/{{assemblyfile}}_short_names.fasta",assemblytype='singles_hostfiltered')
+  shell:
+   """awk -F '_' '/>NODE/{{$0=">NODE_"$2}}1' {input} > {output}"""
+
+rule shorten_scaffold_names_anvi:
   input:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta"
   output:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_short_names.fasta"
+  log:
+    report="logs/anvi-script-reformat-fasta_{assemblytype}_{hostcode}_{assemblyfile}.report",
+    stdout="logs/anvi-script-reformat-fasta_{assemblytype}_{hostcode}_{assemblyfile}.stdout",
+    stderr="logs/anvi-script-reformat-fasta_{assemblytype}_{hostcode}_{assemblyfile}.stderr"
   shell:
-   """awk -F '_' '/>NODE/{{$0=">NODE_"$2}}1' {input} > {output}"""
+   "anvi-script-reformat-fasta -l 2500 --simplify-names -r {log.report} {input} -o {output} > {log.stdout} 2> {log.stderr} "
 
 rule bwa_index_assembly_scaffolds:
   input:
@@ -688,7 +708,7 @@ rule backmap_samtools_sort_assemblysource:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.bam"
   output:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam"
-  threads: 6
+  threads: 100
   resources:
     mem_mb=5000
   log:
@@ -696,6 +716,32 @@ rule backmap_samtools_sort_assemblysource:
     stderr="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{hostcode}.stderr"
   shell:
     "samtools sort -@ {threads} -m {resources.mem_mb}M -o {output} {input} > {log.stdout} 2> {log.stderr}"
+
+ruleorder: backmap_samtools_index > backmap_samtools_index_binningsignal
+
+rule backmap_samtools_index:
+  input:
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam"
+  output:
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam.bai"
+  log:
+    stdout="logs/bwa_backmap_samtools_index_{assemblytype}_{hostcode}_{hostcode}.stdout",
+    stderr="logs/bwa_backmap_samtools_index_{assemblytype}_{hostcode}_{hostcode}.stderr"
+  threads: 100
+  shell:
+    "samtools index -@ {threads} {input} > {log.stdout} 2> {log.stderr}"
+
+rule backmap_samtools_index_binningsignal:
+  input:
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam"
+  output:
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam.bai"
+  log:
+    stdout="logs/bwa_backmap_samtools_index_{assemblytype}_{hostcode}_{binningsignal}.stdout",
+    stderr="logs/bwa_backmap_samtools_index_{assemblytype}_{hostcode}_{binningsignal}.stderr"
+  threads: 100
+  shell:
+    "samtools index -@ {threads} {input} > {log.stdout} 2> {log.stderr}"
 
 rule jgi_summarize_script:
   input:
@@ -779,3 +825,114 @@ rule BAT_add_names:
   threads: 1
   shell:
     "CAT add_names {params} -i {input.i} -t {input.tf} -o {output} > {log.stdout} 2> {log.stderr}"
+
+rule anvi-gen-contigs-databse:
+  input:
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta"
+  output:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db"
+  log:
+    stdout="logs/anvi-gen-contigs-database_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-gen-contigs-database_{assemblytype}_{hostcode}.stderr"
+  shell:
+    """
+    anvi-gen-contigs-database -f {input} -o {output} -n 'sample {hostcode} assembly {assemblytype}' > {log.stdout} 2> {log.stderr}
+    """
+
+rule anvi-run-hmms:
+  input:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db"
+  output:
+    touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done")
+  threads: 100
+  log:
+    stdout="logs/anvi-run-hmms_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-run-hmms_{assemblytype}_{hostcode}.stderr"
+  shell:
+    "anvi-run-hmms -c {input} -T {threads}"
+
+ruleorder: anvi-profile_binningsignal > anvi-profile
+
+rule anvi-profile:
+  input:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
+    touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done"),
+    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",
+    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam.bai"
+  output:
+    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}"),
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db"
+  params:
+    "--min-contig-length 2500"
+  log:
+    stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stdout",
+    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stderr"
+  shell:
+    "anvi-profile -c {input.db} -i {input.bam} -o {output.path} -T {threads} {params} -S 'assembly {assemblytype} sample {hostcode} backmapped {hostcode}' > {log.stdout} 2> {log.stderr}"
+
+rule anvi-profile_binningsignal:
+  input:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
+    touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done"),
+    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",
+    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam.bai"
+  output:
+    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}"),
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}/PROFILE.db"
+  params:
+    "--min-contig-length 2500"
+  log:
+    stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stdout",
+    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stderr"
+  shell:
+    "anvi-profile -c {input.db} -i {input.bam} -o {output.path} -T {threads} {params} -S 'assembly {assemblytype} sample {hostcode} binningsignal {binningsignal}' > {log.stdout} 2> {log.stderr}"
+
+rule anvi-merge:
+  input:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
+    source="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db",
+    signal=expand("data/assembly_{{assemblytype}}_binningsignals_anvio/{{hostcode}}_{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS)
+  output:
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}/PROFILE.db",
+    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}")
+  params:
+    "--enforce-hierarchical-clustering "
+  log:
+    stdout="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stderr"
+  shell:
+    "anvi-merge -c {input.db} -o {output.path} -S 'assembly {hostcode} with binningsignals' {params} {input.source} {input.signal} > {log.stdout} 2> {log.stderr}"
+
+def get_all_bins(wildcards):
+    bins=checkpoints.metabat2.get(assemblytype='singles_doublefiltered',hostcode=wildcards.hostcode).output
+    return bins
+
+#rule prepare_anvi-import-metabat2:
+#  input:
+#    get_all_bins
+#  output:
+#    "data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab",
+#  log:
+#    "logs/prepare_anvi-import-metabat2.stderr
+#  shell:
+#    """
+#    echo -e "bin\theader" > {output.binlist}
+#    for   f in ( {input} )
+#    do    cat $f | grep '>' | sed "s/^/bin_{bin_nr}\t/g" >> {output.binlist} 2> {log}
+#    """
+
+rule anvi-import-metabat2:
+  input:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}/PROFILE.db",
+    binlist="data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab"
+  output:
+    touch(profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}/PROFILE_db_imported-metabat2.done")
+  params:
+    "-C 'metabat2' ",
+    "--contigs-mode"
+  log:
+    stdout="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stderr"
+  shell:
+    "anvi-import-collection {input.binlist} -c {input.db} {params} -p {input.profile} > {log.stdout} 2> {log.stderr}"
