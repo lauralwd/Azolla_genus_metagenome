@@ -705,7 +705,7 @@ rule backmap_samtools_sort_assemblysource:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.bam"
   output:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam"
-  threads: 6
+  threads: 100
   resources:
     mem_mb=5000
   log:
