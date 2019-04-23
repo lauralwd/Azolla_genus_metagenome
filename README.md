@@ -8,7 +8,7 @@ Feel free to fork or contribute, I would be happy to work together.
 
 A consise visual summary of the snakemake workflow would look like this:
 
-![Snakemake rule graph](https://github.com/lauralwd/Azolla_genus_metagenome/blob/binning/rulegraph.svg)
+![Snakemake rule graph](https://github.com/lauralwd/Azolla_genus_metagenome/blob/master/rulegraph.svg)
 
 ## Students
 Students willing to travel to-, or currently studying at Utrecht University are most welcome to discuss starting an internship for ECTS as part of this project. 
