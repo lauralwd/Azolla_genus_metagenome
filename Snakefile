@@ -857,7 +857,8 @@ rule anvi-profile:
     bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",
     bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam.bai"
   output:
-    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}")
+    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}"),
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db"
   params:
     "--min-contig-length 2500"
   log:
@@ -873,7 +874,8 @@ rule anvi-profile_binningsignal:
     bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",
     bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam.bai"
   output:
-    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}")
+    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}"),
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}/PROFILE.db"
   params:
     "--min-contig-length 2500"
   log:
@@ -881,3 +883,19 @@ rule anvi-profile_binningsignal:
     stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stderr"
   shell:
     "anvi-profile -c {input.db} -i {input.bam} -o {output.path} -T {threads} {params} -S 'assembly {assemblytype} sample {hostcode} binningsignal {binningsignal}' > {log.stdout} 2> {log.stderr}"
+
+rule anvi-merge:
+  input:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
+    source="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db",
+    signal=expand("data/assembly_{{assemblytype}}_binningsignals_anvio/{{hostcode}}_{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS)
+  output:
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}/PROFILE.db",
+    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}")
+  params:
+    "--enforce-hierarchical-clustering "
+  log:
+    stdout="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stderr"
+  shell:
+    "anvi-merge -c {input.db} -o {output.path} -S 'assembly {hostcode} with binningsignals' {params} {input.source} {input.signal} > {log.stdout} 2> {log.stderr}"
