@@ -847,3 +847,37 @@ rule anvi-run-hmms:
     stderr="logs/anvi-run-hmms_{assemblytype}_{hostcode}.stderr"
   shell:
     "anvi-run-hmms -c {input} -T {threads}"
+
+ruleorder: anvi-profile_binningsignal > anvi-profile
+
+rule anvi-profile:
+  input:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
+    touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done"),
+    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",
+    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam.bai"
+  output:
+    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}")
+  params:
+    "--min-contig-length 2500"
+  log:
+    stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stdout",
+    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stderr"
+  shell:
+    "anvi-profile -c {input.db} -i {input.bam} -o {output.path} -T {threads} {params} -S 'assembly {assemblytype} sample {hostcode} backmapped {hostcode}' > {log.stdout} 2> {log.stderr}"
+
+rule anvi-profile_binningsignal:
+  input:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
+    touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done"),
+    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",
+    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam.bai"
+  output:
+    path=dir("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}")
+  params:
+    "--min-contig-length 2500"
+  log:
+    stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stdout",
+    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stderr"
+  shell:
+    "anvi-profile -c {input.db} -i {input.bam} -o {output.path} -T {threads} {params} -S 'assembly {assemblytype} sample {hostcode} binningsignal {binningsignal}' > {log.stdout} 2> {log.stderr}"
