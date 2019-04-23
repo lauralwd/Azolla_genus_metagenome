@@ -826,7 +826,7 @@ rule BAT_add_names:
   shell:
     "CAT add_names {params} -i {input.i} -t {input.tf} -o {output} > {log.stdout} 2> {log.stderr}"
 
-rule anvi-gen-contigs-databse:
+rule anvi_gen_contigs_database:
   input:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta"
   output:
@@ -839,7 +839,7 @@ rule anvi-gen-contigs-databse:
     anvi-gen-contigs-database -f {input} -o {output} -n 'sample {hostcode} assembly {assemblytype}' > {log.stdout} 2> {log.stderr}
     """
 
-rule anvi-run-hmms:
+rule anvi_run_hmms:
   input:
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db"
   output:
@@ -851,9 +851,9 @@ rule anvi-run-hmms:
   shell:
     "anvi-run-hmms -c {input} -T {threads}"
 
-ruleorder: anvi-profile_binningsignal > anvi-profile
+ruleorder: anvi_profile_binningsignal > anvi_profile
 
-rule anvi-profile:
+rule anvi_profile:
   input:
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
     touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done"),
@@ -870,7 +870,7 @@ rule anvi-profile:
   shell:
     "anvi-profile -c {input.db} -i {input.bam} -o {output.path} -T {threads} {params} -S 'assembly {assemblytype} sample {hostcode} backmapped {hostcode}' > {log.stdout} 2> {log.stderr}"
 
-rule anvi-profile_binningsignal:
+rule anvi_profile_binningsignal:
   input:
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
     touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done"),
@@ -887,7 +887,7 @@ rule anvi-profile_binningsignal:
   shell:
     "anvi-profile -c {input.db} -i {input.bam} -o {output.path} -T {threads} {params} -S 'assembly {assemblytype} sample {hostcode} binningsignal {binningsignal}' > {log.stdout} 2> {log.stderr}"
 
-rule anvi-merge:
+rule anvi_merge:
   input:
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
     source="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db",
@@ -921,7 +921,7 @@ def get_all_bins(wildcards):
 #    do    cat $f | grep '>' | sed "s/^/bin_{bin_nr}\t/g" >> {output.binlist} 2> {log}
 #    """
 
-rule anvi-import-metabat2:
+rule anvi_import_metabat2:
   input:
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
     profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}/PROFILE.db",
