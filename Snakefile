@@ -926,10 +926,10 @@ def get_all_bins(wildcards):
 rule anvi_import_metabat2:
   input:
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
-    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}/PROFILE.db",
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db",
     binlist="data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab"
   output:
-    touch(profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}}/PROFILE_db_imported-metabat2.done")
+    profile=touch("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE_db_imported-metabat2.done")
   params:
     "-C 'metabat2' ",
     "--contigs-mode"
