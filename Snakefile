@@ -697,7 +697,9 @@ rule checkm:
   threads: 72
   log:
     stdout="logs/checkm_{assemblytype}_{hostcode}.stdout",
-    stderr="logs/checkm_{assemblytype}_{hostcode}.stdout"
+    stderr="logs/checkm_{assemblytype}_{hostcode}.stderr"
+  conda:
+    "envs/checkm.yaml"
   shell:
     "checkm lineage_wf -t {threads} {params.options} {input} {params.dir} -f {output.table} > {log.stdout} 2> {log.stderr}"
 
