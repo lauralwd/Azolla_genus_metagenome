@@ -2,4 +2,4 @@ name: checkm
 channels:
   - bioconda
 dependencies:
-  - checkm-genome=1.013
+  - checkm-genome=1.0.13
