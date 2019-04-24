@@ -586,7 +586,7 @@ rule backmap_samtools_sort:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam"
   threads: 100
   resources:
-    mem_mb=5000
+    mem_mb=2000
   log:
     stdout="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{binningsignal}.stdout",
     stderr="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{binningsignal}.stderr"
@@ -619,7 +619,7 @@ rule backmap_samtools_sort_assemblysource:
     "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam"
   threads: 100
   resources:
-    mem_mb=5000
+    mem_mb=2000
   log:
     stdout="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{hostcode}.stdout",
     stderr="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{hostcode}.stderr"
