@@ -745,6 +745,8 @@ rule anvi_gen_contigs_database:
     stderr="logs/anvi-gen-contigs-database_{assemblytype}_{hostcode}.stderr"
   params:
     "-n 'sample {hostcode} assembly {assemblytype}'"
+  conda:
+    "envs/anvio.yaml"
   shell:
     """
     anvi-gen-contigs-database -f {input} -o {output} {params} > {log.stdout} 2> {log.stderr}
@@ -759,6 +761,8 @@ rule anvi_run_hmms:
   log:
     stdout="logs/anvi-run-hmms_{assemblytype}_{hostcode}.stdout",
     stderr="logs/anvi-run-hmms_{assemblytype}_{hostcode}.stderr"
+  conda:
+    "envs/anvio.yaml"
   shell:
     "anvi-run-hmms -c {input} -T {threads}"
 
@@ -779,6 +783,8 @@ rule anvi_profile:
   log:
     stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stdout",
     stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stderr"
+  conda:
+    "envs/anvio.yaml"
   shell:
     "anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params} > {log.stdout} 2> {log.stderr}"
 
@@ -797,6 +803,8 @@ rule anvi_profile_binningsignal:
   log:
     stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stdout",
     stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stderr"
+  conda:
+    "envs/anvio.yaml"
   shell:
     "anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params} > {log.stdout} 2> {log.stderr}"
 
@@ -814,6 +822,8 @@ rule anvi_merge:
   log:
     stdout="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stdout",
     stderr="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stderr"
+  conda:
+    "envs/anvio.yaml"
   shell:
     "anvi-merge -c {input.db} -o {params.path} {params} {input.source} {input.signal} > {log.stdout} 2> {log.stderr}"
 
@@ -848,5 +858,7 @@ rule anvi_import_metabat2:
   log:
     stdout="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stdout",
     stderr="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stderr"
+  conda:
+    "envs/anvio.yaml"
   shell:
     "anvi-import-collection {input.binlist} -c {input.db} {params} -p {input.profile} > {log.stdout} 2> {log.stderr}"
