@@ -792,8 +792,8 @@ rule anvi_profile_binningsignal:
     profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}/PROFILE.db"
   params:
     "--min-contig-length 2500",
-    lambda w: expand(" -S 'assembly {assemblytype} sample {hostcode} binningsignal {binningsignal}' ", assemblytype=w.assemblytype , hostcode=w.binningsignal),
-    path=lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}", assemblytype=w.assemblytype , hostcode=w.hostcode)
+    lambda w: expand(" -S 'assembly {assemblytype} sample {hostcode} binningsignal {binningsignal}' ", assemblytype=w.assemblytype , hostcode=w.hostcode, binningsignal=w.binningsignal),
+    path=lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}", assemblytype=w.assemblytype , hostcode=w.hostcode, binningsignal=w.binningsignal)
   log:
     stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stdout",
     stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stderr"
