@@ -1,3 +1,4 @@
+name: anvio
 channels:
   - conda-forge
   - defaults
