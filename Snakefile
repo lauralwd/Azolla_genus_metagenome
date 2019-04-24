@@ -766,7 +766,7 @@ rule anvi_run_hmms:
   conda:
     "envs/anvio.yaml"
   shell:
-    "anvi-run-hmms -c {input} -T {threads}"
+    "anvi-run-hmms -c {input} -T {threads} > {log.stdout} 2> {log.stderr}"
 
 ruleorder: anvi_profile_binningsignal > anvi_profile
 
