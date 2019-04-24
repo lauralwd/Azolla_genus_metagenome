@@ -533,6 +533,8 @@ rule shorten_scaffold_names_anvi:
     report="logs/anvi-script-reformat-fasta_{assemblytype}_{hostcode}_{assemblyfile}.report",
     stdout="logs/anvi-script-reformat-fasta_{assemblytype}_{hostcode}_{assemblyfile}.stdout",
     stderr="logs/anvi-script-reformat-fasta_{assemblytype}_{hostcode}_{assemblyfile}.stderr"
+  conda:
+    "envs/anvio.yaml"
   shell:
    "anvi-script-reformat-fasta -l 2500 --simplify-names -r {log.report} {input} -o {output} > {log.stdout} 2> {log.stderr} "
 
