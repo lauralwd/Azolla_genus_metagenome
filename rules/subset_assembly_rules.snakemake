@@ -1,0 +1,101 @@
+# This file contains rules for the subset assembly workflow, a set of rules which can be used
+# when assembly of full sequencing datasets runs out of memmory. If you don't need these rules
+# then make sure the include line in the main snakemake file is commented out.
+
+# Hostcodes to include in the subset workflow
+SUBSETHOSTCODES=[''] #Azrub_IRRI_479']
+
+
+## rules for handling too big assemblies
+def get_subset_samples(wildcards):
+  if wildcards.hostcode in SUBSETHOSTCODES :
+    fastq = expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",hostcode=wildcards.hostcode,PE=DIRECTIONS)
+  else:
+    fastq = ''
+  return fastq
+  return fastq
+
+rule subset_fastq_file:
+  input:
+    get_subset_samples #"data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz"
+  output:
+    "data/sequencing_genomic_trimmed_filtered_corrected_subset/subset_{hostcode}.{PE}.fastq.gz"
+  threads: 20
+  resources: io=1
+  shell:
+    """
+    set +o pipefail
+    reads=$( echo "$(zcat {input} | wc -l) * 6 / 10 / 4" | bc | cut -d '.' -f 1 )
+    lines=$(echo "$reads * 4" | bc )
+    zcat {input} | head -n $lines |  pigz -p {threads} -c > {output}
+    """
+
+rule spades_subset_assembly:
+  input:
+    s1=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset/subset_{{hostcode}}.{PE}.fastq.gz",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset/subset_{{hostcode}}.{PE}.fastq.gz",PE=2)
+  params:
+    basedir=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/", hostcode=w.hostcode, assemblytype='singles_hostfiltered_subset'),
+    options="--meta --only-assembler"
+  output:
+    contigs=  expand("data/assembly_{assemblytype}/{{hostcode}}/{assemblyfile}.fasta",assemblytype='singles_hostfiltered_subset',assemblyfile='contigs'),
+    scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/{assemblyfile}.fasta",assemblytype='singles_hostfiltered_subset',assemblyfile='scaffolds')
+  threads: 100
+  shadow: "shallow"
+  resources:
+    mem_mb=500
+  log:
+    stdout=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stdout",assemblytype='singles_hostfiltered_subset'),
+    stderr=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stderr",assemblytype='singles_hostfiltered_subset')
+  shell:
+    "spades.py {params.options} -t {threads} --memory {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
+
+rule filter_for_subset_assembly:
+  input:
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_BAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4),assemblytype='singles_hostfiltered_subset'),
+    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_BAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2),assemblytype='singles_hostfiltered_subset'),
+    s1=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1,),
+    s2=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
+  params:
+    opts="--very-fast",
+    i = lambda w : expand("data/assembly_{assemblytype}/{hostcode}/CAT_BAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype='singles_hostfiltered_subset', hostcode = w.hostcode),
+    outbase= lambda w : expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{hostcode}/corrected/{hostcode}", hostcode=w.hostcode)
+  output:
+       expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}",PE=DIRECTIONS)
+  threads: 36
+  log:
+    stderr="logs/bowtie2_filter_for_subset_assembly_{hostcode}.stderr"
+  shell:
+    "bowtie2 {params.opts} --threads {threads} --un-conc-gz {params.outbase} -x {params.i} -1 {input.s1} -2 {input.s2}   > /dev/null 2> {log.stderr}"
+
+rule rename_subset_filtered_sequencing_files:
+  input:
+    a1=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}",PE=1),
+    a2=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}",PE=2)
+  output:
+    b1=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1),
+    b2=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
+  shell:
+    "mv {input.a1} {output.b1} && mv {input.a2} {output.b2}"
+
+rule spades_first_assembly_subsetreads:
+  input:
+    s1=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
+  params:
+    basedir= lambda w: expand("data/assembly_{assemblytype}/{hostcode}/", hostcode=w.hostcode, assemblytype='singles_hostfiltered'),
+    options="--meta --only-assembler"
+  output:
+    contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/{assemblyfile}.fasta",assemblytype='singles_hostfiltered',assemblyfile='contigs'),
+    scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/{assemblyfile}.fasta",assemblytype='singles_hostfiltered',assemblyfile='scaffolds')
+  threads: 100
+  shadow: "shallow"
+  resources:
+    mem_mb=500
+  log:
+    stdout=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
+    stderr=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stderr",assemblyfile='contigs',assemblytype='singles_hostfiltered')
+  shell:
+    "spades.py {params.options} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
+
+ruleorder: spades_first_assembly_subsetreads > spades_first_assembly

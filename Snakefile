@@ -1,6 +1,6 @@
 #HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
 HOSTCODES= ['Azrub_IRRI_479','Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 'Azfil_minuscyano_170', 'Azfil_minuscyano_350', 'Azfil_wild_galgw_E_1', 'Azfil_wild_galgw_E_2', 'Azfil_wild_galgw_E_3', 'Azfil_wild_galgw_P_2', 'Azfil_wild_galgw_P_3', 'Azfil_wild_galgw_P_4', 'Azmex_IRRI_486', 'Azmic_IRRI_456', 'Aznil_IRRI_479', 'Azspnov_IRRI_1_472', 'Azspnov_IRRI_2_489']
-SUBSETHOSTCODES=[''] #Azrub_IRRI_479']
+
 DIRECTIONS=["1","2"]
 
 ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered']
@@ -66,97 +66,6 @@ rule allsourcesorted:
   input:
     expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
 
-## rules for handling too big assemblies
-def get_subset_samples(wildcards):
-  if wildcards.hostcode in SUBSETHOSTCODES :
-    fastq = expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",hostcode=wildcards.hostcode,PE=DIRECTIONS) 
-  else:
-    fastq = ''
-  return fastq
-  return fastq
-
-rule subset_fastq_file:
-  input:
-    get_subset_samples #"data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz"
-  output:
-    "data/sequencing_genomic_trimmed_filtered_corrected_subset/subset_{hostcode}.{PE}.fastq.gz"
-  threads: 20
-  resources: io=1
-  shell:
-    """
-    set +o pipefail
-    reads=$( echo "$(zcat {input} | wc -l) * 6 / 10 / 4" | bc | cut -d '.' -f 1 )
-    lines=$(echo "$reads * 4" | bc )
-    zcat {input} | head -n $lines |  pigz -p {threads} -c > {output}
-    """
-
-rule spades_subset_assembly:
-  input:
-    s1=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset/subset_{{hostcode}}.{PE}.fastq.gz",PE=1),
-    s2=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset/subset_{{hostcode}}.{PE}.fastq.gz",PE=2)
-  params:
-    basedir=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/", hostcode=w.hostcode, assemblytype='singles_hostfiltered_subset'),
-    options="--meta --only-assembler"
-  output:
-    contigs=  expand("data/assembly_{assemblytype}/{{hostcode}}/{assemblyfile}.fasta",assemblytype='singles_hostfiltered_subset',assemblyfile='contigs'),
-    scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/{assemblyfile}.fasta",assemblytype='singles_hostfiltered_subset',assemblyfile='scaffolds')
-  threads: 100
-  shadow: "shallow"
-  resources:
-    mem_mb=500
-  log:
-    stdout=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stdout",assemblytype='singles_hostfiltered_subset'),
-    stderr=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stderr",assemblytype='singles_hostfiltered_subset')
-  shell:
-    "spades.py {params.options} -t {threads} --memory {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
-
-rule filter_for_subset_assembly:
-  input:
-    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_BAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.{i}.bt2",i=range(1,4),assemblytype='singles_hostfiltered_subset'),
-    expand("data/assembly_{assemblytype}/{{hostcode}}/CAT_BAT_filter_bt2index_{{hostcode}}/{{hostcode}}_filter.rev.{i}.bt2",i=range(1,2),assemblytype='singles_hostfiltered_subset'),
-    s1=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1,),
-    s2=expand("data/sequencing_genomic_trimmed_filtered_corrected/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
-  params:
-    opts="--very-fast",
-    i = lambda w : expand("data/assembly_{assemblytype}/{hostcode}/CAT_BAT_filter_bt2index_{hostcode}/{hostcode}_filter",assemblytype='singles_hostfiltered_subset', hostcode = w.hostcode),
-    outbase= lambda w : expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{hostcode}/corrected/{hostcode}", hostcode=w.hostcode)
-  output:
-       expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}",PE=DIRECTIONS)
-  threads: 36
-  log:
-    stderr="logs/bowtie2_filter_for_subset_assembly_{hostcode}.stderr"
-  shell:
-    "bowtie2 {params.opts} --threads {threads} --un-conc-gz {params.outbase} -x {params.i} -1 {input.s1} -2 {input.s2}   > /dev/null 2> {log.stderr}"
-
-rule rename_subset_filtered_sequencing_files:
-  input:
-    a1=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}",PE=1),
-    a2=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}",PE=2)
-  output:
-    b1=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1),
-    b2=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
-  shell:
-    "mv {input.a1} {output.b1} && mv {input.a2} {output.b2}"
-
-rule spades_first_assembly_subsetreads:
-  input:
-    s1=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1),
-    s2=expand("data/sequencing_genomic_trimmed_filtered_corrected_subset_filtered/{{hostcode}}/corrected/{{hostcode}}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2)
-  params:
-    basedir= lambda w: expand("data/assembly_{assemblytype}/{hostcode}/", hostcode=w.hostcode, assemblytype='singles_hostfiltered'),
-    options="--meta --only-assembler"
-  output:
-    contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/{assemblyfile}.fasta",assemblytype='singles_hostfiltered',assemblyfile='contigs'),
-    scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/{assemblyfile}.fasta",assemblytype='singles_hostfiltered',assemblyfile='scaffolds')
-  threads: 100
-  shadow: "shallow"
-  resources:
-    mem_mb=500
-  log:
-    stdout=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stdout",assemblytype='singles_hostfiltered'),
-    stderr=expand("logs/SPADES_assembly_{assemblytype}_{{hostcode}}.stderr",assemblyfile='contigs',assemblytype='singles_hostfiltered')
-  shell:
-    "spades.py {params.options} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
 
 ## Read QC stuff
 rule fastqc_raw_data:
@@ -380,8 +289,6 @@ rule spades_hammer:
     stderr="logs/SPAdes_correct_sequencing{hostcode}.stderr"
   shell:
     "spades.py {params.options} -t {threads} -1 {input.s1} -2 {input.s2} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
-
-ruleorder: spades_first_assembly_subsetreads > spades_first_assembly
 
 rule spades_first_assembly:
   input:
