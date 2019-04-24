@@ -805,6 +805,7 @@ rule anvi_profile_binningsignal:
   log:
     stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stdout",
     stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stderr"
+  threads: 100
   conda:
     "envs/anvio.yaml"
   shell:
