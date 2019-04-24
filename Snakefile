@@ -743,9 +743,11 @@ rule anvi_gen_contigs_database:
   log:
     stdout="logs/anvi-gen-contigs-database_{assemblytype}_{hostcode}.stdout",
     stderr="logs/anvi-gen-contigs-database_{assemblytype}_{hostcode}.stderr"
+  params:
+    "-n 'sample {hostcode} assembly {assemblytype}'"
   shell:
     """
-    anvi-gen-contigs-database -f {input} -o {output} -n 'sample {hostcode} assembly {assemblytype}' > {log.stdout} 2> {log.stderr}
+    anvi-gen-contigs-database -f {input} -o {output} {params} > {log.stdout} 2> {log.stderr}
     """
 
 rule anvi_run_hmms:
@@ -807,12 +809,13 @@ rule anvi_merge:
     profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
   params:
     "--enforce-hierarchical-clustering ",
+    "-S 'assembly {hostcode} with binningsignals'",
     path=lambda w:expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}",assemblytype=w.assemblytype , hostcode=w.hostcode)
   log:
     stdout="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stdout",
     stderr="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stderr"
   shell:
-    "anvi-merge -c {input.db} -o {params.path} -S 'assembly {hostcode} with binningsignals' {params} {input.source} {input.signal} > {log.stdout} 2> {log.stderr}"
+    "anvi-merge -c {input.db} -o {params.path} {params} {input.source} {input.signal} > {log.stdout} 2> {log.stderr}"
 
 def get_all_bins(wildcards):
     bins=checkpoints.metabat2.get(assemblytype='singles_doublefiltered',hostcode=wildcards.hostcode).output
