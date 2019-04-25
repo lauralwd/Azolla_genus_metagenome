@@ -785,6 +785,7 @@ rule anvi_profile:
   log:
     stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stdout",
     stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stderr"
+  threads: 100
   conda:
     "envs/anvio.yaml"
   shell:
@@ -825,8 +826,8 @@ rule anvi_merge:
   output:
     profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
   params:
-    "--enforce-hierarchical-clustering ",
-    "-S 'assembly {hostcode} with binningsignals'",
+    options="--enforce-hierarchical-clustering ",
+    name= "-S 'assembly_{hostcode}_with_binningsignals'",
     path=lambda w:expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}",assemblytype=w.assemblytype , hostcode=w.hostcode)
   log:
     stdout="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stdout",
@@ -834,7 +835,10 @@ rule anvi_merge:
   conda:
     "envs/anvio.yaml"
   shell:
-    "anvi-merge -c {input.db} -o {params.path} {params} {input.source} {input.signal} > {log.stdout} 2> {log.stderr}"
+    """
+    rmdir {params.path}
+    anvi-merge -c {input.db} -o {params.path} {params.options} {params.name} {input.source} {input.signal} > {log.stdout} 2> {log.stderr}
+    """
 
 def get_all_bins(wildcards):
     bins=checkpoints.metabat2.get(assemblytype='singles_doublefiltered',hostcode=wildcards.hostcode).output
