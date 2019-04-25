@@ -902,14 +902,9 @@ rule anvi_import_metabat2:
 
 def get_input_hybrid_assemblies(wildcards):
     HOST=wildcards.host
-    # these are the libraries that we'll assemble for this host, the HOSTS list should be difined such that this number is always bigger than 1
+    PE=wildcards.PE
     HOST_LIBRARIES=list(filter(lambda x:HOST in x, HOSTCODES))
-    # Count the number of libraries, SPAdes wants these explicitly numbered
-    COUNT = list(range(1,len(HOST_LIBRARIES)+1))
-    # construct paths for both pairs
-    LEFT  = ['data/sequencing_doublefiltered/' + h + '/' + h +'.1.fastq.gz' for h in HOST_LIBRARIES]
-    RIGHT = ['data/sequencing_doublefiltered/' + h + '/' + h +'.2.fastq.gz' for h in HOST_LIBRARIES]
-    READS=LEFT+RIGHT
+    READS  = ['data/sequencing_doublefiltered/' + h + '/' + h +'.' + PE + '.fastq.gz' for h in HOST_LIBRARIES]
     return(READS)
 
 #def get_input_hybrid_assemblies_commandline(wildcards):
@@ -940,7 +935,8 @@ rule concatenate_fastq_for_hybrid_assembly:
 
 rule SPADES_hybrid_assembly:
   input:
-    get_input_hybrid_assemblies
+    s1=expand("data/sequencing_doublefiltered_concatenated/{{host}}.{PE}.fastq.gz",PE=1),
+    s2=expand("data/sequencing_doublefiltered_concatenated/{{host}}.{PE}.fastq.gz",PE=2)
   output:
     contigs=expand("data/assembly_{assemblytype}/{{host}}/contigs.fasta",assemblytype='hybrid_doublefiltered'),
     scaffolds=expand("data/assembly_{assemblytype}/{{host}}/scaffolds.fasta",assemblytype='hybrid_doublefiltered'),
@@ -950,8 +946,7 @@ rule SPADES_hybrid_assembly:
     paramfile=expand("data/assembly_{assemblytype}/{{host}}/params.txt",assemblytype='hybrid_doublefiltered')
   params:
     options="--meta --only-assembler",
-    basedir=lambda w: expand("data/assembly_{assemblytype}/{host}/",assemblytype='hybrid_doublefiltered',host=w.host),
-    inputcommandline=get_input_hybrid_assemblies_commandline
+    basedir=lambda w: expand("data/assembly_{assemblytype}/{host}/",assemblytype='hybrid_doublefiltered',host=w.host)
   threads: 100
   shadow: "shallow"
   resources:
@@ -960,8 +955,9 @@ rule SPADES_hybrid_assembly:
     stdout=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stdout",assemblytype='hybrid_doublefiltered'),
     stderr=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stderr",assemblytype='hybrid_doublefiltered')
   shell:
-    "spades.py {params.options} -t {threads} -m {resources.mem_gb} {params.inputcommandline} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
+    "spades.py {params.options} -t {threads} -m {resources.mem_gb} -1 {input.s1} -2 {input.s2}  -o {params.basedir} > {log.stdout} 2> {log.stderr}"
 
 rule allhybridassemblies:
   input:
     contigs=expand("data/assembly_{assemblytype}/{host}/contigs.fasta",assemblytype='hybrid_doublefiltered',host=HOSTS)
+ 
