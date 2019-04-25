@@ -922,8 +922,8 @@ def get_input_hybrid_assemblies_commandline(wildcards):
     LEFT  = ['data/sequencing_doublefiltered/' + h + '/' + h +'.1.fastq.gz' for h in HOST_LIBRARIES]
     RIGHT = ['data/sequencing_doublefiltered/' + h + '/' + h +'.2.fastq.gz' for h in HOST_LIBRARIES]
     # combine both lists into one list of lists
-    LEFTNUMBERED= list(zip(COUNT,LEFT))
-    RIGHTNUMBERED=list(zip(COUNT,LEFT))
+    LEFTNUMBERED= list(zip(COUNT,LEFT ))
+    RIGHTNUMBERED=list(zip(COUNT,RIGHT))
     # now use those lists of lists to construct commandlines
     LEFTNAMED =['--pe' + str(h[0]) + '-1 ' + h[1] for h in LEFTNUMBERED ]
     RIGHTNAMED=['--pe' + str(h[0]) + '-2 ' + h[1] for h in RIGHTNUMBERED]
