@@ -1,13 +1,17 @@
-#HOSTCODES=["azca1_SRR6480231", "azca2_SRR6480201", "azfil_SRR6480158", "azfil_SRR6932851", "azmex_SRR6480159", "azmic_SRR6480161", "aznil_SRR6480196", "aznil_SRR6482158", "azrub_SRR6480160"]
+# Ideally, format your hostcoes as 'species'_'accession'_'uniquenr/library/strain/treatment' for later automatic processing.
 HOSTCODES= ['Azrub_IRRI_479','Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 'Azfil_minuscyano_170', 'Azfil_minuscyano_350', 'Azfil_wild_galgw_E_1', 'Azfil_wild_galgw_E_2', 'Azfil_wild_galgw_E_3', 'Azfil_wild_galgw_P_2', 'Azfil_wild_galgw_P_3', 'Azfil_wild_galgw_P_4', 'Azmex_IRRI_486', 'Azmic_IRRI_456', 'Aznil_IRRI_479', 'Azspnov_IRRI_1_472', 'Azspnov_IRRI_2_489']
-
 DIRECTIONS=["1","2"]
 
+# Assuming that host codes are formated as 'species'_'accession'_'uniquenr/library/strain/treatment' the following line of code
+# autmatically creates an array of host accession combinations for cross-assembly of different strains,sequencing libraries, treatments
+HOSTS=list(set([i.split('_',3)[0] + '_' + i.split('_',3)[1] for i in HOSTCODES]))
+
 ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered']
+# Ideally these should only contain letter, numbers and underscores. Exceptionally, these can contain points but they will be replaced by underscores for anvi'o
 BINNINGSIGNALS=['dijkhuizen2018.E.1', 'dijkhuizen2018.E.2', 'dijkhuizen2018.E.3', 'dijkhuizen2018.P.2', 'dijkhuizen2018.P.3', 'dijkhuizen2018.P.4','ran2010.nostoc.SRR066216','ran2010.nostoc.SRR066217','ran2010.nostoc.SRR3923641','ran2010.nostoc.SRR3923645','ran2010.nostoc.SRR3923646']
 ASSEMBLYFILES=['contigs','scaffolds']
-## 'All'-rules
 
+## 'All'-rules
 rule all:
   input:
     expand("data/bins_{assemblytype}/{hostcode}.BAT.bin2classification.txt",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
@@ -664,7 +668,7 @@ rule jgi_summarize_script:
   threads: 32
   shell:
     "jgi_summarize_bam_contig_depths --minContigLength 2500 --percentIdentity 80 --outputDepth {output} {input} > {log.stdout} 2> {log.stderr}"
-    
+
 rule metabat2:
   input:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta",
