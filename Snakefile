@@ -932,7 +932,7 @@ def get_input_hybrid_assemblies_commandline(wildcards):
 
 rule SPADES_hybrid_assembly:
   input:
-    get_input_hybrid_assemblies()
+    get_input_hybrid_assemblies
   output:
     contigs=expand("data/assembly_{assemblytype}/{{host}}/contigs.fasta",assemblytype='hybrid_doublefiltered'),
     scaffolds=expand("data/assembly_{assemblytype}/{{host}}/scaffolds.fasta",assemblytype='hybrid_doublefiltered'),
@@ -942,7 +942,8 @@ rule SPADES_hybrid_assembly:
     paramfile=expand("data/assembly_{assemblytype}/{{host}}/params.txt",assemblytype='hybrid_doublefiltered')
   params:
     options="--meta --only-assembler",
-    basedir=lambda w: expand("data/assembly_{assemblytype}/{host}/",assemblytype='hybrid_doublefiltered',hostcode=w.hostcode)
+    basedir=lambda w: expand("data/assembly_{assemblytype}/{host}/",assemblytype='hybrid_doublefiltered',host=w.host),
+    inputcommandline=get_input_hybrid_assemblies_commandline
   threads: 100
   shadow: "shallow"
   resources:
@@ -951,7 +952,7 @@ rule SPADES_hybrid_assembly:
     stdout=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stdout",assemblytype='hybrid_doublefiltered'),
     stderr=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stderr",assemblytype='hybrid_doublefiltered')
   shell:
-    "spades.py {params.options} -t {threads} -m {resources.mem_gb} {input} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
+    "spades.py {params.options} -t {threads} -m {resources.mem_gb} {params.inputcommandline} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
 
 rule allhybridassemblies:
   input:
