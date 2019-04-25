@@ -917,7 +917,7 @@ def get_input_hybrid_assemblies():
     RIGHTNAMED=['--pe' + str(h[0]) + '-2 ' + h[1] for h in RIGHTNUMBERED]
     READS=LEFTNAMED+RIGHTNAMED
     return(READS)
-    
+
 rule SPADES_hybrid_assembly:
   input:
     get_input_hybrid_assemblies()
@@ -941,6 +941,6 @@ rule SPADES_hybrid_assembly:
   shell:
     "spades.py {params.options} -t {threads} -m {resources.mem_gb} {input} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
 
-rule allhybridassemblies
+rule allhybridassemblies:
   input:
     contigs=expand("data/assembly_{assemblytype}/{host}/contigs.fasta",assemblytype='hybrid_doublefiltered',host=HOSTS)
