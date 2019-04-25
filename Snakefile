@@ -779,8 +779,8 @@ rule anvi_profile:
   output:
     profile= "data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db"
   params:
-    "--min-contig-length 2500",
-    lambda w: expand(" -S 'assembly {assemblytype} sample {hostcode} binningsignal {hostcode}' ", assemblytype=w.assemblytype , hostcode=w.hostcode.replace('.','_')),
+    length="--min-contig-length 2500",
+    name=lambda w: expand(" -S 'assembly {assemblytype} sample {hostcode} binningsignal {hostcode}' ", assemblytype=w.assemblytype , hostcode=w.hostcode.replace('.','_')),
     path= lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}", assemblytype=w.assemblytype , hostcode=w.hostcode)
   log:
     stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stdout",
@@ -790,7 +790,7 @@ rule anvi_profile:
   shell:
     """
     rmdir {params.path}
-    anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params} > {log.stdout} 2> {log.stderr}
+    anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
     """
 
 rule anvi_profile_binningsignal:
