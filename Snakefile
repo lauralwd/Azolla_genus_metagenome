@@ -788,7 +788,10 @@ rule anvi_profile:
   conda:
     "envs/anvio.yaml"
   shell:
-    "anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params} > {log.stdout} 2> {log.stderr}"
+    """
+    rmdir {params.path}
+    anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params} > {log.stdout} 2> {log.stderr}
+    """
 
 rule anvi_profile_binningsignal:
   input:
@@ -809,7 +812,10 @@ rule anvi_profile_binningsignal:
   conda:
     "envs/anvio.yaml"
   shell:
-    "anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}"
+    """
+    rmdir {params.path}
+    anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
+    """
 
 rule anvi_merge:
   input:
