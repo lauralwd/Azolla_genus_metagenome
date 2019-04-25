@@ -3,10 +3,29 @@ HOSTCODES= ['Azrub_IRRI_479','Azfil_lab_250', 'Azfil_lab_500', 'Azfil_lab_800', 
 DIRECTIONS=["1","2"]
 
 # Assuming that host codes are formated as 'species'_'accession'_'uniquenr/library/strain/treatment' the following line of code
-# autmatically creates an array of host accession combinations for cross-assembly of different strains,sequencing libraries, treatments
-HOSTS=list(set([i.split('_',3)[0] + '_' + i.split('_',3)[1] for i in HOSTCODES]))
+# autmatically creates an array of host accession combinations for cross-assembly of different strains,sequencing libraries, treatments.
+# Likewise, the code below creates a list of species which have multiple sequencing libraries.
 
-ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered']
+def get_species_cross_assembly():
+  return_species=set([])
+  for i in set([i.split('_',3)[0] for i in HOSTCODES]):
+    species_sub=list(filter(lambda x:i in x, HOSTCODES))
+    if len(species_sub) >= 2 :
+      return_species.add(i)
+  return(list(return_species))
+
+def get_hosts_cross_assembly():
+  return_hosts=set([])
+  for i in set([i.split('_',3)[0] + '_' + i.split('_',3)[1] for i in HOSTCODES]):
+    host_sub=list(filter(lambda x:i in x, HOSTCODES))
+    if len(host_sub) >= 2 :
+      return_hosts.add(i)
+  return(list(return_hosts))
+
+SPECIES=get_species_cross_assembly()
+HOSTS=get_hosts_cross_assembly()
+
+ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered'] #,'species_doublefiltered']
 # Ideally these should only contain letter, numbers and underscores. Exceptionally, these can contain points but they will be replaced by underscores for anvi'o
 BINNINGSIGNALS=['dijkhuizen2018.E.1', 'dijkhuizen2018.E.2', 'dijkhuizen2018.E.3', 'dijkhuizen2018.P.2', 'dijkhuizen2018.P.3', 'dijkhuizen2018.P.4','ran2010.nostoc.SRR066216','ran2010.nostoc.SRR066217','ran2010.nostoc.SRR3923641','ran2010.nostoc.SRR3923645','ran2010.nostoc.SRR3923646']
 ASSEMBLYFILES=['contigs','scaffolds']
