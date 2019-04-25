@@ -900,8 +900,20 @@ rule anvi_import_metabat2:
     "anvi-import-collection {input.binlist} -c {input.db} {params} -p {input.profile} > {log.stdout} 2> {log.stderr}"
 
 
-def get_input_hybrid_assemblies():
-    HOST=HOSTS[1]
+def get_input_hybrid_assemblies(wildcards):
+    HOST=wildcards.host
+    # these are the libraries that we'll assemble for this host, the HOSTS list should be difined such that this number is always bigger than 1
+    HOST_LIBRARIES=list(filter(lambda x:HOST in x, HOSTCODES))
+    # Count the number of libraries, SPAdes wants these explicitly numbered
+    COUNT = list(range(1,len(HOST_LIBRARIES)+1))
+    # construct paths for both pairs
+    LEFT  = ['data/sequencing_doublefiltered/' + h + '/' + h +'.1.fastq.gz' for h in HOST_LIBRARIES]
+    RIGHT = ['data/sequencing_doublefiltered/' + h + '/' + h +'.2.fastq.gz' for h in HOST_LIBRARIES]
+    READS=LEFT+RIGHT
+    return(READS)
+
+def get_input_hybrid_assemblies_commandline(wildcards):
+    HOST=wildcards.host
     # these are the libraries that we'll assemble for this host, the HOSTS list should be difined such that this number is always bigger than 1
     HOST_LIBRARIES=list(filter(lambda x:HOST in x, HOSTCODES))
     # Count the number of libraries, SPAdes wants these explicitly numbered
