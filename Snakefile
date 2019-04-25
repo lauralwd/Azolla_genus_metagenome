@@ -759,7 +759,7 @@ rule anvi_run_hmms:
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db"
   output:
     touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done")
-  threads: 100
+  threads: 5
   log:
     stdout="logs/anvi-run-hmms_{assemblytype}_{hostcode}.stdout",
     stderr="logs/anvi-run-hmms_{assemblytype}_{hostcode}.stderr"
