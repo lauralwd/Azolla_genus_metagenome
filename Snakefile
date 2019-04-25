@@ -780,7 +780,7 @@ rule anvi_profile:
     profile= "data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db"
   params:
     "--min-contig-length 2500",
-    lambda w: expand(" -S 'assembly {assemblytype} sample {hostcode} binningsignal {hostcode}' ", assemblytype=w.assemblytype , hostcode=w.hostcode),
+    lambda w: expand(" -S 'assembly {assemblytype} sample {hostcode} binningsignal {hostcode}' ", assemblytype=w.assemblytype , hostcode=w.hostcode.replace('.','_')),
     path= lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}", assemblytype=w.assemblytype , hostcode=w.hostcode)
   log:
     stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stdout",
@@ -800,7 +800,7 @@ rule anvi_profile_binningsignal:
     profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}/PROFILE.db"
   params:
     length="--min-contig-length 2500",
-    name=lambda w: expand("-S assembly_{assemblytype}_sample_{hostcode}_binningsignal_{binningsignal}", assemblytype=w.assemblytype , hostcode=w.hostcode, binningsignal=w.binningsignal),
+    name=lambda w: expand("-S assembly_{assemblytype}_sample_{hostcode}_binningsignal_{binningsignal}", assemblytype=w.assemblytype , hostcode=w.hostcode, binningsignal=w.binningsignal.replace('.','_')),
     path=lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}", assemblytype=w.assemblytype , hostcode=w.hostcode, binningsignal=w.binningsignal)
   log:
     stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stdout",
