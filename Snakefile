@@ -879,3 +879,49 @@ rule anvi_import_metabat2:
     "envs/anvio.yaml"
   shell:
     "anvi-import-collection {input.binlist} -c {input.db} {params} -p {input.profile} > {log.stdout} 2> {log.stderr}"
+
+
+def get_input_hybrid_assemblies():
+    HOST=HOSTS[1]
+    # these are the libraries that we'll assemble for this host, the HOSTS list should be difined such that this number is always bigger than 1
+    HOST_LIBRARIES=list(filter(lambda x:HOST in x, HOSTCODES))
+    # Count the number of libraries, SPAdes wants these explicitly numbered
+    COUNT = list(range(1,len(HOST_LIBRARIES)+1))
+    # construct paths for both pairs
+    LEFT  = ['data/sequencing_doublefiltered/' + h + '/' + h +'.1.fastq.gz' for h in HOST_LIBRARIES]
+    RIGHT = ['data/sequencing_doublefiltered/' + h + '/' + h +'.2.fastq.gz' for h in HOST_LIBRARIES]
+    # combine both lists into one list of lists
+    LEFTNUMBERED= list(zip(COUNT,LEFT))
+    RIGHTNUMBERED=list(zip(COUNT,LEFT))
+    # now use those lists of lists to construct commandlines
+    LEFTNAMED =['--pe' + str(h[0]) + '-1 ' + h[1] for h in LEFTNUMBERED ]
+    RIGHTNAMED=['--pe' + str(h[0]) + '-2 ' + h[1] for h in RIGHTNUMBERED]
+    READS=LEFTNAMED+RIGHTNAMED
+    return(READS)
+    
+rule SPADES_hybrid_assembly:
+  input:
+    get_input_hybrid_assemblies()
+  output:
+    contigs=expand("data/assembly_{assemblytype}/{{host}}/contigs.fasta",assemblytype='hybrid_doublefiltered'),
+    scaffolds=expand("data/assembly_{assemblytype}/{{host}}/scaffolds.fasta",assemblytype='hybrid_doublefiltered'),
+    graph=expand("data/assembly_{assemblytype}/{{host}}/assembly_graph.fastg",assemblytype='hybrid_doublefiltered'),
+    graph_scaffolds=expand("data/assembly_{assemblytype}/{{host}}/assembly_graph_with_scaffolds.gfa",assemblytype='hybrid_doublefiltered'),
+    datasetyaml=expand("data/assembly_{assemblytype}/{{host}}/input_dataset.yaml",assemblytype='hybrid_doublefiltered'),
+    paramfile=expand("data/assembly_{assemblytype}/{{host}}/params.txt",assemblytype='hybrid_doublefiltered')
+  params:
+    options="--meta --only-assembler",
+    basedir=lambda w: expand("data/assembly_{assemblytype}/{host}/",assemblytype='hybrid_doublefiltered',hostcode=w.hostcode)
+  threads: 100
+  shadow: "shallow"
+  resources:
+    mem_gb=500
+  log:
+    stdout=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stdout",assemblytype='hybrid_doublefiltered'),
+    stderr=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stderr",assemblytype='hybrid_doublefiltered')
+  shell:
+    "spades.py {params.options} -t {threads} -m {resources.mem_gb} {input} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
+
+rule allhybridassemblies
+  input:
+    contigs=expand("data/assembly_{assemblytype}/{host}/contigs.fasta",assemblytype='hybrid_doublefiltered',host=HOSTS)
