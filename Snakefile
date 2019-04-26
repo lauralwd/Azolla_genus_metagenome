@@ -36,6 +36,9 @@ rule all:
     expand("data/bins_{assemblytype}/{hostcode}.BAT.bin2classification.txt",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
     expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
     expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db",assemblytype='singles_doublefiltered',hostcode=HOSTCODES)
+rule allhybridassemblies:
+  input:
+    contigs=expand("data/assembly_{assemblytype}/{host}/contigs.fasta",assemblytype='hybrid_doublefiltered',host=HOSTS)
 rule alltaxtab:
   input:
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
@@ -957,7 +960,4 @@ rule SPADES_hybrid_assembly:
   shell:
     "spades.py {params.options} -t {threads} -m {resources.mem_gb} -1 {input.s1} -2 {input.s2}  -o {params.basedir} > {log.stdout} 2> {log.stderr}"
 
-rule allhybridassemblies:
-  input:
-    contigs=expand("data/assembly_{assemblytype}/{host}/contigs.fasta",assemblytype='hybrid_doublefiltered',host=HOSTS)
  
