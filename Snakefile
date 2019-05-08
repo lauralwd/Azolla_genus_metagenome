@@ -37,7 +37,7 @@ rule all:
     expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
     expand("data/assembly_{assemblytype}/{host}/contigs.fasta",assemblytype='hybrid_doublefiltered',host=HOSTS),
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='hybrid_doublefiltered',hostcode=HOSTS,assemblyfile=ASSEMBLYFILES),
-    expand("data/bins_{assemblytype}/{hostcode}.BAT.names.txt",assemblytype='hybrid_doublefiltered',hostcode=HOSTS)
+    expand("data/bins_{assemblytype}/{hostcode}.BAT.names.txt",assemblytype='hybrid_doublefiltered',hostcode=HOSTCODES)
 rule allhybridassemblies:
   input:
     contigs=expand("data/assembly_{assemblytype}/{host}/contigs.fasta",assemblytype='hybrid_doublefiltered',host=HOSTS)
