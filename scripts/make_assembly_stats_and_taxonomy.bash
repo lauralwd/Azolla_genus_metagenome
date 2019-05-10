@@ -29,5 +29,5 @@ do    for   h in ${hostcodes[@]}
 	    done
       done
 done | cut -f 1,2,3,4,6,8,10,11,14-20 		\
-     | sed -i 's/\:\ [01]\.[0-9][0-9]//g'	\
+     | sed  's/\:\ [01]\.[0-9][0-9]//g'	\
 	> "$output"
