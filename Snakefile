@@ -987,4 +987,4 @@ rule BLASR_filter_long_reads:
     stdout="logs/BLASR_filter_long_reads_{host}.stdout",
     stderr="logs/BLASR_filter_long_reads_{host}.stderr"
   shell:
-    "blasr <(zcat {input.reads}) {input.genome} {params} --nproc {threads} --unaligned {output.unaligned} --out {output.bam}  > {log.stdout} 2> {log.stderr}"
+    "blasr {input.reads} {input.genome} {params} --nproc {threads} --unaligned {output.unaligned} --out {output.bam}  > {log.stdout} 2> {log.stderr}"
