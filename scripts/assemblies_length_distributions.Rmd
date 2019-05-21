@@ -2,7 +2,9 @@
 title: "Assembly statistics"
 author: "Laura Dijkhuizen"
 date: "07/03/2019"
-output: html_notebook
+output:
+  pdf_document: default
+  html_notebook: default
 ---
 
 ```{r setup, include=FALSE}
@@ -11,7 +13,7 @@ knitr::opts_knit$set(root.dir = "/stor/azolla_metagenome/Azolla_genus_metagenome
 ```
  
 # import libraries and data
-```{r}
+```{r import libraries and data}
 #setwd
 setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
 library(data.table)
@@ -30,9 +32,13 @@ metrics <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/analys
 rm(classes,header)
 ```
 
+# Assembly samples
+In this stats and taxonomy file there is information about `r length(levels(metrics$assembly))` types of assemblies being: `r levels(metrics$assembly)`
+Irespective these assembly types there are `r length(levels(metrics$sample))` samples or 'hostcodes' as they are called in the Snakemake workflow.
+
 # Assembly length
 Let's plot the length distribution for the scaffolds and contigs assembled in the different assemblies. Contigs or scaffolds shorter than 2.5kbp are discarded by default in metabat2, the red vertical line indicates this separation.
-```{r}
+```{r lengthplot_linear, fig.height = 10, fig.width = 15}
 lengthplot <- ggplot (metrics,aes(x=length,col=scaffolded,alpha=.4))
 lengthplot <- lengthplot + geom_freqpoly(bins=50)
 lengthplot <- lengthplot + facet_grid(assembly ~ sample)
@@ -41,11 +47,14 @@ lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
 lengthplot <- lengthplot + theme_classic()
 lengthplot <- lengthplot + labs(y='count',x='sequence length')
 lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
+lengthplot <- lengthplot + theme(legend.position = "bottom",
+                                 strip.text.x = element_text(angle = 80),
+                                 axis.text.x = element_text(angle = 80,hjust = 1))
 lengthplot
 ```
 
 the double log10 axis slightly exagerates the amount of sequencing lost, ploted in a linear x-axis it is more fair to judge.
-```{r}
+```{r lengthplot_log10, fig.height = 10, fig.width = 15}
 lengthplot <- ggplot(metrics,aes(x=length,col=scaffolded,alpha=.4))
 lengthplot <- lengthplot + geom_freqpoly(bins=50)
 lengthplot <- lengthplot + facet_grid(assembly ~ sample)
@@ -54,22 +63,34 @@ lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
 lengthplot <- lengthplot + theme_classic()
 lengthplot <- lengthplot + labs(y='count',x='sequence length')
 lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
+lengthplot <- lengthplot + theme(legend.position = "bottom",
+                                 strip.text.x = element_text(angle = 80),
+                                 axis.text.x = element_text(angle = 80,hjust = 1))
 lengthplot
 ```
 
-The difference between length distributions of scaffolds and contigs is minimal and distributed as expected. Plotting the lengths as boxplots however shows that the _Azolla filiculoides_ samples, those filtered for host DNA most efficiently, clearly have a better length distribution than the other samples do. Here I show only sequences longer than 2500bp
+The difference between length distributions of scaffolds and contigs is minimal and distributed as expected. Plotting the lengths as boxplots however shows that the _Azolla filiculoides_ samples, those filtered for host DNA most efficiently, clearly have a better length distribution than the other samples do. Here I show only sequences longer than 2500bp.
 
-```{r}
+First, create a 2500+ subset.
+
+```{r subset to 2500}
+metrics2500 <- metrics[length >= 2500]
+```
+
+And plot:
+
+```{r lengthboxplot_2500_log10, fig.height = 8, fig.width = 15}
 lenghtbox <- ggplot(metrics2500,aes(y=length,x=sample,col=scaffolded,alpha=.4))
 lenghtbox <- lenghtbox + geom_boxplot()
 lenghtbox <- lenghtbox + facet_grid(assembly ~ . )
 lenghtbox <- lenghtbox + theme_classic()
 lenghtbox <- lenghtbox + scale_y_log10()
+lenghtbox <- lenghtbox + theme(axis.text.x = element_text(angle = 45,hjust = 1))
 lenghtbox
 ```
 
 I wonder if scaffolds after the double filter are longer than if they are only filtered for host DNA. Plotting these as boxplots again. Naturally the distributions will differ for sequences identified by CAT as plant were filtered out. Hence, I plot these separatelly.
-```{r}
+```{r lengthboxplot_2500+_perkingdom, fig.height = 10, fig.width = 15}
 lenghtbox <- ggplot(metrics2500,
                     aes(y=length,x=sample,col=assembly,alpha=.4)
                     )
@@ -80,7 +101,7 @@ lenghtbox <- lenghtbox + geom_boxplot()
 lenghtbox <- lenghtbox + theme_classic()
 lenghtbox <- lenghtbox + scale_y_log10()
 lenghtbox <- lenghtbox + geom_vline(xintercept =0)
-lenghtbox <- lenghtbox + theme(axis.text.x=element_text(angle = 45,hjust = 1))
+lenghtbox <- lenghtbox + theme(axis.text.x=element_text(angle = 90,hjust = 1),legend.position = "bottom")
 lenghtbox
 ```
 To my complete surprise, filtering out plant DNA from the first assembly, filtering the reads and then reassembling the plant DNA depleted short sequences, has not yielded longer scaffolds nor contigs for Bacteria. It is odd that no contigs of the hostfiltered assembly were assigned a super kingdom but all end up in 'root (no rank)' or in 'NA'.
@@ -101,7 +122,7 @@ Plotting length by rank in the assembly (synonymous to node nr) shows that the i
 
 # Taxonomy
 
-```{r}
+```{r tax_dotplot_kingdom, fig.height = 10, fig.width = 15 }
 length_dist <- ggplot(metrics2500[scaffolded == 'scaffolds'],aes(x=length,y=coverage,size=length,alpha=.001,col=superkingdom))
 length_dist <- length_dist + facet_grid(assembly ~ sample,scales = 'free_x')
 length_dist <- length_dist + geom_point()
@@ -109,8 +130,67 @@ length_dist <- length_dist + scale_x_log10()
 length_dist <- length_dist + scale_y_log10()
 length_dist <- length_dist + labs(x='contig length',y='contig coverage')
 length_dist <- length_dist + theme_classic()
+length_dist <- length_dist + theme(legend.position = "bottom",
+                                   strip.text.x = element_text(angle = 80),
+                                   axis.text.x = element_text(angle = 80,hjust = 1))
 length_dist
+```
+And save to a png file
+```{r tax_dotplot_kingdom_png}
 ggsave(filename = "./coverage_overlength_distributions_per_assembly_kingdom.png",
+       plot = length_dist,
+       device = 'png',
+       dpi = 500,
+       units = 'cm',
+       width = 42,
+       height = 29.7 )
+```
+
+Take out all eukaryota and plot the remaing phyla
+
+```{r tax_dotplot_phylum, fig.height = 15, fig.width = 15 }
+length_dist <- ggplot(metrics2500[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota'],aes(x=length,y=coverage,size=length,alpha=.001,col=phylum))
+length_dist <- length_dist + facet_grid(assembly ~ sample,scales = 'free_x')
+length_dist <- length_dist + geom_point()
+length_dist <- length_dist + scale_x_log10()
+length_dist <- length_dist + scale_y_log10()
+length_dist <- length_dist + labs(x='contig length',y='contig coverage')
+length_dist <- length_dist + theme_classic()
+length_dist <- length_dist + theme(legend.position = "bottom",
+                                   strip.text.x = element_text(angle = 80),
+                                   axis.text.x = element_text(angle = 80,hjust = 1))
+length_dist
+```
+
+And save to a png file
+```{r}
+ggsave(filename = "./coverage_overlength_distributions_per_assembly_phylum.png",
+       plot = length_dist,
+       device = 'png',
+       dpi = 500,
+       units = 'cm',
+       width = 42,
+       height = 29.7 )
+```
+
+
+```{r tax_dotplot_order, fig.height = 20, fig.width = 15 }
+length_dist <- ggplot(metrics2500[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota'],aes(x=length,y=coverage,size=length,alpha=.001,col=order))
+length_dist <- length_dist + facet_grid(assembly ~ sample,scales = 'free_x')
+length_dist <- length_dist + geom_point()
+length_dist <- length_dist + scale_x_log10()
+length_dist <- length_dist + scale_y_log10()
+length_dist <- length_dist + labs(x='contig length',y='contig coverage')
+length_dist <- length_dist + theme_classic()
+length_dist <- length_dist + theme(legend.position = "bottom",
+                                   strip.text.x = element_text(angle = 80),
+                                   axis.text.x = element_text(angle = 80,hjust = 1))
+length_dist
+```
+
+
+```{r}
+ggsave(filename = "./coverage_overlength_distributions_per_assembly_order.png",
        plot = length_dist,
        device = 'png',
        dpi = 500,
