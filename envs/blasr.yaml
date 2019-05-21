@@ -1,0 +1,5 @@
+name: anvio
+channels:
+  - bioconda
+dependencies:
+  - blasr=5.3.3
