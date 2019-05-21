@@ -975,11 +975,11 @@ rule BLASR_filter_long_reads:
     reads="data/sequencing_genomic-longreads_trimmed/{host}_longreads-selfcorrected_trimmed.fasta",
     genome="references/host_genome/host_filter.fasta"
   output:
-    unaligned="data/sequencing_genomic-longreads_trimmed_filtered/{host}_longreads-selfcorrected_trimmed_filtered.fasta.gz",
+    #unaligned="data/sequencing_genomic-longreads_trimmed_filtered/{host}_longreads-selfcorrected_trimmed_filtered.fasta",
     bam="data/sequencing_genomic-longreads_trimmed_filtered/{host}_longreads-selfcorrected_trimmed_algined-to-host.bam"
   threads: 100
   params:
-    "--hitPolicy allbest --bam "
+    "--hitPolicy allbest --bam"
   shadow: "shallow"
   conda:
     "envs/blasr.yaml"
@@ -987,4 +987,4 @@ rule BLASR_filter_long_reads:
     stdout="logs/BLASR_filter_long_reads_{host}.stdout",
     stderr="logs/BLASR_filter_long_reads_{host}.stderr"
   shell:
-    "blasr {input.reads} {input.genome} {params} --nproc {threads} --unaligned {output.unaligned} --out {output.bam}  > {log.stdout} 2> {log.stderr}"
+    "blasr {input.reads} {input.genome} {params} --nproc {threads} --out {output.bam} > {log.stdout} 2> {log.stderr}"
