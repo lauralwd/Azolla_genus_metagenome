@@ -962,9 +962,17 @@ rule SPADES_hybrid_assembly:
   shell:
     "spades.py {params.options} -t {threads} -m {resources.mem_gb} -1 {input.s1} -2 {input.s2}  -o {params.basedir} > {log.stdout} 2> {log.stderr}"
 
+rule unzip_long_reads_for_blasr:
+  input:
+    "data/sequencing_genomic-longreads_trimmed/{host}_longreads-selfcorrected_trimmed.fasta.gz"
+  output:
+    temp("data/sequencing_genomic-longreads_trimmed/{host}_longreads-selfcorrected_trimmed.fasta")
+  shell:
+    "unpigz {input} --keep "
+
 rule BLASR_filter_long_reads:
   input:
-    fastq="data/sequencing_genomic-longreads_trimmed/{host}_longreads-selfcorrected_trimmed.fasta.gz",
+    reads="data/sequencing_genomic-longreads_trimmed/{host}_longreads-selfcorrected_trimmed.fasta",
     genome="references/host_genome/host_filter.fasta"
   output:
     unaligned="data/sequencing_genomic-longreads_trimmed_filtered/{host}_longreads-selfcorrected_trimmed_filtered.fasta.gz",
@@ -979,4 +987,4 @@ rule BLASR_filter_long_reads:
     stdout="logs/BLASR_filter_long_reads_{host}.stdout",
     stderr="logs/BLASR_filter_long_reads_{host}.stderr"
   shell:
-    "blasr <(zcat {input.fastq}) {input.genome} {params} --nproc {threads} --unaligned {output.unaligned} --out {output.bam}  > {log.stdout} 2> {log.stderr}"
+    "blasr <(zcat {input.reads}) {input.genome} {params} --nproc {threads} --unaligned {output.unaligned} --out {output.bam}  > {log.stdout} 2> {log.stderr}"
