@@ -224,6 +224,30 @@ rule CAT_filter_contignames:
   shell:
     "cat {input} | grep -v '#' | grep -v Bacteria | cut -f 1  > {output} 2> {log}"
 
+rule CAT_get_bacterial_contignames:
+  input:
+     "references/host_genome/contig_taxonomy.tab"
+  output:
+     "references/host_genome/bacterial_contigs.txt"
+  threads: 1
+  log:
+    "logs/CAT_contigfilterlist.stderr"
+  shell:
+    "cat {input} | grep -v '#' | grep Bacteria | cut -f 1  > {output} 2> {log}"
+
+rule create_host_bacterialcontigs_fasta:
+  input:
+    n="references/host_genome/bacterial_contigs.txt",
+    f="references/host_genome/host_genome.fasta"
+  output:
+    "references/host_genome/host_bacterial_contigs.fasta"
+  threads: 1
+  log:
+    stdout="logs/CAT_create_host_bacterial_contigs.stdout",
+    stderr="logs/CAT_create_host_bacterial_contigs.stderr"
+  shell:
+    "samtools faidx {input.f} -o {output} -r {input.n} > {log.stdout} 2> {log.stderr}"
+
 rule create_host_filter_fasta:
   input:
     n="references/host_genome/contig_filterlist.txt",
