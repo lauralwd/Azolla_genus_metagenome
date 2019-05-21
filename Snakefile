@@ -240,7 +240,7 @@ rule create_host_bacterialcontigs_fasta:
     n="references/host_genome/bacterial_contigs.txt",
     f="references/host_genome/host_genome.fasta"
   output:
-    "references/host_genome/host_bacterial_contigs.fasta"
+    expand("references/host_genome/{host}_host-genome_bacterial_contigs.fasta",host='Azfil_lab')
   threads: 1
   log:
     stdout="logs/CAT_create_host_bacterial_contigs.stdout",
@@ -965,7 +965,8 @@ rule concatenate_fastq_for_hybrid_assembly:
 rule SPADES_hybrid_assembly:
   input:
     s1=expand("data/sequencing_doublefiltered_concatenated/{{host}}.{PE}.fastq.gz",PE=1),
-    s2=expand("data/sequencing_doublefiltered_concatenated/{{host}}.{PE}.fastq.gz",PE=2)
+    s2=expand("data/sequencing_doublefiltered_concatenated/{{host}}.{PE}.fastq.gz",PE=2),
+    contigs="references/host_genome/{host}_host-genome_bacterial_contigs.fasta"
   output:
     contigs=expand("data/assembly_{assemblytype}/{{host}}/contigs.fasta",assemblytype='hybrid_doublefiltered'),
     scaffolds=expand("data/assembly_{assemblytype}/{{host}}/scaffolds.fasta",assemblytype='hybrid_doublefiltered'),
@@ -984,7 +985,7 @@ rule SPADES_hybrid_assembly:
     stdout=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stdout",assemblytype='hybrid_doublefiltered'),
     stderr=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stderr",assemblytype='hybrid_doublefiltered')
   shell:
-    "spades.py {params.options} -t {threads} -m {resources.mem_gb} -1 {input.s1} -2 {input.s2}  -o {params.basedir} > {log.stdout} 2> {log.stderr}"
+    "spades.py {params.options} -t {threads} -m {resources.mem_gb} -1 {input.s1} -2 {input.s2} --trusted-contigs {input.contigs} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
 
 rule unzip_long_reads_for_blasr:
   input:
