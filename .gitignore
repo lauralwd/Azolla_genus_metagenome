@@ -7,3 +7,5 @@ analyses/
 logs/  
 references/
 data/
+*.pdf
+*.html
