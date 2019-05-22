@@ -984,9 +984,7 @@ def get_input_hybrid_assemblies(wildcards):
 
 rule SPADES_hybrid_assembly:
   input:
-    s1=expand("data/sequencing_doublefiltered_concatenated/{{host}}.{PE}.fastq.gz",PE=1),
-    s2=expand("data/sequencing_doublefiltered_concatenated/{{host}}.{PE}.fastq.gz",PE=2),
-    pacbio="data/sequencing_genomic-longreads_trimmed_filtered/{host}_longreads-selfcorrected_trimmed_filtered.fasta.gz"
+    unpack(get_input_hybrid_assemblies)
   output:
     contigs=expand("data/assembly_{assemblytype}/{{host}}/contigs.fasta",assemblytype='hybrid_doublefiltered'),
     scaffolds=expand("data/assembly_{assemblytype}/{{host}}/scaffolds.fasta",assemblytype='hybrid_doublefiltered'),
