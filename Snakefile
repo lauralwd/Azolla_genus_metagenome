@@ -965,7 +965,7 @@ rule concatenate_fastq_for_hybrid_assembly:
 from os import listdir
 def get_input_hybrid_assemblies(wildcards):
     HOST=wildcards.host
-    SPECIES=HOST #HOST.split('_',1)[0]
+    SPECIES=HOST.split('_',1)[0]
     s1  = {'s1' : 'data/sequencing_doublefiltered_concatenated/' + HOST +'.' + '1' + '.fastq.gz' }
     s2  = {'s2' : 'data/sequencing_doublefiltered_concatenated/' + HOST +'.' + '2' + '.fastq.gz' }
     input = {}
@@ -1000,6 +1000,7 @@ rule SPADES_hybrid_assembly:
   resources:
     mem_gb=500
   log:
+
     stdout=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stdout",assemblytype='hybrid_doublefiltered'),
     stderr=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stderr",assemblytype='hybrid_doublefiltered')
   run:
@@ -1007,7 +1008,6 @@ rule SPADES_hybrid_assembly:
        shell("spades.py {params.options} -t {threads} -m {resources.mem_gb} -1 {input.s1} -2 {input.s2} --pacbio {input.pacbio} -o {params.basedir} > {log.stdout} 2> {log.stderr}")
     else :
        shell("spades.py {params.options} -t {threads} -m {resources.mem_gb} -1 {input.s1} -2 {input.s2} -o {params.basedir} > {log.stdout} 2> {log.stderr}")
-
 
 rule unzip_long_reads_for_blasr:
   input:
