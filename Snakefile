@@ -966,8 +966,8 @@ from os import listdir
 def get_input_hybrid_assemblies(wildcards):
     HOST=wildcards.host
     SPECIES=HOST #HOST.split('_',1)[0]
-    s1  = {'s1' : 'data/sequencing_doublefiltered_concatenated/' + HOST + '/' + HOST +'.' + '1' + '.fastq.gz' }
-    s2  = {'s2' : 'data/sequencing_doublefiltered_concatenated/' + HOST + '/' + HOST +'.' + '2' + '.fastq.gz' }
+    s1  = {'s1' : 'data/sequencing_doublefiltered_concatenated/' + HOST +'.' + '1' + '.fastq.gz' }
+    s2  = {'s2' : 'data/sequencing_doublefiltered_concatenated/' + HOST +'.' + '2' + '.fastq.gz' }
     input = {}
     input.update(s1)
     input.update(s2)
