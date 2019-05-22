@@ -929,7 +929,7 @@ rule anvi_import_metabat2:
     "anvi-import-collection {input.binlist} -c {input.db} {params} -p {input.profile} > {log.stdout} 2> {log.stderr}"
 
 
-def get_input_hybrid_assemblies(wildcards):
+def get_concatenate_hybrid_assemblies(wildcards):
     HOST=wildcards.host
     PE=wildcards.PE
     HOST_LIBRARIES=list(filter(lambda x:HOST in x, HOSTCODES))
@@ -956,7 +956,7 @@ def get_input_hybrid_assemblies(wildcards):
 
 rule concatenate_fastq_for_hybrid_assembly:
   input:
-    get_input_hybrid_assemblies
+    get_concatenate_hybrid_assemblies
   output:
     temp("data/sequencing_doublefiltered_concatenated/{host}.{PE}.fastq.gz")
   shell:
