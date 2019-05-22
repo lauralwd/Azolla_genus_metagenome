@@ -1002,8 +1002,12 @@ rule SPADES_hybrid_assembly:
   log:
     stdout=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stdout",assemblytype='hybrid_doublefiltered'),
     stderr=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stderr",assemblytype='hybrid_doublefiltered')
-  shell:
-    "spades.py {params.options} -t {threads} -m {resources.mem_gb} -1 {input.s1} -2 {input.s2} --pacbio {input.pacbio} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
+  run:
+    if os.path.isfile(input.pacbio) == True :
+       shell("spades.py {params.options} -t {threads} -m {resources.mem_gb} -1 {input.s1} -2 {input.s2} --pacbio {input.pacbio} -o {params.basedir} > {log.stdout} 2> {log.stderr}")
+    else :
+       shell("spades.py {params.options} -t {threads} -m {resources.mem_gb} -1 {input.s1} -2 {input.s2} -o {params.basedir} > {log.stdout} 2> {log.stderr}")
+
 
 rule unzip_long_reads_for_blasr:
   input:
