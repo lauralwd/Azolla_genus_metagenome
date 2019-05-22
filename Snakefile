@@ -1000,7 +1000,6 @@ rule SPADES_hybrid_assembly:
   resources:
     mem_gb=500
   log:
-
     stdout=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stdout",assemblytype='hybrid_doublefiltered'),
     stderr=expand("logs/SPADES_assembly_{assemblytype}_{{host}}.stderr",assemblytype='hybrid_doublefiltered')
   run:
