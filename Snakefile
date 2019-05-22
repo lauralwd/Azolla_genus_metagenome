@@ -962,6 +962,26 @@ rule concatenate_fastq_for_hybrid_assembly:
   shell:
     "cat {input} > {output}"
 
+from os import listdir
+def get_input_hybrid_assemblies(wildcards):
+    HOST=wildcards.host
+    SPECIES=HOST #HOST.split('_',1)[0]
+    s1  = {'s1' : 'data/sequencing_doublefiltered_concatenated/' + HOST + '/' + HOST +'.' + '1' + '.fastq.gz' }
+    s2  = {'s2' : 'data/sequencing_doublefiltered_concatenated/' + HOST + '/' + HOST +'.' + '2' + '.fastq.gz' }
+    input = {}
+    input.update(s1)
+    input.update(s2)
+    longreadfiles=listdir("data/sequencing_genomic-longreads_trimmed/")
+    longreadfiles_species=list(filter(lambda x:SPECIES in x, longreadfiles))
+    if len(longreadfiles_species) > 0 :
+      longreadfiles_species_path= "data/sequencing_genomic-longreads_trimmed/" + longreadfiles_species[0]
+      if os.path.isfile(longreadfiles_species_path) == True :
+        pacbio = {'pacbio' : longreadfiles_species_path }
+        input.update(pacbio)
+        return(input)
+      return(input)
+    return input
+
 rule SPADES_hybrid_assembly:
   input:
     s1=expand("data/sequencing_doublefiltered_concatenated/{{host}}.{PE}.fastq.gz",PE=1),
