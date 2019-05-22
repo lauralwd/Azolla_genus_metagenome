@@ -1022,4 +1022,4 @@ rule compress_blasr_filtered_reads:
     "data/sequencing_genomic-longreads_trimmed_filtered/{host}_longreads-selfcorrected_trimmed_filtered.fasta.gz"
   threads: 100
   shell:
-    "pigz --best -j {threads} --keep data/sequencing_genomic-longreads_trimmed_filtered/{host}_longreads-selfcorrected_trimmed_filtered.fasta"
+    "pigz --best -p {threads} --keep {input}"
