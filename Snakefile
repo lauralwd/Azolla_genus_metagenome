@@ -557,7 +557,7 @@ rule collect_assembly_stats_singles:
     hostcode= lambda w : expand("{hostcode}",hostcode=HOSTCODES),
     assemblyfile= lambda w : expand("{assemblyfile}",assemblyfile=ASSEMBLYFILES)
   output:
-    "analyses/assembly_stats_and_taxonomy.tab.gz"
+    "analyses/assembly_stats_and_taxonomy.tab"
   threads: 12
   resources:
     mem_mb=1000
@@ -574,7 +574,7 @@ rule collect_assembly_stats_hybrid:
     hostcode= lambda w : expand("{hostcode}",hostcode=HOSTS),
     assemblyfile= lambda w : expand("{assemblyfile}",assemblyfile=ASSEMBLYFILES)
   output:
-    "analyses/assembly-hybrid_stats_and_taxonomy.tab.gz"
+    "analyses/assembly-hybrid_stats_and_taxonomy.tab"
   threads: 12
   resources:
     mem_mb=1000
