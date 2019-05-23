@@ -547,7 +547,7 @@ rule spades_second_assembly:
     "spades.py {params.options} -t {threads} -m {resources.mem_mb} -1 {input.s1} -2 {input.s2} -o {params.basedir} > {log.stdout} 2> {log.stderr}"
 
 ## assembly analyses and diagnostigs
-rule collect_assembly_stats:
+rule collect_assembly_stats_singles:
   input:
     expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
   params:
