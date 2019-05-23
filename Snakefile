@@ -564,6 +564,23 @@ rule collect_assembly_stats_singles:
     scripts/make_assembly_stats_and_taxonomy.bash "{params.assemblytype}" "{params.hostcode}" "{params.assemblyfile}" {threads} {resources.mem_mb} {output}
     """
 
+rule collect_assembly_stats_hybrid:
+  input:
+    expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='hybrid_doublefiltered',hostcode=HOSTS,assemblyfile=ASSEMBLYFILES)
+  params:
+    assemblytype= lambda w : expand("{assemblytype}",assemblytype='hybrid_doublefiltered'),
+    hostcode= lambda w : expand("{hostcode}",hostcode=HOSTS),
+    assemblyfile= lambda w : expand("{assemblyfile}",assemblyfile=ASSEMBLYFILES)
+  output:
+    "analyses/assembly-hybrid_stats_and_taxonomy.tab.gz"
+  threads: 12
+  resources:
+    mem_mb=1000
+  shell:
+    """
+    scripts/make_assembly_stats_and_taxonomy.bash "{params.assemblytype}" "{params.hostcode}" "{params.assemblyfile}" {threads} {resources.mem_mb} {output}
+    """
+
 ## assembly processing for binning an Anvi'o
 
 ruleorder: shorten_scaffold_names_awk > shorten_scaffold_names_anvi
