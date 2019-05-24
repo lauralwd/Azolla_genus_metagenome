@@ -856,8 +856,6 @@ rule anvi_run_hmms:
   shell:
     "anvi-run-hmms -c {input} -T {threads} > {log.stdout} 2> {log.stderr}"
 
-ruleorder: anvi_profile_binningsignal > anvi_profile
-
 rule anvi_profile:
   input:
     "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
@@ -905,11 +903,32 @@ rule anvi_profile_binningsignal:
     rmdir {params.path}
     anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
     """
+ruleorder: anvi_profile_binningsignal > anvi_profile_binningsignal_library
 
+rule anvi_profile_binningsignal_library:
   input:
+    "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
-    source="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db",
-    signal=expand("data/assembly_{{assemblytype}}_binningsignals_anvio/{{hostcode}}_{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS)
+    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{library}.sorted.bam",
+    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{library}.sorted.bam.bai"
+  output:
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{library}/PROFILE.db"
+  params:
+    length="--min-contig-length 2500",
+    name=lambda w: expand("-S assembly_{assemblytype}_sample_{hostcode}_binningsignal_{library}", assemblytype=w.assemblytype , hostcode=w.hostcode, binningsignal=w.binningsignal.replace('.','_')),
+    path=lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{library}", assemblytype=w.assemblytype , hostcode=w.hostcode, library=w.library)
+  log:
+    stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{library}.stdout",
+    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{library}.stderr"
+  threads: 100
+  conda:
+    "envs/anvio.yaml"
+  shell:
+    """
+    rmdir {params.path}
+    anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
+    """
+
 def get_anvi_merge_profiles(wildcards):
     input={}
     if wildcards.assemblytype != 'hybrid_doublefiltered':
