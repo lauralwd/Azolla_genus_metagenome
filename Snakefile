@@ -707,19 +707,17 @@ rule backmap_bwa_mem_assemblysource:
   shell:
     "bwa mem -t {threads} {params.index} {input.s1} {input.s2} 2> {log.stderr} | samtools view -F 4 -@ {threads} -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
-ruleorder: backmap_samtools_sort > backmap_samtools_sort_assemblysource
-
-rule backmap_samtools_sort_assemblysource:
+rule backmap_samtools_sort:
   input:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam"
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam"
   threads: 100
   resources:
     mem_mb=2000
   log:
-    stdout="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{hostcode}.stdout",
-    stderr="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{hostcode}.stderr"
+    stdout="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{binningsignal}.stdout",
+    stderr="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{binningsignal}.stderr"
   shell:
     "samtools sort -@ {threads} -m {resources.mem_mb}M -o {output} {input} > {log.stdout} 2> {log.stderr}"
 
