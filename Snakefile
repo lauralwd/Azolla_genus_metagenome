@@ -759,7 +759,7 @@ rule metabat2:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta",
     depthmatrix="data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab"
   output:
-    dir=directory("data/bins_{assemblytype}/{hostcode}")
+    dir=directory("data/bins_{assemblytype}/{hostcode}/")
   params:
     prefix=lambda w: expand("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin",assemblytype=w.assemblytype,hostcode=w.hostcode)
   threads: 72
@@ -777,7 +777,7 @@ checkpoint dummy_metabat2:
 
 rule checkm:
   input:
-    "data/bins_{assemblytype}/{hostcode}"
+    "data/bins_{assemblytype}/{hostcode}/"
   output:
     table="data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out"
   params:
@@ -794,7 +794,7 @@ rule checkm:
 
 rule CAT_bins:
   input:
-    bindir="data/bins_{assemblytype}/{hostcode}",
+    bindir="data/bins_{assemblytype}/{hostcode}/",
     dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-27.nr.dmnd",
     db="references/CAT_customised_20190108/CAT_database_customised",
     tf="references/CAT_customised_20190108/taxonomy_customised"
