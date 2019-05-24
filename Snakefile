@@ -733,10 +733,18 @@ rule backmap_samtools_index_binningsignal:
   shell:
     "samtools index -@ {threads} {input} > {log.stdout} 2> {log.stderr}"
 
+def get_bams_for_binning(wildcards):
+    if wildcards.assemblytype != 'hybrid_doublefiltered':
+        input=expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) +  expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode)
+        return(input)
+    elif wildcards.assemblytype == 'hybrid_doublefiltered':
+      HOST_LIBRARIES=list(filter(lambda x:wildcards.hostcode in x, HOSTCODES)) + BINNINGSIGNALS
+      input=expand("data/assembly_{assemblytype}_binningsignals/{host}/{host}_{hostcode}.sorted.bam",assemblytype=wildcards.assemblytype,host=wildcards.hostcode,hostcode=HOST_LIBRARIES)
+      return(input)
+
 rule jgi_summarize_script:
   input:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",
-    expand("data/assembly_{{assemblytype}}_binningsignals/{{hostcode}}/{{hostcode}}_{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS)
+    get_bams_for_binning
   output:
     "data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab"
   log:
