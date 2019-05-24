@@ -450,7 +450,6 @@ rule BAT_filter_contignames_bins:
     do  grep '>' {params.binfolder}/$f.fa
     done | tr -d '>' | cut -f 1 > {output} 2> {log}
     """
-
 rule combine_filter_contignames:
   input:
     "data/assembly_{assemblytype}/{hostcode}/BAT_{hostcode}_filterlist.txt",
@@ -985,7 +984,6 @@ rule anvi_import_metabat2:
     "envs/anvio.yaml"
   shell:
     "anvi-import-collection {input.binlist} -c {input.db} {params} -p {input.profile} > {log.stdout} 2> {log.stderr}"
-
 
 def get_concatenate_hybrid_assemblies(wildcards):
     HOST=wildcards.host
