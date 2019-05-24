@@ -33,12 +33,15 @@ ASSEMBLYFILES=['contigs','scaffolds']
 ## 'All'-rules
 rule all:
   input:
+    "analyses/assembly_stats_and_taxonomy.tab",
+    expand("data/bins_{assemblytype}/{hostcode}.BAT.names.txt",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
     expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
     expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
-    expand("data/assembly_{assemblytype}/{host}/contigs.fasta",assemblytype='hybrid_doublefiltered',host=HOSTS),
-    expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='hybrid_doublefiltered',hostcode=HOSTS,assemblyfile=ASSEMBLYFILES),
-    expand("data/bins_{assemblytype}/{hostcode}.BAT.names.txt",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
-    "analyses/assembly-hybrid_stats_and_taxonomy.tab"
+    "analyses/assembly-hybrid_stats_and_taxonomy.tab",
+    expand("data/bins_{assemblytype}/{hostcode}.BAT.names.txt",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
+    expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
+    expand("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS)
+    # ,expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db",assemblytype='hybrid_doublefiltered',hostcode=HOSTS)
 
 rule allhybridassemblies:
   input:
