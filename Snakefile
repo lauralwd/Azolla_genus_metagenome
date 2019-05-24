@@ -907,11 +907,32 @@ rule anvi_profile_binningsignal:
     anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
     """
 
-rule anvi_merge:
   input:
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
     source="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db",
     signal=expand("data/assembly_{{assemblytype}}_binningsignals_anvio/{{hostcode}}_{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS)
+def get_anvi_merge_profiles(wildcards):
+    input={}
+    if wildcards.assemblytype != 'hybrid_doublefiltered':
+        source={ 'source' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db",hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype) }
+        signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype) }
+        input.update(source)
+        input.update(signal)
+        return(input)
+    elif wildcards.assemblytype == 'hybrid_doublefiltered':
+        HOST_LIBRARIES=list(filter(lambda x:wildcards.hostcode in x, HOSTCODES))
+        source={ 'source' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{library}/PROFILE.db",    libraries=HOST_LIBRARIES,    assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
+        print(source)
+        signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
+        input.update(source)
+        input.update(signal)
+        return(input)
+    return(input)
+
+rule anvi_merge:
+  input:
+    unpack(get_anvi_merge_profiles),
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db"
   output:
     profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
   params:
