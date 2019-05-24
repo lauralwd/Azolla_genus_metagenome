@@ -628,19 +628,37 @@ rule bwa_index_assembly_scaffolds:
 
 import os.path
 def get_binning_reads(wildcards):
-    pathpe=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed_paired.R1.fastq.gz")
-    pathse=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed.fastq.gz")
-    if os.path.isfile(pathpe) ==  True :
-      dict = {'reads' :  expand("data/sequencing_binning_signals/{binningsignal}.trimmed_paired.R{PE}.fastq.gz", PE=[1,2],binningsignal=wildcards.binningsignal) }
-    elif os.path.isfile(pathse) == True :
-      dict = {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz", binningsignal=wildcards.binningsignal) }
-    return dict
+    if wildcards.assemblytype != 'hybrid_doublefiltered' :
+        pathpe=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed_paired.R1.fastq.gz")
+        pathse=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed.fastq.gz")
+        index={'index': expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb']) }
+        if os.path.isfile(pathpe) ==  True :
+            dict = {'reads' :  expand("data/sequencing_binning_signals/{binningsignal}.trimmed_paired.R{PE}.fastq.gz", PE=[1,2],binningsignal=wildcards.binningsignal) }
+        elif os.path.isfile(pathse) == True :
+            dict = {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz", binningsignal=wildcards.binningsignal) }
+            return dict
+        dict.update(index)
+        return dict
+    elif wildcards.assemblytype == 'hybrid_doublefiltered' :
+        if len(list(filter(lambda x:wildcards.binningsignal in x, BINNINGSIGNALS))) > 0 :
+            pathpe=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed_paired.R1.fastq.gz")
+            pathse=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed.fastq.gz")
+            index={'index': expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb']) }
+            if os.path.isfile(pathpe) ==  True :
+                dict = {'reads' :  expand("data/sequencing_binning_signals/{binningsignal}.trimmed_paired.R{PE}.fastq.gz", PE=[1,2],binningsignal=wildcards.binningsignal) }
+            elif os.path.isfile(pathse) == True :
+                dict = {'reads' : expand("data/sequencing_binning_signals/{binningsignal}.trimmed.fastq.gz", binningsignal=wildcards.binningsignal) }
+                return dict
+            dict.update(index)
+        elif len(list(filter(lambda x:wildcards.binningsignal in x, BINNINGSIGNALS))) == 0 :
+            index={'index': expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb']) }
+            dict = { 'reads' : expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=DIRECTIONS,hostcode=wildcards.binningsignal) }
+        return dict
     return dict
 
 rule backmap_bwa_mem:
   input:
     unpack(get_binning_reads),
-    index=expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
   params:
     index=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
