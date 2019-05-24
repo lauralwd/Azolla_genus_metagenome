@@ -671,19 +671,6 @@ rule backmap_bwa_mem:
   shell:
     "bwa mem -t {threads} {params.index} {input.reads} 2> {log.stderr} | samtools view -F 4 -@ {threads} -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
-rule backmap_samtools_sort:
-  input:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam"
-  output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam"
-  threads: 100
-  resources:
-    mem_mb=2000
-  log:
-    stdout="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{binningsignal}.stdout",
-    stderr="logs/bwa_backmap_samtools_sort_{assemblytype}_{hostcode}_{binningsignal}.stderr"
-  shell:
-    "samtools sort -@ {threads} -m {resources.mem_mb}M -o {output} {input} > {log.stdout} 2> {log.stderr}"
 
 rule backmap_bwa_mem_assemblysource:
   input:
