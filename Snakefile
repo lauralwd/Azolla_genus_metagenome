@@ -973,24 +973,6 @@ def get_concatenate_hybrid_assemblies(wildcards):
     READS  = ['data/sequencing_doublefiltered/' + h + '/' + h +'.' + PE + '.fastq.gz' for h in HOST_LIBRARIES]
     return(READS)
 
-#def get_input_hybrid_assemblies_commandline(wildcards):
-#    HOST=wildcards.host
-#    # these are the libraries that we'll assemble for this host, the HOSTS list should be difined such that this number is always bigger than 1
-#    HOST_LIBRARIES=list(filter(lambda x:HOST in x, HOSTCODES))
-#    # Count the number of libraries, SPAdes wants these explicitly numbered
-#    COUNT = list(range(1,len(HOST_LIBRARIES)+1))
-#    # construct paths for both pairs
-#    LEFT  = ['data/sequencing_doublefiltered/' + h + '/' + h +'.1.fastq.gz' for h in HOST_LIBRARIES]
-#    RIGHT = ['data/sequencing_doublefiltered/' + h + '/' + h +'.2.fastq.gz' for h in HOST_LIBRARIES]
-#    # combine both lists into one list of lists
-#    LEFTNUMBERED= list(zip(COUNT,LEFT ))
-#    RIGHTNUMBERED=list(zip(COUNT,RIGHT))
-#    # now use those lists of lists to construct commandlines
-#    LEFTNAMED =['--pe' + str(h[0]) + '-1 ' + h[1] for h in LEFTNUMBERED ]
-#    RIGHTNAMED=['--pe' + str(h[0]) + '-2 ' + h[1] for h in RIGHTNUMBERED]
-#    READS=LEFTNAMED+RIGHTNAMED
-#    return(READS)
-
 rule concatenate_fastq_for_hybrid_assembly:
   input:
     get_concatenate_hybrid_assemblies
