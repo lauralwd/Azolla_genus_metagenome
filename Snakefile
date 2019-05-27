@@ -776,7 +776,7 @@ checkpoint dummy_metabat2:
 
 rule checkm:
   input:
-    "data/bins_{assemblytype}/{hostcode}/"
+    "data/bins_{assemblytype}/{hostcode}"
   output:
     table="data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out"
   params:
