@@ -939,7 +939,6 @@ def get_anvi_merge_profiles(wildcards):
         return(input)
     elif wildcards.assemblytype == 'hybrid_doublefiltered':
         HOST_LIBRARIES=list(filter(lambda x:wildcards.hostcode in x, HOSTCODES))
-        print(source)
         source={ 'source' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{library}/PROFILE.db",    library=HOST_LIBRARIES,    assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
         signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
         input.update(source)
