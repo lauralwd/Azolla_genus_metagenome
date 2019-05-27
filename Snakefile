@@ -887,7 +887,7 @@ rule anvi_profile_binningsignal:
     bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",
     bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam.bai"
   output:
-    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}/PROFILE.db"
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db"
   params:
     length="--min-contig-length 2500",
     name=lambda w: expand("-S assembly_{assemblytype}_sample_{hostcode}_binningsignal_{binningsignal}", assemblytype=w.assemblytype , hostcode=w.hostcode, binningsignal=w.binningsignal.replace('.','_')),
@@ -912,7 +912,7 @@ rule anvi_profile_binningsignal_library:
     bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{library}.sorted.bam",
     bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{library}.sorted.bam.bai"
   output:
-    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{library}/PROFILE.db"
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{library}/PROFILE.db"
   params:
     length="--min-contig-length 2500",
     name=lambda w: expand("-S assembly_{assemblytype}_sample_{hostcode}_binningsignal_{library}", assemblytype=w.assemblytype , hostcode=w.hostcode, binningsignal=w.binningsignal.replace('.','_')),
@@ -932,16 +932,16 @@ rule anvi_profile_binningsignal_library:
 def get_anvi_merge_profiles(wildcards):
     input={}
     if wildcards.assemblytype != 'hybrid_doublefiltered':
-        source={ 'source' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db",hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype) }
-        signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype) }
+        source={ 'source' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{hostcode}/PROFILE.db",hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype) }
+        signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype) }
         input.update(source)
         input.update(signal)
         return(input)
     elif wildcards.assemblytype == 'hybrid_doublefiltered':
         HOST_LIBRARIES=list(filter(lambda x:wildcards.hostcode in x, HOSTCODES))
-        source={ 'source' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{library}/PROFILE.db",    libraries=HOST_LIBRARIES,    assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
         print(source)
-        signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
+        source={ 'source' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{library}/PROFILE.db",    library=HOST_LIBRARIES,    assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
+        signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
         input.update(source)
         input.update(signal)
         return(input)
