@@ -856,29 +856,29 @@ rule anvi_run_hmms:
   shell:
     "anvi-run-hmms -c {input} -T {threads} > {log.stdout} 2> {log.stderr}"
 
-rule anvi_profile:
-  input:
-    "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
-    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
-    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",
-    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam.bai"
-  output:
-    profile= "data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}/PROFILE.db"
-  params:
-    length="--min-contig-length 2500",
-    name=lambda w: expand(" -S 'assembly_{assemblytype}_sample_{hostcode}_binningsignal_{hostcode}' ", assemblytype=w.assemblytype , hostcode=w.hostcode.replace('.','_')),
-    path= lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}", assemblytype=w.assemblytype , hostcode=w.hostcode)
-  log:
-    stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stdout",
-    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stderr"
-  threads: 100
-  conda:
-    "envs/anvio.yaml"
-  shell:
-    """
-    rmdir {params.path}
-    anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
-    """
+#rule anvi_profile:
+#  input:
+#    "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
+#    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
+#    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",
+#    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam.bai"
+#  output:
+#    profile= "data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{hostcode}/PROFILE.db"
+#  params:
+#    length="--min-contig-length 2500",
+#    name=lambda w: expand(" -S 'assembly_{assemblytype}_sample_{hostcode}_binningsignal_{hostcode}' ", assemblytype=w.assemblytype , hostcode=w.hostcode.replace('.','_')),
+#    path= lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}", assemblytype=w.assemblytype , hostcode=w.hostcode)
+#  log:
+#    stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stdout",
+#    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stderr"
+#  threads: 100
+#  conda:
+#    "envs/anvio.yaml"
+#  shell:
+#    """
+#    rmdir {params.path}
+#    anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
+#   """
 
 rule anvi_profile_binningsignal:
   input:
