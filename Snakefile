@@ -906,31 +906,32 @@ rule anvi_profile_binningsignal:
     fi
     anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
     """
-ruleorder: anvi_profile_binningsignal > anvi_profile_binningsignal_library
 
-rule anvi_profile_binningsignal_library:
-  input:
-    "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
-    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
-    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{library}.sorted.bam",
-    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{library}.sorted.bam.bai"
-  output:
-    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{library}/PROFILE.db"
-  params:
-    length="--min-contig-length 2500",
-    name=lambda w: expand("-S assembly_{assemblytype}_sample_{hostcode}_binningsignal_{library}", assemblytype=w.assemblytype , hostcode=w.hostcode, binningsignal=w.binningsignal.replace('.','_')),
-    path=lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{library}", assemblytype=w.assemblytype , hostcode=w.hostcode, library=w.library)
-  log:
-    stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{library}.stdout",
-    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{library}.stderr"
-  threads: 100
-  conda:
-    "envs/anvio.yaml"
-  shell:
-    """
-    rmdir {params.path}
-    anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
-    """
+#ruleorder: anvi_profile_binningsignal > anvi_profile_binningsignal_library
+#
+#rule anvi_profile_binningsignal_library:
+#  input:
+#    "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
+#    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
+#    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{library}.sorted.bam",
+#    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{library}.sorted.bam.bai"
+#  output:
+#    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{library}/PROFILE.db"
+#  params:
+#    length="--min-contig-length 2500",
+#    name=lambda w: expand("-S assembly_{assemblytype}_sample_{hostcode}_binningsignal_{library}", assemblytype=w.assemblytype , hostcode=w.hostcode, binningsignal=w.binningsignal.replace('.','_')),
+#    path=lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{library}", assemblytype=w.assemblytype , hostcode=w.hostcode, library=w.library)
+#  log:
+#    stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{library}.stdout",
+#    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{library}.stderr"
+#  threads: 100
+#  conda:
+#    "envs/anvio.yaml"
+#  shell:
+#    """
+#    rmdir {params.path}
+#    anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
+#    """
 
 def get_anvi_merge_profiles(wildcards):
     input={}
