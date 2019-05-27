@@ -894,13 +894,16 @@ rule anvi_profile_binningsignal:
     path=lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{binningsignal}", assemblytype=w.assemblytype , hostcode=w.hostcode, binningsignal=w.binningsignal)
   log:
     stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stdout",
-    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stderr"
+    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{binningsignal}.stderr",
+    preperr="logs/anvi-profile_prep_{assemblytype}_{hostcode}_{binningsignal}.stderr"
   threads: 100
   conda:
     "envs/anvio.yaml"
   shell:
     """
-    rmdir {params.path}
+    if [ -d {params.path} ]
+    then rmdir {params.path} > {log.preperr} 2>&1
+    fi
     anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
     """
 ruleorder: anvi_profile_binningsignal > anvi_profile_binningsignal_library
