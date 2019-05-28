@@ -859,6 +859,29 @@ rule anvi_run_hmms:
   shell:
     "anvi-run-hmms -c {input} -T {threads} > {log.stdout} 2> {log.stderr}"
 
+rule anvi_setup_ncbi_cogs:
+  output:
+    dir=directory("references/anvi_ncbi_cogs")
+  threads: 100
+  shell:
+    "anvi-setup-ncbi-cogs -T {threads} --just-do-it --cog-data-dir {output.dir}"
+
+rule anvi_run_ncbi_cogs:
+  input:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
+    dir="references/anvi_ncbi_cogs" 
+  output:
+    touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_ncbi_cogs.done")
+  threads: 5
+  params: "--sensitive"
+  log:
+    stdout="logs/anvi-run-cogs_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-run-cogs_{assemblytype}_{hostcode}.stderr"
+  conda:
+    "envs/anvio.yaml"
+  shell:
+    "anvi-run-ncbi-cogs {params} -c {input.db} -T {threads} --cog-data-dir {input.dir} > {log.stdout} 2> {log.stderr}"
+
 #rule anvi_profile:
 #  input:
 #    "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
