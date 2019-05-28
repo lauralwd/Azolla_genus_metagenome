@@ -1016,11 +1016,10 @@ rule prepare_anvi_import_metabat2:
   threads: 3
   shell:
     """
-    echo -e "bin\theader" > {output}
     bins=( $(echo "{input}" | tr ' ' '\n' ) )
     for   f in ${{bins[@]}}
     do    nr=$(echo $f | rev | cut -f 2 -d '.' )
-          cat $f | grep '>' | sed "s/^/bin.$nr\t/g" >> {output} 2> {log}
+          cat $f | grep '>' | tr -d '>' | sed "s/$/\tbin$nr/g"  >> {output} 2> {log}
     done
     """
 
