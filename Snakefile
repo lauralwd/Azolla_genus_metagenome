@@ -981,19 +981,23 @@ def get_all_bins(wildcards):
                   )
     return input
 
-#rule prepare_anvi-import-metabat2:
-#  input:
-#    get_all_bins
-#  output:
-#    "data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab",
-#  log:
-#    "logs/prepare_anvi-import-metabat2.stderr
-#  shell:
-#    """
-#    echo -e "bin\theader" > {output.binlist}
-#    for   f in ( {input} )
-#    do    cat $f | grep '>' | sed "s/^/bin_{bin_nr}\t/g" >> {output.binlist} 2> {log}
-#    """
+rule prepare_anvi_import_metabat2:
+  input:
+    get_all_bins
+  output:
+    "data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab"
+  log:
+    "logs/prepare_anvi-import-metabat2-{assemblytype}-{hostcode}.stderr"
+  threads: 3
+  shell:
+    """
+    echo -e "bin\theader" > {output}
+    bins=( $(echo "{input}" | tr ' ' '\n' ) )
+    for   f in ${{bins[@]}}
+    do    nr=$(echo $f | rev | cut -f 2 -d '.' )
+          cat $f | grep '>' | sed "s/^/bin.$nr\t/g" >> {output} 2> {log}
+    done
+    """
 
 rule anvi_import_metabat2:
   input:
