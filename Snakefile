@@ -600,9 +600,32 @@ rule shorten_scaffold_names_awk:
   shell:
    """awk -F '_' '/>NODE/{{$0=">NODE_"$2}}1' {input} > {output}"""
 
+rule CAT_filter_unclassified_and_eukaryotic_scaffolds_for_anvio:
+  input:
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_taxonomy.tab",assemblyfile='scaffolds')
+  output:
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_minus-unclassified_minus-eukaryotic_filterlist.txt",assemblyfile='scaffolds')
+  threads: 1
+  log:
+    expand("logs/CAT_assembly_{{assemblytype}}_{assemblyfile}filterlist_{{hostcode}}.stderr",assemblyfile='scaffolds')
+  shell:
+    "cat {input} | grep -v Eukaryota | grep -v unclassified | grep -v '#' | cut -f 1 | sort -n  > {output} 2> {log}"
+
+rule filter_unclassfied_filter_eukaryotic:
+  input:
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta",
+    filterlist=expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_minus-unclassified_minus-eukaryotic_filterlist.txt",assemblyfile='scaffolds')
+  output:
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_minus-unclassified_minus-eukaryotic.fasta"
+  log:
+    stdout="logs/filter-final-fasta-eukaryotic-unclassfied_{assemblytype}_{hostcode}_{assemblyfile}.stdout",
+    stderr="logs/filter-final-fasta-eukaryotic-unclassified_{assemblytype}_{hostcode}_{assemblyfile}.stderr"    
+  shell:
+    "samtools faidx {input.scaffolds} -o {output.scaffolds} -r {input.filterlist} > {log.stdout} 2> {log.stderr}"
+
 rule shorten_scaffold_names_anvi:
   input:
-    scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta"
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_minus-unclassified_minus-eukaryotic.fasta"
   output:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_short_names.fasta"
   log:
