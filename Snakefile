@@ -1000,9 +1000,10 @@ def get_anvi_merge_profiles(wildcards):
     elif wildcards.assemblytype == 'hybrid_doublefiltered':
         HOST_LIBRARIES=list(filter(lambda x:wildcards.hostcode in x, HOSTCODES))
         source={ 'source' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{library}/PROFILE.db",    library=HOST_LIBRARIES,    assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
-        signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
         input.update(source)
-        input.update(signal)
+        if wildcards.hostcode != 'Azfil_wild':
+            signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
+            input.update(signal)
         return(input)
     return(input)
 
@@ -1024,7 +1025,7 @@ rule anvi_merge:
   shell:
     """
     rmdir {params.path}
-    anvi-merge -c {input.db} -o {params.path} {params.options} {params.name} {input.source} {input.signal} > {log.stdout} 2> {log.stderr}
+    anvi-merge -c {input.db} -o {params.path} {params.options} {params.name} {input} {input} > {log.stdout} 2> {log.stderr}
     """
 
 def get_all_bins(wildcards):
