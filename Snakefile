@@ -973,8 +973,13 @@ rule anvi_merge:
     """
 
 def get_all_bins(wildcards):
-    bins=checkpoints.metabat2.get(assemblytype='singles_doublefiltered',hostcode=wildcards.hostcode).output
-    return bins
+    bins = checkpoints.metabat2.get(**wildcards).output[0]
+    input= expand("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa",
+                  assemblytype=wildcards.assemblytype,
+                  hostcode=wildcards.hostcode,
+                  bin_nr=glob_wildcards(os.path.join(bins,"{hostcode}_bin.{bin_nr}.fa")).bin_nr
+                  )
+    return input
 
 #rule prepare_anvi-import-metabat2:
 #  input:
