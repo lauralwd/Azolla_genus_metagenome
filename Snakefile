@@ -863,6 +863,11 @@ rule anvi_setup_ncbi_cogs:
   output:
     dir=directory("references/anvi_ncbi_cogs")
   threads: 100
+  log:
+    stdout="logs/anvi-setup-cogs.stdout",
+    stderr="logs/anvi-setup-cogs.stderr"
+  conda:
+    "envs/anvio.yaml"
   shell:
     "anvi-setup-ncbi-cogs -T {threads} --just-do-it --cog-data-dir {output.dir}"
 
