@@ -877,7 +877,7 @@ rule anvi_run_ncbi_cogs:
     dir="references/anvi_ncbi_cogs" 
   output:
     touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_ncbi_cogs.done")
-  threads: 5
+  threads: 20
   params: "--sensitive"
   log:
     stdout="logs/anvi-run-cogs_{assemblytype}_{hostcode}.stdout",
