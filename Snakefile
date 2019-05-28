@@ -1034,8 +1034,8 @@ rule anvi_import_metabat2:
     "-C 'metabat2' ",
     "--contigs-mode"
   log:
-    stdout="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stdout",
-    stderr="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stderr"
+    stdout="logs/anvi-import-metabat2_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-import-metabat2_{assemblytype}_{hostcode}.stderr"
   conda:
     "envs/anvio.yaml"
   shell:
