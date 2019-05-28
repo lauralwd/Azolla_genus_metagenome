@@ -869,7 +869,7 @@ rule anvi_setup_ncbi_cogs:
   conda:
     "envs/anvio.yaml"
   shell:
-    "anvi-setup-ncbi-cogs -T {threads} --just-do-it --cog-data-dir {output.dir}"
+    "anvi-setup-ncbi-cogs -T {threads} --just-do-it --cog-data-dir {output.dir} > {log.stdout} 2> {log.stderr}"
 
 rule anvi_run_ncbi_cogs:
   input:
