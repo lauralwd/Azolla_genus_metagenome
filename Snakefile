@@ -41,7 +41,8 @@ rule all:
     expand("data/bins_{assemblytype}/{hostcode}.BAT.names.txt",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
     expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
     expand("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
-    expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db",assemblytype='hybrid_doublefiltered',hostcode=HOSTS)
+    expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
+    expand("data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab",assemblytype='hybrid_doublefiltered',hostcode=HOSTS)
 
 rule allhybridassemblies:
   input:
