@@ -436,7 +436,7 @@ rule CAT_filter_contignames_first_spades_assembly:
   log:
     expand("logs/CAT_assembly_{{assemblytype}}_{assemblyfile}filterlist_{{hostcode}}.stderr",assemblyfile='scaffolds')
   shell:
-    "cat {input} | grep Eukaryota | cut -f 1 | cut -f 1,2 -d '_'  > {output} 2> {log}"
+    "cat {input} | grep -v Eukaryota | cut -f 1 | sort -n  > {output} 2> {log}"
 
 rule BAT_filter_contignames_bins:
   input:
