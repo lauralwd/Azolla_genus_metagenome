@@ -754,12 +754,12 @@ rule jgi_summarize_script:
   shell:
     "jgi_summarize_bam_contig_depths --minContigLength 2500 --percentIdentity 80 --outputDepth {output} {input} > {log.stdout} 2> {log.stderr}"
 
-rule metabat2:
+checkpoint metabat2:
   input:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta",
     depthmatrix="data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab"
   output:
-    dir=directory("data/bins_{assemblytype}/{hostcode}/")
+    bins=directory("data/bins_{assemblytype}/{hostcode}/")
   params:
     prefix=lambda w: expand("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin",assemblytype=w.assemblytype,hostcode=w.hostcode)
   threads: 72
@@ -769,11 +769,11 @@ rule metabat2:
   shell:
     "metabat2 -t {threads} -i {input.scaffolds} -a {input.depthmatrix} -o {params.prefix} > {log.stdout} 2> {log.stderr}"
 
-checkpoint dummy_metabat2:
-  input:
-    "data/bins_{assemblytype}/{hostcode}"
-  output:
-    "data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa"
+#checkpoint dummy_metabat2:
+#  input:
+#    "data/bins_{assemblytype}/{hostcode}"
+#  output:
+#    bins="data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa"
 
 rule checkm:
   input:
