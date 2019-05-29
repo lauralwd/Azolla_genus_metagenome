@@ -915,6 +915,46 @@ rule anvi_run_ncbi_cogs:
   shell:
     "anvi-run-ncbi-cogs {params} -c {input.db} -T {threads} --cog-data-dir {input.dir} > {log.stdout} 2> {log.stderr}"
 
+rule prepare_anvi_import_cat_taxonomy:
+  input:
+    report="logs/anvi-script-reformat-fasta_{assemblytype}_{hostcode}_{assemblyfile}.report",
+    taxonomy="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab"
+  output:
+    "data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy_shortnames.tab"
+  threads: 2
+  shell:
+    """
+    echo "item_name\tcategorical_kingdom\tcategorical_phylum\tcategorical_class\tcategorical_order\tcategorical_family\tcategorical_genus\tcategorical_species\tcategorical_strain" \
+		> {output}
+    join -1 2 -2 1					\
+		<( sort -k2d {input.report} )		\
+		<(tail -n +2 {input.taxonomy}		\
+			| cut -f 1,7-			\
+			| sed 's/: [01]\.[0-9][0-9]//g'	\
+			| tr ' ' '_'			\
+			| sort -k1d			)\
+	| tr ' ' '\t'					\
+	| cut -f 2-					\
+	| sort -n					\
+		 >> {output}
+    """
+
+rule anvi_import_cat_taxonomy:
+  input:
+    taxonomy=expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_taxonomy_shortnames.tab",assemblyfile='scaffolds'),
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
+  output:
+    touch("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/CAT_taxonomy_imported.done")
+  threads: 1
+  params:
+    "--target-data-table items --just-do-it"
+  log:
+    stdout="logs/anvi-import_cat_taxonomy_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-import_cat_taxonomy_{assemblytype}_{hostcode}.stderr"
+  shell:
+    "anvi-import-misc-data {params} -p {input.profile} {input.taxonomy}  > {log.stdout} 2> {log.stderr}"
+
+
 #rule anvi_profile:
 #  input:
 #    "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
