@@ -36,12 +36,15 @@ rule all:
     "analyses/assembly_stats_and_taxonomy.tab",
     expand("data/bins_{assemblytype}/{hostcode}.BAT.names.txt",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
     expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
-    expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
+    expand("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
+    expand("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_ncbi_cogs.done",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
+    expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE_db_imported-metabat2.done",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
     "analyses/assembly-hybrid_stats_and_taxonomy.tab",
     expand("data/bins_{assemblytype}/{hostcode}.BAT.names.txt",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
     expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
     expand("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
-    expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db",assemblytype='hybrid_doublefiltered',hostcode=HOSTS)
+    expand("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_ncbi_cogs.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
+    expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE_db_imported-metabat2.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS)
 
 rule allhybridassemblies:
   input:
@@ -433,7 +436,7 @@ rule CAT_filter_contignames_first_spades_assembly:
   log:
     expand("logs/CAT_assembly_{{assemblytype}}_{assemblyfile}filterlist_{{hostcode}}.stderr",assemblyfile='scaffolds')
   shell:
-    "cat {input} | grep Eukaryota | cut -f 1 | cut -f 1,2 -d '_'  > {output} 2> {log}"
+    "cat {input} | grep -v Eukaryota | cut -f 1 | sort -n  > {output} 2> {log}"
 
 rule BAT_filter_contignames_bins:
   input:
@@ -597,9 +600,32 @@ rule shorten_scaffold_names_awk:
   shell:
    """awk -F '_' '/>NODE/{{$0=">NODE_"$2}}1' {input} > {output}"""
 
+rule CAT_filter_unclassified_and_eukaryotic_scaffolds_for_anvio:
+  input:
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_taxonomy.tab",assemblyfile='scaffolds')
+  output:
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_minus-unclassified_minus-eukaryotic_filterlist.txt",assemblyfile='scaffolds')
+  threads: 1
+  log:
+    expand("logs/CAT_assembly_{{assemblytype}}_{assemblyfile}filterlist_{{hostcode}}.stderr",assemblyfile='scaffolds')
+  shell:
+    "cat {input} | grep -v Eukaryota | grep -v unclassified | grep -v '#' | cut -f 1 | sort -n  > {output} 2> {log}"
+
+rule filter_unclassfied_filter_eukaryotic:
+  input:
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta",
+    filterlist=expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_minus-unclassified_minus-eukaryotic_filterlist.txt",assemblyfile='scaffolds')
+  output:
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_minus-unclassified_minus-eukaryotic.fasta"
+  log:
+    stdout="logs/filter-final-fasta-eukaryotic-unclassfied_{assemblytype}_{hostcode}_{assemblyfile}.stdout",
+    stderr="logs/filter-final-fasta-eukaryotic-unclassified_{assemblytype}_{hostcode}_{assemblyfile}.stderr"    
+  shell:
+    "samtools faidx {input.scaffolds} -o {output.scaffolds} -r {input.filterlist} > {log.stdout} 2> {log.stderr}"
+
 rule shorten_scaffold_names_anvi:
   input:
-    scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta"
+    scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_minus-unclassified_minus-eukaryotic.fasta"
   output:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_short_names.fasta"
   log:
@@ -627,10 +653,10 @@ rule bwa_index_assembly_scaffolds:
 
 import os.path
 def get_binning_reads(wildcards):
+    index={'index': expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb']) }
     if wildcards.assemblytype != 'hybrid_doublefiltered' :
         pathpe=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed_paired.R1.fastq.gz")
         pathse=("data/sequencing_binning_signals/" + wildcards.binningsignal + ".trimmed.fastq.gz")
-        index={'index': expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb']) }
         if os.path.isfile(pathpe) ==  True :
             dict = {'reads' :  expand("data/sequencing_binning_signals/{binningsignal}.trimmed_paired.R{PE}.fastq.gz", PE=[1,2],binningsignal=wildcards.binningsignal) }
         elif os.path.isfile(pathse) == True :
@@ -650,14 +676,16 @@ def get_binning_reads(wildcards):
                 return dict
             dict.update(index)
         elif len(list(filter(lambda x:wildcards.binningsignal in x, BINNINGSIGNALS))) == 0 :
-            index={'index': expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb']) }
             dict = { 'reads' : expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=DIRECTIONS,hostcode=wildcards.binningsignal) }
+        dict.update(index)
         return dict
+    dict.update(index)
     return dict
 
 rule backmap_bwa_mem:
   input:
     unpack(get_binning_reads),
+    expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
   params:
     index=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
@@ -753,12 +781,12 @@ rule jgi_summarize_script:
   shell:
     "jgi_summarize_bam_contig_depths --minContigLength 2500 --percentIdentity 80 --outputDepth {output} {input} > {log.stdout} 2> {log.stderr}"
 
-rule metabat2:
+checkpoint metabat2:
   input:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta",
     depthmatrix="data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab"
   output:
-    dir=directory("data/bins_{assemblytype}/{hostcode}/")
+    bins=directory("data/bins_{assemblytype}/{hostcode}/")
   params:
     prefix=lambda w: expand("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin",assemblytype=w.assemblytype,hostcode=w.hostcode)
   threads: 72
@@ -768,11 +796,11 @@ rule metabat2:
   shell:
     "metabat2 -t {threads} -i {input.scaffolds} -a {input.depthmatrix} -o {params.prefix} > {log.stdout} 2> {log.stderr}"
 
-checkpoint dummy_metabat2:
-  input:
-    "data/bins_{assemblytype}/{hostcode}"
-  output:
-    "data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa"
+#checkpoint dummy_metabat2:
+#  input:
+#    "data/bins_{assemblytype}/{hostcode}"
+#  output:
+#    bins="data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa"
 
 rule checkm:
   input:
@@ -855,6 +883,34 @@ rule anvi_run_hmms:
     "envs/anvio.yaml"
   shell:
     "anvi-run-hmms -c {input} -T {threads} > {log.stdout} 2> {log.stderr}"
+
+rule anvi_setup_ncbi_cogs:
+  output:
+    dir=directory("references/anvi_ncbi_cogs")
+  threads: 100
+  log:
+    stdout="logs/anvi-setup-cogs.stdout",
+    stderr="logs/anvi-setup-cogs.stderr"
+  conda:
+    "envs/anvio.yaml"
+  shell:
+    "anvi-setup-ncbi-cogs -T {threads} --just-do-it --cog-data-dir {output.dir} > {log.stdout} 2> {log.stderr}"
+
+rule anvi_run_ncbi_cogs:
+  input:
+    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
+    dir="references/anvi_ncbi_cogs" 
+  output:
+    touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_ncbi_cogs.done")
+  threads: 20
+  params: "--sensitive"
+  log:
+    stdout="logs/anvi-run-cogs_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-run-cogs_{assemblytype}_{hostcode}.stderr"
+  conda:
+    "envs/anvio.yaml"
+  shell:
+    "anvi-run-ncbi-cogs {params} -c {input.db} -T {threads} --cog-data-dir {input.dir} > {log.stdout} 2> {log.stderr}"
 
 #rule anvi_profile:
 #  input:
@@ -944,9 +1000,10 @@ def get_anvi_merge_profiles(wildcards):
     elif wildcards.assemblytype == 'hybrid_doublefiltered':
         HOST_LIBRARIES=list(filter(lambda x:wildcards.hostcode in x, HOSTCODES))
         source={ 'source' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{library}/PROFILE.db",    library=HOST_LIBRARIES,    assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
-        signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
         input.update(source)
-        input.update(signal)
+        if wildcards.hostcode != 'Azfil_wild':
+            signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
+            input.update(signal)
         return(input)
     return(input)
 
@@ -968,26 +1025,34 @@ rule anvi_merge:
   shell:
     """
     rmdir {params.path}
-    anvi-merge -c {input.db} -o {params.path} {params.options} {params.name} {input.source} {input.signal} > {log.stdout} 2> {log.stderr}
+    anvi-merge -c {input.db} -o {params.path} {params.options} {params.name} {input} {input} > {log.stdout} 2> {log.stderr}
     """
 
 def get_all_bins(wildcards):
-    bins=checkpoints.metabat2.get(assemblytype='singles_doublefiltered',hostcode=wildcards.hostcode).output
-    return bins
+    bins = checkpoints.metabat2.get(**wildcards).output[0]
+    input= expand("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa",
+                  assemblytype=wildcards.assemblytype,
+                  hostcode=wildcards.hostcode,
+                  bin_nr=glob_wildcards(os.path.join(bins,"{hostcode}_bin.{bin_nr}.fa")).bin_nr
+                  )
+    return input
 
-#rule prepare_anvi-import-metabat2:
-#  input:
-#    get_all_bins
-#  output:
-#    "data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab",
-#  log:
-#    "logs/prepare_anvi-import-metabat2.stderr
-#  shell:
-#    """
-#    echo -e "bin\theader" > {output.binlist}
-#    for   f in ( {input} )
-#    do    cat $f | grep '>' | sed "s/^/bin_{bin_nr}\t/g" >> {output.binlist} 2> {log}
-#    """
+rule prepare_anvi_import_metabat2:
+  input:
+    get_all_bins
+  output:
+    "data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab"
+  log:
+    "logs/prepare_anvi-import-metabat2-{assemblytype}-{hostcode}.stderr"
+  threads: 3
+  shell:
+    """
+    bins=( $(echo "{input}" | tr ' ' '\n' ) )
+    for   f in ${{bins[@]}}
+    do    nr=$(echo $f | rev | cut -f 2 -d '.' )
+          cat $f | grep '>' | tr -d '>' | sed "s/$/\tbin$nr/g"  >> {output} 2> {log}
+    done
+    """
 
 rule anvi_import_metabat2:
   input:
@@ -1000,8 +1065,8 @@ rule anvi_import_metabat2:
     "-C 'metabat2' ",
     "--contigs-mode"
   log:
-    stdout="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stdout",
-    stderr="logs/anvi-merge-profile_{assemblytype}_{hostcode}.stderr"
+    stdout="logs/anvi-import-metabat2_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-import-metabat2_{assemblytype}_{hostcode}.stderr"
   conda:
     "envs/anvio.yaml"
   shell:
