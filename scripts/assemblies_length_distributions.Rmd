@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
 ```
  
-# import libraries and data
+# import libraries and data for single library assemblies
 ```{r import libraries and data}
 #setwd
 setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
@@ -182,15 +182,201 @@ length_dist <- length_dist + scale_x_log10()
 length_dist <- length_dist + scale_y_log10()
 length_dist <- length_dist + labs(x='contig length',y='contig coverage')
 length_dist <- length_dist + theme_classic()
+length_dist <- length_dist + guides(col=guide_legend(ncol=5))
+length_dist <- length_dist + theme(legend.position = "bottom",
+                                   strip.text.x = element_text(angle = 80),
+                                   axis.text.x = element_text(angle = 80,hjust = 1))
+#length_dist
+```
+
+
+```{r}
+ggsave(filename = "./coverage_overlength_distributions_per_assembly_order.png",
+       plot = length_dist,
+       device = 'png',
+       dpi = 500,
+       units = 'cm',
+       width = 29.7,
+       height = 42 )
+```
+
+
+# import libraries and data for hybrid assemblies
+```{r import libraries and data hybrid}
+#setwd
+setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
+library(data.table)
+library(ggplot2)
+header <-  c('assembly', 'sample', 'scaffolded', 'node',    'length',  'coverage', 'ORFs',    'ORFs_classified', 'superkingdom', 'phylum', 'class',  'order',  'family', 'genus', 'species')
+classes <- c('factor',   'factor', 'factor',     'numeric', 'numeric', 'numeric',  'numeric', 'numeric',         'factor',       'factor', 'factor', 'factor', 'factor', 'factor', 'factor')
+metrics_hybrid <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly-hybrid_stats_and_taxonomy.tab",
+                 sep = '\t',
+                 fill = TRUE,
+                 header = F,
+                 stringsAsFactors = T,
+                 data.table = T,
+                 col.names = header,
+                 colClasses = classes
+)
+rm(classes,header)
+```
+
+
+# Assembly samples
+In this stats and taxonomy file there is information about `r length(levels(metrics$assembly))` types of assemblies being: `r levels(metrics$assembly)`
+Irespective these assembly types there are `r length(levels(metrics$sample))` samples or 'hostcodes' as they are called in the Snakemake workflow.
+
+# Assembly length
+Let's plot the length distribution for the scaffolds and contigs assembled in the different assemblies. Contigs or scaffolds shorter than 2.5kbp are discarded by default in metabat2, the red vertical line indicates this separation.
+```{r lengthplot_linear_hybrid, fig.height = 5, fig.width = 10}
+lengthplot <- ggplot (metrics_hybrid,aes(x=length,col=scaffolded,alpha=.4))
+lengthplot <- lengthplot + geom_freqpoly(bins=50)
+lengthplot <- lengthplot + facet_grid(assembly ~ sample)
+lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
+lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
+lengthplot <- lengthplot + theme_classic()
+lengthplot <- lengthplot + labs(y='count',x='sequence length')
+lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
+lengthplot <- lengthplot + theme(legend.position = "bottom",
+                                 strip.text.x = element_text(angle = 80),
+                                 axis.text.x = element_text(angle = 80,hjust = 1))
+lengthplot
+```
+
+the double log10 axis slightly exagerates the amount of sequencing lost, ploted in a linear x-axis it is more fair to judge.
+```{r lengthplot_log10_hybrid, fig.height = 5, fig.width = 10}
+lengthplot <- ggplot(metrics_hybrid,aes(x=length,col=scaffolded,alpha=.4))
+lengthplot <- lengthplot + geom_freqpoly(bins=50)
+lengthplot <- lengthplot + facet_grid(assembly ~ sample)
+lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
+#lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
+lengthplot <- lengthplot + theme_classic()
+lengthplot <- lengthplot + labs(y='count',x='sequence length')
+lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
+lengthplot <- lengthplot + theme(legend.position = "bottom",
+                                 strip.text.x = element_text(angle = 80),
+                                 axis.text.x = element_text(angle = 80,hjust = 1))
+lengthplot
+```
+
+
+Create a 2500+ subset.
+
+```{r subset to 2500 hybrid}
+metrics2500_hybrid <- metrics_hybrid[length >= 2500]
+```
+
+And plot:
+
+```{r lengthboxplot_2500_log10_hybrid, fig.height = 5, fig.width = 8}
+lenghtbox <- ggplot(metrics2500_hybrid,aes(y=length,x=sample,col=scaffolded,alpha=.4))
+lenghtbox <- lenghtbox + geom_boxplot()
+lenghtbox <- lenghtbox + facet_grid(assembly ~ . )
+lenghtbox <- lenghtbox + theme_classic()
+lenghtbox <- lenghtbox + scale_y_log10()
+lenghtbox <- lenghtbox + theme(axis.text.x = element_text(angle = 45,hjust = 1))
+lenghtbox
+```
+
+```{r lengthboxplot_2500+_perkingdom_hybrid, fig.height = 10, fig.width = 10}
+lenghtbox <- ggplot(metrics2500_hybrid,
+                    aes(y=length,x=sample,col=sample,alpha=.4)
+                    )
+lenghtbox <- lenghtbox + facet_grid(scaffolded ~ superkingdom)
+#lenghtbox <- lenghtbox + geom_violin()
+lenghtbox <- lenghtbox + geom_boxplot()
+
+lenghtbox <- lenghtbox + theme_classic()
+lenghtbox <- lenghtbox + scale_y_log10()
+lenghtbox <- lenghtbox + geom_vline(xintercept =0)
+lenghtbox <- lenghtbox + theme(axis.text.x=element_text(angle = 90,hjust = 1),legend.position = "bottom")
+lenghtbox
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Taxonomy
+
+```{r tax_dotplot_kingdom_hybrid, fig.height = 8, fig.width = 8 }
+length_dist <- ggplot(metrics2500_hybrid[scaffolded == 'scaffolds'],aes(x=length,y=coverage,size=length,alpha=.001,col=superkingdom))
+length_dist <- length_dist + facet_grid(assembly ~ sample,scales = 'free_x')
+length_dist <- length_dist + geom_point()
+length_dist <- length_dist + scale_x_log10()
+length_dist <- length_dist + scale_y_log10()
+length_dist <- length_dist + labs(x='contig length',y='contig coverage')
+length_dist <- length_dist + theme_classic()
+length_dist <- length_dist + theme(legend.position = "bottom",
+                                   strip.text.x = element_text(angle = 80),
+                                   axis.text.x = element_text(angle = 80,hjust = 1))
+length_dist
+```
+And save to a png file
+```{r tax_dotplot_kingdom_png_hybrid}
+ggsave(filename = "./coverage_hybrid_overlength_distributions_per_assembly_kingdom.png",
+       plot = length_dist,
+       device = 'png',
+       dpi = 500,
+       units = 'cm',
+       width = 42,
+       height = 29.7 )
+```
+
+Take out all eukaryota and plot the remaing phyla
+
+```{r tax_dotplot_phylum_hybrid, fig.height = 10, fig.width = 8 }
+length_dist <- ggplot(metrics2500_hybrid[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota'],aes(x=length,y=coverage,size=length,alpha=.001,col=phylum))
+length_dist <- length_dist + facet_grid(assembly ~ sample,scales = 'free_x')
+length_dist <- length_dist + geom_point()
+length_dist <- length_dist + scale_x_log10()
+length_dist <- length_dist + scale_y_log10()
+length_dist <- length_dist + labs(x='contig length',y='contig coverage')
+length_dist <- length_dist + theme_classic()
 length_dist <- length_dist + theme(legend.position = "bottom",
                                    strip.text.x = element_text(angle = 80),
                                    axis.text.x = element_text(angle = 80,hjust = 1))
 length_dist
 ```
 
+And save to a png file
+```{r}
+ggsave(filename = "./coverage_hybrid_overlength_distributions_per_assembly_phylum.png",
+       plot = length_dist,
+       device = 'png',
+       dpi = 500,
+       units = 'cm',
+       width = 42,
+       height = 29.7 )
+```
+
+
+```{r tax_dotplot_order_hybrid, fig.height = 10, fig.width = 10 }
+length_dist <- ggplot(metrics2500_hybrid[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota'],aes(x=length,y=coverage,size=length,alpha=.001,col=order))
+length_dist <- length_dist + facet_grid(. ~ sample,scales = 'free_x')
+length_dist <- length_dist + geom_point()
+length_dist <- length_dist + scale_x_log10()
+length_dist <- length_dist + scale_y_log10()
+length_dist <- length_dist + labs(x='contig length',y='contig coverage')
+length_dist <- length_dist + theme_classic()
+length_dist <- length_dist + guides(col=guide_legend(ncol=5))
+length_dist <- length_dist + theme(legend.position = "bottom")
+length_dist
+```
+
 
 ```{r}
-ggsave(filename = "./coverage_overlength_distributions_per_assembly_order.png",
+ggsave(filename = "./coverage_hybrid_overlength_distributions_per_assembly_order.png",
        plot = length_dist,
        device = 'png',
        dpi = 500,
