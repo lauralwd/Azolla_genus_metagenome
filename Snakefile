@@ -36,14 +36,12 @@ rule all:
     "analyses/assembly_stats_and_taxonomy.tab",
     expand("data/bins_{assemblytype}/{hostcode}.BAT.names.txt",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
     expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
-    expand("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
     expand("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_ncbi_cogs.done",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
     expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/CAT_taxonomy_imported.done",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
     expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE_db_imported-metabat2.done",assemblytype='singles_doublefiltered',hostcode=HOSTCODES),
     "analyses/assembly-hybrid_stats_and_taxonomy.tab",
     expand("data/bins_{assemblytype}/{hostcode}.BAT.names.txt",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
     expand("data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
-    expand("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
     expand("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_ncbi_cogs.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
     expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/CAT_taxonomy_imported.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
     expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE_db_imported-metabat2.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS)
@@ -799,12 +797,6 @@ checkpoint metabat2:
   shell:
     "metabat2 -t {threads} -i {input.scaffolds} -a {input.depthmatrix} -o {params.prefix} > {log.stdout} 2> {log.stderr}"
 
-#checkpoint dummy_metabat2:
-#  input:
-#    "data/bins_{assemblytype}/{hostcode}"
-#  output:
-#    bins="data/bins_{assemblytype}/{hostcode}/{hostcode}_bin.{bin_nr}.fa"
-
 rule checkm:
   input:
     "data/bins_{assemblytype}/{hostcode}"
@@ -954,31 +946,6 @@ rule anvi_import_cat_taxonomy:
   shell:
     "anvi-import-misc-data {params} -p {input.profile} {input.taxonomy}  > {log.stdout} 2> {log.stderr}"
 
-
-#rule anvi_profile:
-#  input:
-#    "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
-#    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
-#    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",
-#    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam.bai"
-#  output:
-#    profile= "data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{hostcode}/PROFILE.db"
-#  params:
-#    length="--min-contig-length 2500",
-#    name=lambda w: expand(" -S 'assembly_{assemblytype}_sample_{hostcode}_binningsignal_{hostcode}' ", assemblytype=w.assemblytype , hostcode=w.hostcode.replace('.','_')),
-#    path= lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{hostcode}", assemblytype=w.assemblytype , hostcode=w.hostcode)
-#  log:
-#    stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stdout",
-#    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{hostcode}.stderr"
-#  threads: 100
-#  conda:
-#    "envs/anvio.yaml"
-#  shell:
-#    """
-#    rmdir {params.path}
-#    anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
-#   """
-
 rule anvi_profile_binningsignal:
   input:
     "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
@@ -1005,32 +972,6 @@ rule anvi_profile_binningsignal:
     fi
     anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
     """
-
-#ruleorder: anvi_profile_binningsignal > anvi_profile_binningsignal_library
-#
-#rule anvi_profile_binningsignal_library:
-#  input:
-#    "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
-#    db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
-#    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{library}.sorted.bam",
-#    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{library}.sorted.bam.bai"
-#  output:
-#    profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{library}/PROFILE.db"
-#  params:
-#    length="--min-contig-length 2500",
-#    name=lambda w: expand("-S assembly_{assemblytype}_sample_{hostcode}_binningsignal_{library}", assemblytype=w.assemblytype , hostcode=w.hostcode, binningsignal=w.binningsignal.replace('.','_')),
-#    path=lambda w: expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}_{library}", assemblytype=w.assemblytype , hostcode=w.hostcode, library=w.library)
-#  log:
-#    stdout="logs/anvi-profile_{assemblytype}_{hostcode}_{library}.stdout",
-#    stderr="logs/anvi-profile_{assemblytype}_{hostcode}_{library}.stderr"
-#  threads: 100
-#  conda:
-#    "envs/anvio.yaml"
-#  shell:
-#    """
-#    rmdir {params.path}
-#    anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
-#    """
 
 def get_anvi_merge_profiles(wildcards):
     input={}
