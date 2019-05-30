@@ -1001,7 +1001,7 @@ rule anvi_profile_binningsignal:
   shell:
     """
     if [ -d {params.path} ]
-    then rmdir {params.path} > {log.preperr} 2>&1
+    then rm -rf {params.path} > {log.preperr} 2>&1
     fi
     anvi-profile -c {input.db} -i {input.bam} -o {params.path} -T {threads} {params.length} {params.name} > {log.stdout} 2> {log.stderr}
     """
