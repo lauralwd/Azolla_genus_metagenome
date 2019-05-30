@@ -46,64 +46,6 @@ rule all:
     expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/CAT_taxonomy_imported.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
     expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE_db_imported-metabat2.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS)
 
-
-rule allhybridassemblies:
-  input:
-    contigs=expand("data/assembly_{assemblytype}/{host}/contigs.fasta",assemblytype='hybrid_doublefiltered',host=HOSTS)
-rule alltaxtab:
-  input:
-    expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
-rule allcheckm:
-  input:
-    expand("data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
-rule allbat:
-  input:
-    expand("data/bins_{assemblytype}/{hostcode}.BAT.bin2classification.txt",assemblytype='singles_hostfiltered',hostcode=HOSTCODES)
-
-rule allsecondcat:
-  input:
-    expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",assemblytype='singles_doublefiltered',hostcode=HOSTCODES,assemblyfile=ASSEMBLYFILES)
-rule allfirstcat:
-  input:
-    expand("data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_filterlist.txt",assemblyfile='scaffolds',hostcode=HOSTCODES,assemblytype='singles_hostfiltered')
-rule allfastqc:
-  input:
-    expand("analyses/analyses_reads/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
-rule allfastqc_trimmed:
-  input:
-    expand("analyses/analyses_reads_trimmed/{hostcode}_{PE}", hostcode=HOSTCODES, PE=DIRECTIONS)
-rule allfiltered:
-  input:
-    expand("data/sequencing_genomic_trimmed_filtered/{hostcode}.{PE}.fastq.gz",hostcode=HOSTCODES,PE=DIRECTIONS)
-rule alldoublefiltered:
-  input:
-    expand("data/sequencing_doublefiltered/{hostcode}/{hostcode}.{PE}.fastq.gz",hostcode=HOSTCODES,PE=DIRECTIONS)
-rule allfirstassemblies:
-  input:
-    expand("data/assembly_singles_hostfiltered/{hostcode}/contigs.fasta",hostcode=HOSTCODES)
-rule allreadscorrected:
-  input:
-    expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",hostcode=HOSTCODES, PE=DIRECTIONS)
-rule allsecondassemblies:
-  input:
-    expand("data/assembly_{assemblytype}/{hostcode}/contigs.fasta",hostcode=HOSTCODES,assemblytype='singles_doublefiltered')
-rule allbackmapped:
-  input:
-    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam",       binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
-
-rule allsorted:
-  input:
-    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
-    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
-
-rule allsourcemapped:
-  input:
-    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
-rule allsourcesorted:
-  input:
-    expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES)
-
-
 ## Read QC stuff
 rule fastqc_raw_data:
   input:
