@@ -101,6 +101,7 @@ rule CAT_customise:
     pigz -c  {input.custom_proteins} >> {output.nr}
     grep '>' {input.custom_proteins} | tr -d '>' | awk -v OFS='\t' '{{print $0,  $0, 84609, 0}}' | pigz -c  >> {output.tf_id}
     """
+
 rule CAT_build:
   input:
     db="references/CAT_customised_20190108/CAT_database_customised",
