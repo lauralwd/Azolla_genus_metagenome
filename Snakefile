@@ -956,7 +956,9 @@ rule anvi_merge:
     "envs/anvio.yaml"
   shell:
     """
-    rmdir {params.path}
+    if [ -d {params.path} ]
+    then rm -rf {params.path}
+    fi
     anvi-merge -c {input.db} -o {params.path} {params.options} {params.name} {input} {input} > {log.stdout} 2> {log.stderr}
     """
 
