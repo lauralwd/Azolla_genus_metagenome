@@ -755,7 +755,12 @@ rule checkm:
   conda:
     "envs/checkm.yaml"
   shell:
-    "checkm lineage_wf -t {threads} {params.options} {input} {params.dir} -f {output.table} > {log.stdout} 2> {log.stderr}"
+    """
+    if [ -d {params.dir} ]
+    then rm -rf {params.dir}
+    fi
+    checkm lineage_wf -t {threads} {params.options} {input} {params.dir} -f {output.table} > {log.stdout} 2> {log.stderr}
+    """
 
 rule CAT_bins:
   input:
