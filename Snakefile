@@ -864,7 +864,7 @@ rule prepare_anvi_import_cat_taxonomy:
   threads: 2
   shell:
     """
-    echo "item_name\tcategorical_kingdom\tcategorical_phylum\tcategorical_class\tcategorical_order\tcategorical_family\tcategorical_genus\tcategorical_species\tcategorical_strain" \
+    echo "item_name\tcategorical_kingdom\tcategorical_phylum\tcategorical_class\tcategorical_order\tcategorical_family\tcategorical_genus\tcategorical_species" \
 		> {output}
     join -1 2 -2 1					\
 		<( sort -k2d {input.report} )		\
