@@ -858,25 +858,40 @@ rule anvi_run_ncbi_cogs:
 rule prepare_anvi_import_cat_taxonomy:
   input:
     report="logs/anvi-script-reformat-fasta_{assemblytype}_{hostcode}_{assemblyfile}.report",
-    taxonomy="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab"
+    taxonomy="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",
+    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
   output:
     "data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy_shortnames.tab"
   threads: 2
+  conda:
+    "envs/anvio.yaml"
+  log:
+    "logs/prepare-anvi-import-cat-taxonomy_{assemblytype}_{hostcode}_{assemblyfile}.stderr"
   shell:
     """
     echo "item_name\tcategorical_kingdom\tcategorical_phylum\tcategorical_class\tcategorical_order\tcategorical_family\tcategorical_genus\tcategorical_species" \
-		> {output}
-    join -1 2 -2 1					\
-		<( sort -k2d {input.report} )		\
-		<(tail -n +2 {input.taxonomy}		\
-			| cut -f 1,7-			\
-			| sed 's/: [01]\.[0-9][0-9]//g'	\
-			| tr ' ' '_'			\
-			| sort -k1d			)\
+		> {output} 2> {log}
+    join -1 2 -2 1						\
+		<( sort -k2d {input.report} )			\
+		<(tail -n +2 {input.taxonomy}			\
+			| cut -f 1,7-				\
+			| sed 's/: [01]\.[0-9][0-9]//g'		\
+			| tr ' ' '_'				\
+			| sort -k1d				)\
 	| tr ' ' '\t'					\
 	| cut -f 2-					\
 	| sort -n					\
-		 >> {output}
+		 >> {output}.tmp 2>> {log}
+    join -1 1 -2 1 --check-order -a 1						\
+		<(anvi-get-split-coverages --list-splits -p {input.profile}	\
+			2>> {log}						\
+			| sed 's/_split/\t_split/g' | sort -k1d)		\
+		<( sort -k1d {output}.tmp )					\
+		| tr ' ' '\t'							\
+		| sort -k1n,2n							\
+		| sed 's/\t_split/_split/g'					\
+			>> {output}  2>> {log}
+    rm {output}.tmp 2>> {log}
     """
 
 rule anvi_import_cat_taxonomy:
