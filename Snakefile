@@ -888,6 +888,8 @@ rule anvi_import_cat_taxonomy:
   threads: 1
   params:
     "--target-data-table items --just-do-it"
+  conda:
+    "envs/anvio.yaml"
   log:
     stdout="logs/anvi-import_cat_taxonomy_{assemblytype}_{hostcode}.stdout",
     stderr="logs/anvi-import_cat_taxonomy_{assemblytype}_{hostcode}.stderr"
