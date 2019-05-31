@@ -926,14 +926,14 @@ rule anvi_profile_binningsignal:
 def get_anvi_merge_profiles(wildcards):
     input={}
     if wildcards.assemblytype != 'hybrid_doublefiltered':
-        source={ 'source' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{hostcode}/PROFILE.db",hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype) }
+        source={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{hostcode}/PROFILE.db",hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype) }
         signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype) }
         input.update(source)
         input.update(signal)
         return(input)
     elif wildcards.assemblytype == 'hybrid_doublefiltered':
         HOST_LIBRARIES=list(filter(lambda x:wildcards.hostcode in x, HOSTCODES))
-        source={ 'source' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{library}/PROFILE.db",    library=HOST_LIBRARIES,    assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
+        source={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{library}/PROFILE.db",    library=HOST_LIBRARIES,    assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
         input.update(source)
         if wildcards.hostcode != 'Azfil_wild':
             signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
@@ -961,7 +961,7 @@ rule anvi_merge:
     if [ -d {params.path} ]
     then rm -rf {params.path}
     fi
-    anvi-merge -c {input.db} -o {params.path} {params.options} {params.name} {input} {input} > {log.stdout} 2> {log.stderr}
+    anvi-merge -c {input.db} -o {params.path} {params.options} {params.name} {input.signal} > {log.stdout} 2> {log.stderr}
     """
 
 def get_all_bins(wildcards):
