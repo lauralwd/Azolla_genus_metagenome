@@ -87,7 +87,7 @@ rule CAT_download:
 rule CAT_customise:
   input:
     db="references/CAT_prepare_20190108/2019-01-08_CAT_database/2019-01-08.nr.gz",
-    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy/",
+    tf="references/CAT_prepare_20190108/2019-01-08_taxonomy",
     custom_proteins="references/host_genome/host_proteins.fasta"
   output:
     nr="references/CAT_customised_20190108/CAT_database_customised/2019-1-08.nr.gz",
