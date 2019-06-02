@@ -730,7 +730,7 @@ checkpoint metabat2:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta",
     depthmatrix="data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab"
   output:
-    bins=directory("data/bins_{assemblytype}/{hostcode}/")
+    bins=directory("data/bins_{assemblytype}/{hostcode}")
   params:
     prefix=lambda w: expand("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin",assemblytype=w.assemblytype,hostcode=w.hostcode)
   threads: 72
