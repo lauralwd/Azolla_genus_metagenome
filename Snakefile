@@ -78,7 +78,7 @@ rule download_azolla_proteins:
 
 rule CAT_download:
   output:
-    db=temp("references/CAT_prepare_20190108/2019-01-08_CAT_database"),
+#    db=temp("references/CAT_prepare_20190108/2019-01-08_CAT_database"),
     tf=temp("references/CAT_prepare_20190108/2019-01-08_taxonomy"),
     nr=temp("references/CAT_prepare_20190108/2019-01-08_CAT_database/2019-01-08.nr.gz")
   shell:
