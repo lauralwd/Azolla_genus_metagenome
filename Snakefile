@@ -231,12 +231,12 @@ rule create_host_filter_bt2_index:
 ## data processing rules
 rule trimmomatic_genomic_sequencing:
   input:
-    expand("data/sequencing_genomic/{{hostcode}}_{PE}.fastq.gz", PE=DIRECTIONS)
+    expand("data/sequencing_genomic/{{hostcode}}_R{PE}.fastq.gz", PE=DIRECTIONS)
   params:
     "LEADING:5 TRAILING:5 SLIDINGWINDOW:4:15 MINLEN:36"
   output:
-    p1=temp("data/sequencing_genomic_trimmed/{hostcode}_1.fastq.gz"),
-    p2=temp("data/sequencing_genomic_trimmed/{hostcode}_2.fastq.gz")
+    p1=temp("data/sequencing_genomic_trimmed/{hostcode}_R1.fastq.gz"),
+    p2=temp("data/sequencing_genomic_trimmed/{hostcode}_R2.fastq.gz")
   threads: 4
   resources: io=1
   log:
@@ -251,8 +251,8 @@ rule filter_for_host:
   input:
     expand("references/host_genome/host_filter_bt2index/host_filter.{i}.bt2",i=range(1,4)),
     expand("references/host_genome/host_filter_bt2index/host_filter.rev.{i}.bt2",i=range(1,2)),
-    s1=expand("data/sequencing_genomic_trimmed/{{hostcode}}_{PE}.fastq.gz",PE=1),
-    s2=expand("data/sequencing_genomic_trimmed/{{hostcode}}_{PE}.fastq.gz",PE=2)
+    s1=expand("data/sequencing_genomic_trimmed/{{hostcode}}_R{PE}.fastq.gz",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed/{{hostcode}}_R{PE}.fastq.gz",PE=2)
   params:
     opts="--very-fast",
     i="references/host_genome/host_filter_bt2index/host_filter",
