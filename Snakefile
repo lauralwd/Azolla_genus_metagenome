@@ -91,8 +91,8 @@ rule CAT_customise:
     custom_proteins="references/host_genome/host_proteins.fasta"
   output:
     nr="references/CAT_customised_20190108/CAT_database_customised/2019-1-08.nr.gz",
-    db="references/CAT_customised_20190108/CAT_database_customised",
-    tf=   "references/CAT_customised_20190108/taxonomy_customised",
+    db=directory("references/CAT_customised_20190108/CAT_database_customised"),
+    tf=directory("references/CAT_customised_20190108/taxonomy_customised"),
     tf_id="references/CAT_customised_20190108/taxonomy_customised/2019-01-08.prot.accession2taxid.gz"
   shell:
     """
