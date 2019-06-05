@@ -481,12 +481,12 @@ rule spades_second_assembly:
     options="--meta --only-assembler",
     basedir=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/",assemblytype='singles_doublefiltered',hostcode=w.hostcode)
   output:
-    contigs=expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_doublefiltered'),
-    scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/scaffolds.fasta",assemblytype='singles_doublefiltered'),
-    graph=expand("data/assembly_{assemblytype}/{{hostcode}}/assembly_graph.fastg",assemblytype='singles_doublefiltered'),
-    graph_scaffolds=expand("data/assembly_{assemblytype}/{{hostcode}}/assembly_graph_with_scaffolds.gfa",assemblytype='singles_doublefiltered'),
-    datasetyaml=expand("data/assembly_{assemblytype}/{{hostcode}}/input_dataset.yaml",assemblytype='singles_doublefiltered'),
-    paramfile=expand("data/assembly_{assemblytype}/{{hostcode}}/params.txt",assemblytype='singles_doublefiltered')
+    contigs=protected(expand("data/assembly_{assemblytype}/{{hostcode}}/contigs.fasta",assemblytype='singles_doublefiltered')),
+    scaffolds=protected(expand("data/assembly_{assemblytype}/{{hostcode}}/scaffolds.fasta",assemblytype='singles_doublefiltered')),
+    graph=protected(expand("data/assembly_{assemblytype}/{{hostcode}}/assembly_graph.fastg",assemblytype='singles_doublefiltered')),
+    graph_scaffolds=protected(expand("data/assembly_{assemblytype}/{{hostcode}}/assembly_graph_with_scaffolds.gfa",assemblytype='singles_doublefiltered')),
+    datasetyaml=protected(expand("data/assembly_{assemblytype}/{{hostcode}}/input_dataset.yaml",assemblytype='singles_doublefiltered')),
+    paramfile=protected(expand("data/assembly_{assemblytype}/{{hostcode}}/params.txt",assemblytype='singles_doublefiltered'))
   threads: 100
   shadow: "shallow"
   resources:
@@ -1087,12 +1087,12 @@ rule SPADES_hybrid_assembly:
   input:
     unpack(get_input_hybrid_assemblies)
   output:
-    contigs=expand("data/assembly_{assemblytype}/{{host}}/contigs.fasta",assemblytype='hybrid_doublefiltered'),
-    scaffolds=expand("data/assembly_{assemblytype}/{{host}}/scaffolds.fasta",assemblytype='hybrid_doublefiltered'),
-    graph=expand("data/assembly_{assemblytype}/{{host}}/assembly_graph.fastg",assemblytype='hybrid_doublefiltered'),
-    graph_scaffolds=expand("data/assembly_{assemblytype}/{{host}}/assembly_graph_with_scaffolds.gfa",assemblytype='hybrid_doublefiltered'),
-    datasetyaml=expand("data/assembly_{assemblytype}/{{host}}/input_dataset.yaml",assemblytype='hybrid_doublefiltered'),
-    paramfile=expand("data/assembly_{assemblytype}/{{host}}/params.txt",assemblytype='hybrid_doublefiltered')
+    contigs=protected(expand("data/assembly_{assemblytype}/{{host}}/contigs.fasta",assemblytype='hybrid_doublefiltered')),
+    scaffolds=protected(expand("data/assembly_{assemblytype}/{{host}}/scaffolds.fasta",assemblytype='hybrid_doublefiltered')),
+    graph=protected(expand("data/assembly_{assemblytype}/{{host}}/assembly_graph.fastg",assemblytype='hybrid_doublefiltered')),
+    graph_scaffolds=protected(expand("data/assembly_{assemblytype}/{{host}}/assembly_graph_with_scaffolds.gfa",assemblytype='hybrid_doublefiltered')),
+    datasetyaml=protected(expand("data/assembly_{assemblytype}/{{host}}/input_dataset.yaml",assemblytype='hybrid_doublefiltered')),
+    paramfile=protected(expand("data/assembly_{assemblytype}/{{host}}/params.txt",assemblytype='hybrid_doublefiltered'))
   params:
     options="--meta --only-assembler",
     basedir=lambda w: expand("data/assembly_{assemblytype}/{host}/",assemblytype='hybrid_doublefiltered',host=w.host)
