@@ -46,6 +46,10 @@ rule all:
     expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/CAT_taxonomy_imported.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
     expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE_db_imported-metabat2.done",assemblytype='hybrid_doublefiltered',hostcode=HOSTS)
 
+rule trim:
+  input:
+    expand("data/sequencing_genomic_trimmed/{hostcode}_R{PE}.fastq.gz",hostcode=HOSTCODES,PE=DIRECTIONS)
+
 ## Read QC stuff
 rule fastqc_raw_data:
   input:
