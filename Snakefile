@@ -962,22 +962,24 @@ rule anvi_profile_binningsignal:
     """
 
 def get_anvi_merge_profiles(wildcards):
-    input={}
     if wildcards.assemblytype != 'hybrid_doublefiltered':
-        source={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{hostcode}/PROFILE.db",hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype) }
-        signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype) }
-        input.update(source)
-        input.update(signal)
-        return(input)
+        source= expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{hostcode}/PROFILE.db",hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype)
+        signal= expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype)
+        signal.extend(source)
     elif wildcards.assemblytype == 'hybrid_doublefiltered':
+        HOST=wildcards.hostcode
         HOST_LIBRARIES=list(filter(lambda x:wildcards.hostcode in x, HOSTCODES))
-        source={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{library}/PROFILE.db",    library=HOST_LIBRARIES,    assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
-        input.update(source)
+        signal=expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{library}/PROFILE.db",    library=HOST_LIBRARIES,    assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode)
+        SPECIES=HOST.split('_',1)[0]
+        longreadfiles=listdir("data/sequencing_genomic-longreads_trimmed/")
+        longreadfiles_species=list(filter(lambda x:SPECIES in x, longreadfiles))
         if wildcards.hostcode != 'Azfil_wild':
-            signal={ 'signal' : expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) }
-            input.update(signal)
-        return(input)
-    return(input)
+            binningsignal = expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode)
+            signal.extend(binningsignal)
+        if len(longreadfiles_species) > 0 :
+            pacbio = expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+pacbio_reads/PROFILE.db",assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode)
+            signal.extend(pacbio)
+    return(signal)
 
 rule anvi_merge:
   input:
@@ -999,7 +1001,7 @@ rule anvi_merge:
     if [ -d {params.path} ]
     then rm -rf {params.path}
     fi
-    anvi-merge -c {input.db} -o {params.path} {params.options} {params.name} {input.signal} > {log.stdout} 2> {log.stderr}
+    anvi-merge -c {input.db} -o {params.path} {params.options} {params.name} {input} > {log.stdout} 2> {log.stderr}
     """
 
 def get_all_bins(wildcards):
