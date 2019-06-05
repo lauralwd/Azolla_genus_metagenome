@@ -620,7 +620,7 @@ def get_binning_reads(wildcards):
                 return dict
             dict.update(index)
         elif len(list(filter(lambda x:wildcards.binningsignal in x, BINNINGSIGNALS))) == 0 :
-            dict = { 'reads' : expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=DIRECTIONS,hostcode=wildcards.binningsignal) }
+            dict = { 'reads' : expand("data/sequencing_genomic_trimmed/{hostcode}_R{PE}.fastq.gz",PE=DIRECTIONS,hostcode=wildcards.binningsignal) }
         dict.update(index)
         return dict
     dict.update(index)
@@ -666,6 +666,9 @@ def get_source_binning_reads(wildcards):
 rule backmap_bwa_mem_assemblysource:
   input:
     unpack(get_source_binning_reads)
+    s1=expand("data/sequencing_genomic_trimmed/{{hostcode}}_R{PE}.fastq.gz",PE=1),
+    s2=expand("data/sequencing_genomic_trimmed/{{hostcode}}_R{PE}.fastq.gz",PE=2),
+    index=expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
   params:
     index=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
