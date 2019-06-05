@@ -642,30 +642,30 @@ rule backmap_bwa_mem:
   shell:
     "bwa mem -t {threads} {params.index} {input.reads} 2> {log.stderr} | samtools view -F 4 -@ {threads} -b -o {output}  2> {log.samstderr} > {log.stdout}"
 
-def get_source_binning_reads(wildcards):
-    if wildcards.assemblytype != 'hybrid_doublefiltered':
-        s1={'s1' : expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1,hostcode=wildcards.hostcode) }
-        s2={'s2' : expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2,hostcode=wildcards.hostcode) }
-        index={'index' : expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'],hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype)}
-        input={}
-        input.update(s1)
-        input.update(s2)
-        input.update(index)
-        (input)
-    elif wildcards.assemblytype == 'hybrid_doublefiltered':
-        s1={'s1' : expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=1,hostcode=wildcards.hostcode) }
-        s2={'s2' : expand("data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz",PE=2,hostcode=wildcards.hostcode) }
-        index={'index' : expand("data/assembly_{assemblytype}/{host}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'],hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype)}
-        input={}
-        input.update(s1)
-        input.update(s2)
-        input.update(index)
-        return(input)
-    return(input)
+# def get_source_binning_reads(wildcards):
+#     if wildcards.assemblytype != 'hybrid_doublefiltered':
+#         s1={'s1' : expand("data/sequencing_genomic_trimmed/{hostcode}_R{PE}.fastq.gz",PE=1,hostcode=wildcards.hostcode) }
+#         s2={'s2' : expand("data/sequencing_genomic_trimmed/{hostcode}_R{PE}.fastq.gz",PE=2,hostcode=wildcards.hostcode) }
+#         index={'index' : expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'],hostcode=wildcards.hostcode,assemblytype=wildcards.assemblytype)}
+#         input={}
+#         input.update(s1)
+#         input.update(s2)
+#         input.update(index)
+#         (input)
+#     elif wildcards.assemblytype == 'hybrid_doublefiltered':
+#         s1={'s1' : expand("data/sequencing_genomic_trimmed/{hostcode}_R{PE}.fastq.gz",PE=1,hostcode=wildcards.hostcode) }
+#         s2={'s2' : expand("data/sequencing_genomic_trimmed/{hostcode}_R{PE}.fastq.gz",PE=2,hostcode=wildcards.hostcode) }
+#         index={'index' : expand("data/assembly_{assemblytype}/{host}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'],host=wildcards.hostcode,assemblytype=wildcards.assemblytype)}
+#         input={}
+#         input.update(s1)
+#         input.update(s2)
+#         input.update(index)
+#         return(input)
+#     return(input)
 
 rule backmap_bwa_mem_assemblysource:
   input:
-    unpack(get_source_binning_reads)
+    #unpack(get_source_binning_reads)
     s1=expand("data/sequencing_genomic_trimmed/{{hostcode}}_R{PE}.fastq.gz",PE=1),
     s2=expand("data/sequencing_genomic_trimmed/{{hostcode}}_R{PE}.fastq.gz",PE=2),
     index=expand("data/assembly_{{assemblytype}}/{{hostcode}}/scaffolds_bwa_index/scaffolds.{ext}",ext=['bwt','pac','ann','sa','amb'])
