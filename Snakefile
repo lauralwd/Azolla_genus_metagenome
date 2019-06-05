@@ -663,6 +663,26 @@ rule backmap_bwa_mem:
 #         return(input)
 #     return(input)
 
+ruleorder: BLASR_backmap_long_reads > backmap_bwa_mem_assemblysource
+
+rule BLASR_backmap_long_reads:
+  input:
+    reads="data/sequencing_genomic-longreads_trimmed/Azfil_lab_longreads-selfcorrected_trimmed.fasta",
+    scaffolds=expand("data/assembly_{{assemblytype}}/{{hostcode}}/{assemblyfile}_short_names.fasta",assemblyfile='scaffolds')
+  output:
+    temp("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}+pacbio_reads.bam")
+  threads: 100
+  params:
+    "--hitPolicy allbest --bam"
+  shadow: "shallow"
+  conda:
+    "envs/blasr.yaml"
+  log:
+    stdout="logs/BLASR_filter_long_reads_{assemblytype}_{hostcode}.stdout",
+    stderr="logs/BLASR_filter_long_reads_{assemblytype}_{hostcode}.stderr"
+  shell:
+    "blasr {input.reads} {input.scaffolds} {params} --nproc {threads} --out {output}  > {log.stdout} 2> {log.stderr}"
+
 rule backmap_bwa_mem_assemblysource:
   input:
     #unpack(get_source_binning_reads)
