@@ -633,7 +633,7 @@ rule backmap_bwa_mem:
   params:
     index=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
-    temp("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam")
+    temp("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}+{binningsignal}.bam")
   threads: 100
   log:
     stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}_{binningsignal}.stdout",
@@ -672,7 +672,7 @@ rule backmap_bwa_mem_assemblysource:
   params:
     index=lambda w: expand("data/assembly_{assemblytype}/{hostcode}/scaffolds_bwa_index/scaffolds",assemblytype=w.assemblytype,hostcode=w.hostcode)
   output:
-    temp("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.bam")
+    temp("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}+{hostcode}.bam")
   threads: 100
   log:
     stdout="logs/bwa_backmap_samtools_{assemblytype}_{hostcode}.stdout",
@@ -683,9 +683,9 @@ rule backmap_bwa_mem_assemblysource:
 
 rule backmap_samtools_sort:
   input:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}+{binningsignal}.bam"
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}+{binningsignal}.sorted.bam"
   threads: 100
   resources:
     mem_mb=2000
@@ -697,9 +697,9 @@ rule backmap_samtools_sort:
 
 rule backmap_samtools_index_binningsignal:
   input:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}+{binningsignal}.sorted.bam"
   output:
-    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam.bai"
+    "data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}+{binningsignal}.sorted.bam.bai"
   log:
     stdout="logs/bwa_backmap_samtools_index_{assemblytype}_{hostcode}_{binningsignal}.stdout",
     stderr="logs/bwa_backmap_samtools_index_{assemblytype}_{hostcode}_{binningsignal}.stderr"
@@ -709,11 +709,11 @@ rule backmap_samtools_index_binningsignal:
 
 def get_bams_for_binning(wildcards):
     if wildcards.assemblytype != 'hybrid_doublefiltered':
-        input=expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{hostcode}.sorted.bam",assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) +  expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode)
+        input=expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}+{hostcode}.sorted.bam",assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode) +  expand("data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}+{binningsignal}.sorted.bam",binningsignal=BINNINGSIGNALS,assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode)
         return(input)
     elif wildcards.assemblytype == 'hybrid_doublefiltered':
       HOST_LIBRARIES=list(filter(lambda x:wildcards.hostcode in x, HOSTCODES)) + BINNINGSIGNALS
-      input=expand("data/assembly_{assemblytype}_binningsignals/{host}/{host}_{hostcode}.sorted.bam",assemblytype=wildcards.assemblytype,host=wildcards.hostcode,hostcode=HOST_LIBRARIES)
+      input=expand("data/assembly_{assemblytype}_binningsignals/{host}/{host}+{hostcode}.sorted.bam",assemblytype=wildcards.assemblytype,host=wildcards.hostcode,hostcode=HOST_LIBRARIES)
       return(input)
 
 rule jgi_summarize_script:
@@ -918,8 +918,8 @@ rule anvi_profile_binningsignal:
   input:
     "data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_hmms.done",
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
-    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam",
-    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}_{binningsignal}.sorted.bam.bai"
+    bam="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}+{binningsignal}.sorted.bam",
+    bai="data/assembly_{assemblytype}_binningsignals/{hostcode}/{hostcode}+{binningsignal}.sorted.bam.bai"
   output:
     profile="data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+{binningsignal}/PROFILE.db"
   params:
