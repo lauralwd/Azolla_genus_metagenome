@@ -563,7 +563,7 @@ rule filter_unclassfied_filter_eukaryotic:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/{assemblyfile}_minus-unclassified_minus-eukaryotic.fasta"
   log:
     stdout="logs/filter-final-fasta-eukaryotic-unclassfied_{assemblytype}_{hostcode}_{assemblyfile}.stdout",
-    stderr="logs/filter-final-fasta-eukaryotic-unclassified_{assemblytype}_{hostcode}_{assemblyfile}.stderr"    
+    stderr="logs/filter-final-fasta-eukaryotic-unclassified_{assemblytype}_{hostcode}_{assemblyfile}.stderr"
   shell:
     "samtools faidx {input.scaffolds} -o {output.scaffolds} -r {input.filterlist} > {log.stdout} 2> {log.stderr}"
 
@@ -753,7 +753,7 @@ checkpoint metabat2:
     scaffolds="data/assembly_{assemblytype}/{hostcode}/scaffolds_short_names.fasta",
     depthmatrix="data/assembly_{assemblytype}/{hostcode}/{hostcode}_depthmatrix.tab"
   output:
-    bins="data/bins_{assemblytype}/{hostcode,[A-Za-z0-9_]+}"
+    bins=directory("data/bins_{assemblytype}/{hostcode,[A-Za-z0-9_]+}")
   params:
     prefix=lambda w: expand("data/bins_{assemblytype}/{hostcode}/{hostcode}_bin",assemblytype=w.assemblytype,hostcode=w.hostcode)
   threads: 72
@@ -865,7 +865,7 @@ rule anvi_setup_ncbi_cogs:
 rule anvi_run_ncbi_cogs:
   input:
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
-    dir="references/anvi_ncbi_cogs" 
+    dir="references/anvi_ncbi_cogs"
   output:
     touch("data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs_db_run_ncbi_cogs.done")
   threads: 20
