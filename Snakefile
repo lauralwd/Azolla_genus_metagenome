@@ -859,7 +859,7 @@ rule prepare_anvi_import_cat_taxonomy:
   input:
     report="logs/anvi-script-reformat-fasta_{assemblytype}_{hostcode}_{assemblyfile}.report",
     taxonomy="data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy.tab",
-    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
+    profile=ancient("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db")
   output:
     "data/assembly_{assemblytype}/{hostcode}/CAT_{hostcode}_{assemblyfile}_taxonomy_shortnames.tab"
   threads: 2
@@ -897,7 +897,7 @@ rule prepare_anvi_import_cat_taxonomy:
 rule anvi_import_cat_taxonomy:
   input:
     taxonomy=expand("data/assembly_{{assemblytype}}/{{hostcode}}/CAT_{{hostcode}}_{assemblyfile}_taxonomy_shortnames.tab",assemblyfile='scaffolds'),
-    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
+    profile=ancient("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db")
   output:
     touch("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/CAT_taxonomy_imported.done")
   threads: 1
@@ -992,7 +992,7 @@ rule prepare_anvi_import_metabat2:
   input:
     get_all_bins
   output:
-    "data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab"
+    temp("data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab")
   log:
     "logs/prepare_anvi-import-metabat2-{assemblytype}-{hostcode}.stderr"
   threads: 3
@@ -1008,7 +1008,7 @@ rule prepare_anvi_import_metabat2:
 rule anvi_import_metabat2:
   input:
     db="data/assembly_{assemblytype}_anvio/{hostcode}/{hostcode}_contigs.db",
-    profile="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db",
+    profile=ancient("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"),
     binlist="data/bins_{assemblytype}/{hostcode}/{hostcode}_binlist.tab"
   output:
     profile=touch("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE_db_imported-metabat2.done")
