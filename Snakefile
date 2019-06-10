@@ -799,9 +799,21 @@ rule checkm:
     fi
     checkm lineage_wf -t {threads} {params.options} {input.bins} {params.dir} -f {output.table} > {log.stdout} 2> {log.stderr}
     """
+rule prodigal_get_ORFs_for_CAT_bins:
+  input:
+    bindir="data/bins_{assemblytype}/{hostcode}"
+  output:
+    a="data/bins_{assemblytype}/{hostcode}.BAT.concatenated.predicted_proteins.faa",
+    o="data/bins_{assemblytype}/{hostcode}.BAT.concatenated.predicted_proteins.gff"
+  params:
+    "-p meta -g 11 -q -f gff"
+  shell:
+    "prodigal -i <(cat {input}/*.fa ) -a {output.a} -o {output.o} {params}"
 
 rule CAT_bins:
   input:
+    a="data/bins_{assemblytype}/{hostcode}.BAT.concatenated.predicted_proteins.faa",
+    o="data/bins_{assemblytype}/{hostcode}.BAT.concatenated.predicted_proteins.gff",
     bindir="data/bins_{assemblytype}/{hostcode}",
     dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-27.nr.dmnd",
     db="references/CAT_customised_20190108/CAT_database_customised",
@@ -817,7 +829,7 @@ rule CAT_bins:
     stdout="logs/BAT_{assemblytype}_{hostcode}.stdout",
     stderr="logs/BAT_{assemblytype}_{hostcode}.stderr"
   shell:
-    "CAT bins -n {threads} -b {input.bindir} -d {input.db} -t {input.tf} {params.options} -o {params.prefix} > {log.stdout} 2> {log.stderr}"
+    "CAT bins -n {threads} -b {input.bindir} -p {input.a} -d {input.db} -t {input.tf} {params.options} -o {params.prefix} > {log.stdout} 2> {log.stderr}"
 
 rule BAT_add_names:
   input:
