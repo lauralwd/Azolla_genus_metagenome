@@ -808,7 +808,7 @@ rule CAT_bins:
     tf="references/CAT_customised_20190108/taxonomy_customised"
   output:
     "data/bins_{assemblytype}/{hostcode}.BAT.bin2classification.txt"
-  shadow: 'shallow'
+#  shadow: 'shallow'
   params:
     options= " -s '.fa' ",
     prefix=lambda w : expand( "data/bins_{assemblytype}/{hostcode}.BAT" , assemblytype=w.assemblytype , hostcode=w.hostcode )
