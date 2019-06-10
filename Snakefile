@@ -767,9 +767,20 @@ checkpoint metabat2:
   shell:
     "metabat2 -t {threads} -i {input.scaffolds} -a {input.depthmatrix} -o {params.prefix} > {log.stdout} 2> {log.stderr}"
 
+rule checkm_set_data_folder:
+  input:
+    "references/checkm_data"
+  output:
+    "references/checkm_data_setroot.done"
+  conda:
+    "envs/checkm.yaml"
+  shell:
+    "checkm data setRoot {input}"
+
 rule checkm:
   input:
-    "data/bins_{assemblytype}/{hostcode}"
+    bins="data/bins_{assemblytype}/{hostcode}",
+    set_root="references/checkm_data_setroot.done"
   output:
     table="data/bins_{assemblytype}_checkm/{hostcode}/{hostcode}.checkm_out"
   params:
@@ -786,7 +797,7 @@ rule checkm:
     if [ -d {params.dir} ]
     then rm -rf {params.dir}
     fi
-    checkm lineage_wf -t {threads} {params.options} {input} {params.dir} -f {output.table} > {log.stdout} 2> {log.stderr}
+    checkm lineage_wf -t {threads} {params.options} {input.bins} {params.dir} -f {output.table} > {log.stdout} 2> {log.stderr}
     """
 
 rule CAT_bins:
