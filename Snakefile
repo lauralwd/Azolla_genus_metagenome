@@ -771,7 +771,7 @@ rule checkm_set_data_folder:
   input:
     "references/checkm_data"
   output:
-    "references/checkm_data_setroot.done"
+    touch("references/checkm_data_setroot.done")
   conda:
     "envs/checkm.yaml"
   shell:
