@@ -1006,7 +1006,8 @@ def get_anvi_merge_profiles(wildcards):
         if len(longreadfiles_species) > 0 :
             pacbio = expand("data/assembly_{assemblytype}_binningsignals_anvio/{hostcode}+pacbio_reads/PROFILE.db",assemblytype=wildcards.assemblytype,hostcode=wildcards.hostcode)
             signal.extend(pacbio)
-    return(signal)
+    dict={'signal' : signal }
+    return(dict)
 
 rule anvi_merge:
   input:
@@ -1028,7 +1029,7 @@ rule anvi_merge:
     if [ -d {params.path} ]
     then rm -rf {params.path}
     fi
-    anvi-merge -c {input.db} -o {params.path} {params.options} {params.name} {input} > {log.stdout} 2> {log.stderr}
+    anvi-merge -c {input.db} -o {params.path} {params.options} {params.name} {input.signal} > {log.stdout} 2> {log.stderr}
     """
 
 def get_all_bins(wildcards):
