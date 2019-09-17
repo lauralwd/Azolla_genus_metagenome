@@ -31,7 +31,7 @@ BINNINGSIGNALS=['dijkhuizen2018.E.1', 'dijkhuizen2018.E.2', 'dijkhuizen2018.E.3'
 ASSEMBLYFILES=['contigs','scaffolds']
 
 ## 'All'-rules
-rule all:
+rule all_assemblies_and_annotations:
   input:
     "analyses/assembly_stats_and_taxonomy.tab",
     expand("data/bins_{assemblytype}/{hostcode}.BAT.names.txt",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES),
