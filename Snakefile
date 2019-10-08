@@ -57,8 +57,8 @@ rule all_assemblies_and_annotations:
 
 rule all_exported_bins:
   input:
-    expand("data/curated_bins/{collection}/{hostcode}",hostcode=HOSTS),
-    expand("data/curated_bins/{collection}/{hostcode}",hostcode=SINGLEHOSTS)
+    expand("data/curated_bins/{{collection}}/{hostcode}",hostcode=HOSTS),
+    expand("data/curated_bins/{{collection}}/{hostcode}",hostcode=SINGLEHOSTS)
   output:
     touch("data/curated_bins/{collection}.exported")
 
