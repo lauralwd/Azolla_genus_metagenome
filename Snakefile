@@ -57,8 +57,10 @@ rule all_assemblies_and_annotations:
 
 rule all_exported_bins:
   input:
-    expand("data/bins_{assemblytype}_manual/{hostcode}",assemblytype='hybrid_doublefiltered',hostcode=HOSTS),
-    expand("data/bins_{assemblytype}_manual/{hostcode}",assemblytype='singles_doublefiltered',hostcode=SINGLEHOSTS)
+    expand("data/curated_bins/{collection}/{hostcode}",hostcode=HOSTS),
+    expand("data/curated_bins/{collection}/{hostcode}",hostcode=SINGLEHOSTS)
+  output:
+    touch("data/curated_bins/{collection}.exported")
 
 rule trim:
   input:
