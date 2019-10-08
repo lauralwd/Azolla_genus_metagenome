@@ -1190,9 +1190,19 @@ rule compress_blasr_filtered_reads:
     "pigz --best -p {threads} --keep {input}"
 
 ############## rules for analyses after the manual curation process.
+def get_single_or_hibrid_anvi_profile_for_export(wildcards):
+    HOSTCODE=wildcards.hostcode
+    if HOSTCODE in HOSTS:
+        PATH = 'data/assembly_hybrid_doublefiltered_binningsignals_anvio/MERGED_' + HOSTCODE + '/PROFILE.db'
+    elif HOSTCODE in SINGLEHOSTS:
+        PATH = 'data/assembly_singles_doublefiltered_binningsignals_anvio/MERGED_' + HOSTCODE + '/PROFILE.db'
+    return(PATH)
+
+
 rule extract_curated_bins_from_anvio:
   input:
-    profiledb="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
+    get_single_or_hibrid_anvi_profile_for_export
+    # profiledb="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
     # profiledb=expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{{hostcode}}/PROFILE.db",assemblytype='singles_hostfiltered')
   output:
     directory("data/curated_bins/{collection}/{hostcode}")
