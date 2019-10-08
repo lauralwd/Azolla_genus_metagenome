@@ -1188,3 +1188,19 @@ rule compress_blasr_filtered_reads:
   threads: 100
   shell:
     "pigz --best -p {threads} --keep {input}"
+
+############## rules for analyses after the manual curation process.
+rule extract_curated_bins_from_anvio:
+  input:
+    profiledb="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
+  output:
+    dir("data/curated_bins/{collection}/{hostcode}")
+  params:
+    "--include-unbinned"
+  conda:
+    "envs/anvio.yaml"
+  log:
+    stdout="logs/anvi-export-bins-collection-{assemblytype}_{hostcode}.stdout",
+    stderr="logs/anvi-export-bins-collection-{assemblytype}_{hostcode}.stderr"
+  shell:
+    "anvi-export-collection -p {input.profiledb} {params} -O {output}"
