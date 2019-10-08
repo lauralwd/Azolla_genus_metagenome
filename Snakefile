@@ -22,8 +22,17 @@ def get_hosts_cross_assembly():
       return_hosts.add(i)
   return(list(return_hosts))
 
+def get_single_hosts():
+  return_hosts=set([])
+  for i in set([i.split('_',3)[0] + '_' + i.split('_',3)[1] for i in HOSTCODES]):
+    host_sub=list(filter(lambda x:i in x, HOSTCODES))
+    if len(host_sub) = 1 :
+      return_hosts.add(i)
+  return(list(return_hosts))
+
 SPECIES=get_species_cross_assembly()
 HOSTS=get_hosts_cross_assembly()
+SINGLEHOSTS=get_single_hosts()
 
 ASSEMBLYTYPES=['singles_doublefiltered','singles_hostfiltered'] # ,'hybrid_doublefiltered'] #,'species_doublefiltered']
 # Ideally these should only contain letter, numbers and underscores. Exceptionally, these can contain points but they will be replaced by underscores for anvi'o
