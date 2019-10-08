@@ -1195,7 +1195,7 @@ rule extract_curated_bins_from_anvio:
     profiledb="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
     # profiledb=expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{{hostcode}}/PROFILE.db",assemblytype='singles_hostfiltered')
   output:
-    "data/curated_bins/{collection}/{hostcode}/"
+    directory("data/curated_bins/{collection}/{hostcode}")
   params:
     "--include-unbinned"
   conda:
