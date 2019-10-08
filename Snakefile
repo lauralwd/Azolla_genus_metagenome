@@ -1214,4 +1214,4 @@ rule extract_curated_bins_from_anvio:
     stdout="logs/anvi-export-bins-{collection}-{hostcode}.stdout",
     stderr="logs/anvi-export-bins-{collection}-{hostcode}.stderr"
   shell:
-    "anvi-export-collection -p {input.profiledb} {params} -O {output} > {log.stdout} 2> {log.stderr}"
+    "anvi-export-collection -p {input} {params} -O {output} > {log.stdout} 2> {log.stderr}"
