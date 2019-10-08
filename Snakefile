@@ -1193,14 +1193,15 @@ rule compress_blasr_filtered_reads:
 rule extract_curated_bins_from_anvio:
   input:
     profiledb="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
+    # profiledb=expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{{hostcode}}/PROFILE.db",assemblytype='singles_hostfiltered')
   output:
     dir("data/curated_bins/{collection}/{hostcode}")
   params:
     "--include-unbinned"
   conda:
     "envs/anvio.yaml"
-  log:
-    stdout="logs/anvi-export-bins-collection-{assemblytype}_{hostcode}.stdout",
-    stderr="logs/anvi-export-bins-collection-{assemblytype}_{hostcode}.stderr"
+#  log:
+#    stdout="logs/anvi-export-bins-{collection}-{hostcode}.stdout",
+#    stderr="logs/anvi-export-bins-{collection}-{hostcode}.stderr"
   shell:
-    "anvi-export-collection -p {input.profiledb} {params} -O {output}"
+    "anvi-export-collection -p {input.profiledb} {params} -O {output} > {log.stdout} 2> {log.stderr}"
