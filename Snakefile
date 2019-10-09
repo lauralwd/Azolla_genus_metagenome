@@ -1207,8 +1207,6 @@ def get_single_or_hibrid_anvi_profile_for_export(wildcards):
 rule extract_curated_bins_from_anvio:
   input:
     unpack(get_single_or_hibrid_anvi_profile_for_export)
-    # profiledb="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
-    # profiledb=expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{{hostcode}}/PROFILE.db",assemblytype='singles_hostfiltered')
   output:
     directory("data/curated_bins/{collection}/{hostcode}")
   params:
