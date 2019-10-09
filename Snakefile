@@ -1193,25 +1193,29 @@ rule compress_blasr_filtered_reads:
 def get_single_or_hibrid_anvi_profile_for_export(wildcards):
     HOSTCODE=wildcards.hostcode
     if HOSTCODE in HOSTS:
-        PATH = 'data/assembly_hybrid_doublefiltered_binningsignals_anvio/MERGED_' + HOSTCODE + '/PROFILE.db'
+        input = {'profile' : 'data/assembly_hybrid_doublefiltered_binningsignals_anvio/MERGED_' + HOSTCODE + '/PROFILE.db'}
+        contigsdb = {'contigdb' : 'data/assembly_hybrid_doublefiltered_anvio/' + HOSTCODE + '/' + HOSTCODE + '_contigs.db'}
+        input.update(contigsdb)
     elif HOSTCODE in SINGLEHOSTS:
-        PATH = 'data/assembly_singles_doublefiltered_binningsignals_anvio/MERGED_' + HOSTCODE + '/PROFILE.db'
-    return(PATH)
+        input = {'profile' : 'data/assembly_singles_doublefiltered_binningsignals_anvio/MERGED_' + HOSTCODE + '/PROFILE.db' }
+        contigsdb = {'contigdb' : 'data/assembly_singles_doublefiltered_anvio/' + HOSTCODE + '/' + HOSTCODE + '_contigs.db'}
+        input.update(contigsdb)
+    return(input)
 
 
 rule extract_curated_bins_from_anvio:
   input:
-    get_single_or_hibrid_anvi_profile_for_export
+    unpack(get_single_or_hibrid_anvi_profile_for_export)
     # profiledb="data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{hostcode}/PROFILE.db"
     # profiledb=expand("data/assembly_{assemblytype}_binningsignals_anvio/MERGED_{{hostcode}}/PROFILE.db",assemblytype='singles_hostfiltered')
   output:
     directory("data/curated_bins/{collection}/{hostcode}")
   params:
-    "--include-unbinned"
+    collection = lambda w:expand("-C {collection}",collection=w.collection)
   conda:
     "envs/anvio.yaml"
   log:
     stdout="logs/anvi-export-bins-{collection}-{hostcode}.stdout",
     stderr="logs/anvi-export-bins-{collection}-{hostcode}.stderr"
   shell:
-    "anvi-export-collection -p {input} {params} -O {output} > {log.stdout} 2> {log.stderr}"
+    "anvi-summarize -p {input.profile} -c {input.contigdb} {params.collection} -o {output} > {log.stdout} 2> {log.stderr}"
