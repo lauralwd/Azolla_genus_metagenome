@@ -1218,3 +1218,39 @@ rule extract_curated_bins_from_anvio:
     stderr="logs/anvi-export-bins-{collection}-{hostcode}.stderr"
   shell:
     "anvi-summarize -p {input.profile} -c {input.contigdb} {params.collection} -o {output} > {log.stdout} 2> {log.stderr}"
+
+rule collect_bins_in_folder:
+  input:
+    "data/curated_bins/{collection}/{hostcode}"
+  output:
+    directory("data/curated_bins/{collection}/{hostcode}_bin-fastas")
+  shell:
+    """
+    if [ ! -d {output} ]
+    then mkdir {output}
+    fi
+    cp --reflink=always {input}/bin_by_bin/*/*contigs.fa {output}
+    """
+
+rule checkm_curated_bins:
+  input:
+    bins="data/curated_bins/{collection}/{hostcode}_bin-fastas",
+    set_root="references/checkm_data_setroot.done"
+  output:
+    table="data/curated_bins/{collection}/{hostcode}_checkm/{hostcode}.checkm_out"
+  params:
+    options="-x fa --pplacer_threads=12 --tab_table",
+    dir=lambda w:expand("data/curated_bins/{collection}/{hostcode}/checkm/{hostcode}",collection=w.collection,hostcode=w.hostcode)
+  threads: 72
+  log:
+    stdout="logs/checkm_curated_bins_{collection}_{hostcode}.stdout",
+    stderr="logs/checkm_curated_bins_{collection}_{hostcode}.stderr"
+  conda:
+    "envs/checkm.yaml"
+  shell:
+    """
+    if [ -d {params.dir} ]
+    then rm -rf {params.dir}
+    fi
+    checkm lineage_wf -t {threads} {params.options} {input.bins} {params.dir} -f {output.table} > {log.stdout} 2> {log.stderr}
+    """
