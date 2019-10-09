@@ -24,8 +24,9 @@ def get_hosts_cross_assembly():
 
 def get_single_hosts():
   return_hosts=set([])
-  for i in set([i.split('_',3)[0] + '_' + i.split('_',3)[1] for i in HOSTCODES]):
-    host_sub=list(filter(lambda x:i in x, HOSTCODES))
+  for i in HOSTCODES:
+    species  = i.split('_',3)[0] + '_' + i.split('_',3)[1]
+    host_sub = list(filter(lambda x:species in x, HOSTCODES))
     if len(host_sub) == 1 :
       return_hosts.add(i)
   return(list(return_hosts))
