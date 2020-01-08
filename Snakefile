@@ -1254,3 +1254,18 @@ rule checkm_curated_bins:
     fi
     checkm lineage_wf -t {threads} {params.options} {input.bins} {params.dir} -f {output.table} > {log.stdout} 2> {log.stderr}
     """
+rule fastq_length:
+  input:
+    "{folder}/{file}.fastq.gz"
+  output:
+    "{folder}/{file}.fastq_length"
+  log:
+    stderr="logs/fastq_length_{folder}_{file}.stderr"
+  shell:
+    """
+    echo "$(zcat {input} | wc -l) / 4" | bc > {output}
+    """
+
+rule collect_fastq_lengths:
+  input:
+    expand("data/sequencing_genomic/{hostcode}_R1.fastq_length",hostcode=HOSTCODES)
