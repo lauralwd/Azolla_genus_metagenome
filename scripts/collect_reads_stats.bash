@@ -78,11 +78,11 @@ do  #assemdir='data/assembly_singles_hostfiltered'
 	| tr -d 'G'				\
 	| sort -n				\
 	| tail -n 1				\
-	| sed -E "s/^/$s\t$host\t$assemname-RAM\t/g"
+	| sed -E "s/^/$s\t\t$host\t$assemname\tRAM\t/g"
         cat "$assemdir/$s"/contigs.fasta	\
 	| grep -v '>'				\
 	| wc -c					\
-	| sed -E "s/^/$s\t$host\t$assemname-size\t/g"
+	| sed -E "s/^/$s\t\t$host\t$assemname\tsize\t/g"
 
 
     done
