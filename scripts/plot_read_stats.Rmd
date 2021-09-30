@@ -8,8 +8,21 @@ In this document I aim to create a figure showing the input data for assemblies 
  - 2 The size of the output assembly
  - 3 The computational demand (in terms of RAM usage) to create these assemblies
 
+We'll tackle this by importing the data, reshaping it a bit and then we experiment with some visualisations to see what works best.
 
 ```{r}
-
+("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
+library(data.table)
+library(ggplot2)
+classes <- c('factor','factor','factor','factor','factor','numeric')
+read.stats <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/reads_stats.tab",
+                    sep = '\t',
+                    fill = TRUE,
+                    header = T,
+                    stringsAsFactors = T,
+                    colClasses = classes,
+                    data.table = T
+)
+head(read.stats)
 ```
 
