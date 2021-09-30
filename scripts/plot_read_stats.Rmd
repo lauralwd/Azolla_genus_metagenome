@@ -1,0 +1,15 @@
+---
+title: "Data filtering figure"
+output: html_notebook
+---
+
+In this document I aim to create a figure showing the input data for assemblies and assembly sizes for my Azolla genus metagenome project. The input is raw sequencing data which is then trimmed, filtered, assembled, filtered again, and assembled again. In this figure I want to show
+ - 1 The decreasing size of input data
+ - 2 The size of the output assembly
+ - 3 The computational demand (in terms of RAM usage) to create these assemblies
+
+
+```{r}
+
+```
+
