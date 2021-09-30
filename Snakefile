@@ -67,12 +67,12 @@ rule trim:
   input:
     expand("data/sequencing_genomic_trimmed/{hostcode}_R{PE}.fastq.gz",hostcode=HOSTCODES,PE=DIRECTIONS)
 
-## Read QC stuff
+## Read QC stuff and rules for a data flow figure
 rule fastqc_raw_data:
   input:
-    "data/sequencing_genomic/{hostcode}_{PE}.fastq.gz"
+    "data/sequencing_genomic/{hostcode}_R{PE}.fastq.gz"
   output:
-    "analyses/analyses_reads/{hostcode}_{PE}"
+    directory("analyses/analyses_reads/{hostcode}_{PE}")
   shell:
     "mkdir {output} 2> /dev/null && fastqc -o {output} {input}"
 
@@ -80,9 +80,33 @@ rule fastqc_trimmed_data:
   input:
     "data/sequencing_genomic_trimmed/{hostcode}_{PE}.fastq.gz"
   output:
-    "analyses/analyses_reads_trimmed/{hostcode}_{PE}"
+    directory("analyses/analyses_reads/{hostcode}_{PE}")
   shell:
     "mkdir {output} 2> /dev/null && fastqc -o {output} {input}"
+
+rule fastqc_filtered_data:
+  input:
+    "data/sequencing_genomic_trimmed_filtered_corrected/{hostcode}/corrected/{hostcode}.{PE}.fastq.00.0_0.cor.fastq.gz"
+  output:
+    directory("analyses/analyses_reads_trimmed_filtered/{hostcode}_{PE}")
+  shell:
+    "mkdir {output} 2> /dev/null && fastqc -o {output} {input}"
+
+rule fastqc_doublefiltered_data:
+  input:
+    "data/sequencing_doublefiltered/{hostcode}/{hostcode}.{PE}.fastq.gz"
+  output:
+    directory("analyses/analyses_reads_doublefiltered/{hostcode}_{PE}")
+  shell:
+    "mkdir {output} 2> /dev/null && fastqc -o {output} {input}"
+
+rule collect_reads_stats:
+  input:
+    expand("analyses/analyses_reads/{hostcode}_{PE}"                  ,hostcode=HOSTCODES,PE=DIRECTIONS),
+    expand("analyses/analyses_reads/{hostcode}_{PE}"                  ,hostcode=HOSTCODES,PE=DIRECTIONS),
+    expand("analyses/analyses_reads_trimmed_filtered/{hostcode}_{PE}" ,hostcode=HOSTCODES,PE=DIRECTIONS),
+    expand("analyses/analyses_reads_doublefiltered/{hostcode}_{PE}"   ,hostcode=HOSTCODES,PE=DIRECTIONS)
+
 
 ## reference rules
 rule download_azolla_genome:
