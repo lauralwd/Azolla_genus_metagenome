@@ -4,7 +4,7 @@
 
 # Fastq sizes by FASTQC reports
 samples=( $(find analyses/analyses_reads -maxdepth 1 -type d | sed 's,analyses/analyses_reads/,,') )
-
+#echo ${samples[@]}
 
 echo -e "sample\tdirection\thost\tstage\tmetric\tvalue"
 # FastQC reports for genomic input, or "raw" files
@@ -29,34 +29,47 @@ do  host=$(echo "$s" | cut -d '_' -f 1,2)
 	| tr ' ' _								\
 	| sed -E 's/[0-9]+-//g'							\
 	| sed "s/^/$s\t$host\ttrimmed\t/g"					\
-	| sed -E "s/_1\t/\t1\t/g"						\
-	| sed -E "s/_2\t/\t2\t/g"
+	| sed -E 's/_1\t/\t1\t/g'						\
+	| sed -E 's/_2\t/\t2\t/g'
 done
 
 # FastQC reports for filtered files
 for s in "${samples[@]}"
 do  host=$(echo "$s" | cut -d '_' -f 1,2)
-    unzip -p ./analyses/analyses_reads_trimmed_filtered/"$s"/"$s"_fastqc.zip 	\
-	"$s"_fastqc/fastqc_data.txt 						\
+    S=$(echo "$s" | sed 's/_1$/\.1/g' | sed 's/_2$/\.2/g' | sed 's/$/.fastq.00.0_0.cor/'  )
+    unzip -p ./analyses/analyses_reads_trimmed_filtered/"$s"/"$S"_fastqc.zip 	\
+	"$S"_fastqc/fastqc_data.txt 						\
 	| grep -E "Total Sequences|Sequence length"				\
 	| tr ' ' _								\
-	| sed -E 's/[0-9]+-//g'							\
 	| sed "s/^/$s\t$host\tfiltered\t/g"					\
+	| sed -E 's/[0-9]+-//g'							\
 	| sed -E "s/_1\t/\t1\t/g"						\
 	| sed -E "s/_2\t/\t2\t/g"
 done
 
-# FastQC reports for double filtered files
+## FastQC reports for double filtered files
 for s in "${samples[@]}"
 do  host=$(echo "$s" | cut -d '_' -f 1,2)
-    unzip -p ./analyses/analyses_reads_doublefiltered/"$s"/"$s"_fastqc.zip 	\
-	"$s"_fastqc/fastqc_data.txt 						\
+    S=$(echo "$s" | sed 's/_1$/\.1/g' | sed 's/_2$/\.2/g'  )
+    unzip -p ./analyses/analyses_reads_doublefiltered/"$s"/"$S"_fastqc.zip 	\
+	"$S"_fastqc/fastqc_data.txt 						\
 	| grep -E "Total Sequences|Sequence length"				\
 	| tr ' ' _								\
 	| sed -E 's/[0-9]+-//g'							\
-	| sed "s/^/$s\t$host\ttrimmed\t/g"					\
+	| sed "s/^/$s\t$host\tdoublefiltered\t/g"				\
 	| sed -E "s/_1\t/\t1\t/g"						\
 	| sed -E "s/_2\t/\t2\t/g"
 done
+unset samples
 
+exit
+# Get assembly RAM sizes
+assemdir='data/assembly_singles_hostfiltered'
+samples=( $(find "$assemdir" -maxdepth 1 -mindepth 1 -type d | sed "s,$assemdir/,,g" ) )
+echo "${samples[@]}"
 
+for s in "${samples[@]}"
+do  cat "$assemdir/$s"/spades.log		\
+	grep -Eo '[0-9]+G +/ +[0-9]+G'		\
+	cut -d '/' -f 1
+done
