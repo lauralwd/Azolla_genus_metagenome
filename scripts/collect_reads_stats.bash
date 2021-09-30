@@ -3,7 +3,7 @@
 # this script collects read counts, assembly sizes and max RAM usage for assemblies
 
 # Fastq sizes by FASTQC reports
-samples=( $(find analyses/analyses_reads -maxdepth 1 -type d | sed 's,analyses/analyses_reads/,,') )
+samples=( $(find analyses/analyses_reads -maxdepth 1 -mindepth 1 -type d | sed 's,analyses/analyses_reads/,,') )
 #echo ${samples[@]}
 
 echo -e "sample\tdirection\thost\tstage\tmetric\tvalue"
@@ -62,14 +62,29 @@ do  host=$(echo "$s" | cut -d '_' -f 1,2)
 done
 unset samples
 
-exit
-# Get assembly RAM sizes
-assemdir='data/assembly_singles_hostfiltered'
-samples=( $(find "$assemdir" -maxdepth 1 -mindepth 1 -type d | sed "s,$assemdir/,,g" ) )
-echo "${samples[@]}"
 
-for s in "${samples[@]}"
-do  cat "$assemdir/$s"/spades.log		\
-	grep -Eo '[0-9]+G +/ +[0-9]+G'		\
-	cut -d '/' -f 1
+# Get assembly sizes and RAM usage
+assemdirs=( data/assembly_*filtered )
+#echo ${assemdirs[@]}
+for assemdir in "${assemdirs[@]}"
+do  #assemdir='data/assembly_singles_hostfiltered'
+    samples=( $(find "$assemdir" -maxdepth 1 -mindepth 1 -type d | sed "s,$assemdir/,,g" ) )
+    for s in "${samples[@]}"
+    do  host=$(echo "$s" | cut -d '_' -f 1,2)
+        assemname=$(echo "$assemdir" | rev | cut -f 1 -d '/' | rev)
+        cat "$assemdir/$s"/spades.log		\
+	| grep -oE '[0-9]+G +/ +[0-9]+G'	\
+	| cut -d '/' -f 1			\
+	| tr -d 'G'				\
+	| sort -n				\
+	| tail -n 1				\
+	| sed -E "s/^/$s\t$host\t$assemname-RAM\t/g"
+        cat "$assemdir/$s"/contigs.fasta	\
+	| grep -v '>'				\
+	| wc -c					\
+	| sed -E "s/^/$s\t$host\t$assemname-size\t/g"
+
+
+    done
 done
+
