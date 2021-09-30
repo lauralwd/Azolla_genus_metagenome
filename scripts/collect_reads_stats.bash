@@ -16,8 +16,8 @@ do  host=$(echo "$s" | cut -d '_' -f 1,2)
 	| tr ' ' _								\
 	| sed -E 's/[0-9]+-//g'							\
 	| sed "s/^/$s\t$host\traw\t/g"						\
-	| sed -E "s/_1\t/\t1\t/g"						\
-	| sed -E "s/_2\t/\t2\t/g"
+	| sed -E "s/_1\t$host/\t1\t$host/g"					\
+	| sed -E "s/_2\t$host/\t2\t$host/g"
 done
 
 # FastQC reports for genomic trimmed files
@@ -29,8 +29,8 @@ do  host=$(echo "$s" | cut -d '_' -f 1,2)
 	| tr ' ' _								\
 	| sed -E 's/[0-9]+-//g'							\
 	| sed "s/^/$s\t$host\ttrimmed\t/g"					\
-	| sed -E 's/_1\t/\t1\t/g'						\
-	| sed -E 's/_2\t/\t2\t/g'
+	| sed -E "s/_1\t$host/\t1\t$host/g"					\
+	| sed -E "s/_2\t$host/\t2\t$host/g"
 done
 
 # FastQC reports for filtered files
@@ -43,8 +43,8 @@ do  host=$(echo "$s" | cut -d '_' -f 1,2)
 	| tr ' ' _								\
 	| sed "s/^/$s\t$host\tfiltered\t/g"					\
 	| sed -E 's/[0-9]+-//g'							\
-	| sed -E "s/_1\t/\t1\t/g"						\
-	| sed -E "s/_2\t/\t2\t/g"
+	| sed -E "s/_1\t$host/\t1\t$host/g"					\
+	| sed -E "s/_2\t$host/\t2\t$host/g"
 done
 
 ## FastQC reports for double filtered files
@@ -57,8 +57,8 @@ do  host=$(echo "$s" | cut -d '_' -f 1,2)
 	| tr ' ' _								\
 	| sed -E 's/[0-9]+-//g'							\
 	| sed "s/^/$s\t$host\tdoublefiltered\t/g"				\
-	| sed -E "s/_1\t/\t1\t/g"						\
-	| sed -E "s/_2\t/\t2\t/g"
+	| sed -E "s/_1\t$host/\t1\t$host/g"					\
+	| sed -E "s/_2\t$host/\t2\t$host/g"
 done
 unset samples
 
