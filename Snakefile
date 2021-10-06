@@ -103,7 +103,7 @@ rule fastqc_doublefiltered_data:
 rule collect_reads_stats:
   input:
     expand("analyses/analyses_reads/{hostcode}_{PE}"                  ,hostcode=HOSTCODES,PE=DIRECTIONS),
-    expand("analyses/analyses_reads/{hostcode}_{PE}"                  ,hostcode=HOSTCODES,PE=DIRECTIONS),
+    expand("analyses/analyses_reads_trimmed/{hostcode}_{PE}"                  ,hostcode=HOSTCODES,PE=DIRECTIONS),
     expand("analyses/analyses_reads_trimmed_filtered/{hostcode}_{PE}" ,hostcode=HOSTCODES,PE=DIRECTIONS),
     expand("analyses/analyses_reads_doublefiltered/{hostcode}_{PE}"   ,hostcode=HOSTCODES,PE=DIRECTIONS),
     expand("data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES,assemblyfile='contigs')
