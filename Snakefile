@@ -105,8 +105,8 @@ rule collect_reads_stats:
     expand("analyses/analyses_reads/{hostcode}_{PE}"                  ,hostcode=HOSTCODES,PE=DIRECTIONS),
     expand("analyses/analyses_reads_trimmed/{hostcode}_{PE}"                  ,hostcode=HOSTCODES,PE=DIRECTIONS),
     expand("analyses/analyses_reads_trimmed_filtered/{hostcode}_{PE}" ,hostcode=HOSTCODES,PE=DIRECTIONS),
-    expand("analyses/analyses_reads_doublefiltered/{hostcode}_{PE}"   ,hostcode=HOSTCODES,PE=DIRECTIONS),
-    expand("data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES,assemblyfile='contigs')
+    expand("analyses/analyses_reads_doublefiltered/{hostcode}_{PE}"   ,hostcode=HOSTCODES,PE=DIRECTIONS)
+#    expand("data/assembly_{assemblytype}/{hostcode}/{assemblyfile}.fasta",assemblytype=ASSEMBLYTYPES,hostcode=HOSTCODES,assemblyfile='contigs')
   output:
     "analyses/reads_stats.tab"
   shell:
