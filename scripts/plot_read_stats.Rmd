@@ -34,3 +34,364 @@ read.stats <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/ana
 head(read.stats)
 ```
 
+# graph gbases
+
+## cleaning
+This table mixes several data types in which I'm interested for this graph, but this also complicates graphing. 
+Here I'll split the reads statistics from the assembly statistics.
+```{r}
+levels(read.stats$stage)
+```
+
+I'll select the data I want based on stage levels, then clean up unused factor levels.
+```{r}
+gbase <- read.stats[ stage %in% c('raw','trimmed','filtered','doublefiltered')]
+gbase$stage  <- factor(gbase$stage ,levels=c('raw',
+                                             'trimmed',
+                                             'filtered',
+                                             'doublefiltered'
+                                             )
+                       )
+gbase$metric <- factor(gbase$metric,levels=c('Sequence_length',
+                                             'Total_Sequences'
+                                             )
+                       )
+gbase$host   <- factor(gbase$host ,levels=c("Azspnov_IRRI1",
+                                            "Azspnov_IRRI2",
+                                            "Azmic_IRRI",
+                                            "Azmex_IRRI",
+                                            "Azfil_lab",
+                                            "Azfil_minuscyano",
+                                            "Azfil_wild",
+                                            "Azrub_IRRI","Aznil_IRRI"
+                                            )
+                       )
+summary(gbase)
+```
+
+## calculate giga bases
+Nextup, I'd like to graph Gbases of sequencing rather than the read count.
+Indeed I have been a bit lazy not counting gigabases from the fastq files and just multiplying read count with maximum read length.
+Since the vast majority of all reads are the maximum length anyway, this is a choice of mine on spending computational resources.
+Anyway, let's reshape/cast this datatable so I can easily multiply the right numbers, and then sum the forward and reverse reads.
+
+```{r}
+gbase.sample <- dcast(data = gbase, sample + direction + host + stage ~ metric)
+gbase.sample$bases <- gbase.sample$Sequence_length * gbase.sample$Total_Sequences
+gbase.sample <- dcast(data = gbase.sample,formula =  sample + host + stage ~ . ,fun.aggregate = sum, value.var = 'bases')
+names(gbase.sample)[4] <- c('bases')
+gbase.sample$bases <- gbase.sample$bases / 1000000000
+head(gbase.sample)
+```
+
+## gbases per host species
+And I do the same per host species, rather than by sequencing sample/run.
+
+```{r}
+gbase.host <- dcast(data = gbase, host + direction + stage ~ metric,fun.aggregate = sum)
+gbase.host$bases <- gbase.host$Sequence_length * gbase.host$Total_Sequences
+gbase.host <- dcast(data = gbase.host,formula =  host + stage ~ .,fun.aggregate = sum, value.var = 'bases')
+names(gbase.host)[3] <- c('bases')
+gbase.host$bases <- gbase.host$bases / 1000000000
+head(gbase.host)
+```
+
+## Relative amounts
+Plotting raw gbase numbers becomes a bit messy, and it's hard to distinguish the wild (small) samples from the lab (big) samples.
+Here, I'll recalculate all numbers as a percentage of the starting amount of gbase sequencing and plot again.
+
+```{r}
+gbase.host.relative <- dcast(data = gbase.host, host  ~ stage,value.var = 'bases' )
+gbase.host.relative$raw.rel <- 100 * gbase.host.relative$raw / gbase.host.relative$raw
+gbase.host.relative$trimmed.rel <- 100 * gbase.host.relative$trimmed / gbase.host.relative$raw
+gbase.host.relative$filtered.rel <- 100 * gbase.host.relative$filtered / gbase.host.relative$raw
+gbase.host.relative$doublefiltered.rel <- 100 * gbase.host.relative$doublefiltered / gbase.host.relative$raw 
+gbase.host.relative <- gbase.host.relative[,c(1,6,7,8,9)]
+gbase.host.relative <- data.table::melt(data = gbase.host.relative,id.vars=c('host'),variable.name='stage',value.name='bases',variable.factor=T)
+```
+
+
+# plot
+One of the things I'd like to show is the decreasing amount of data through filtering, and how that differs per species. 
+The assembly effort and size is a consequence of that input, but that comes later.
+I want to experiment with three things:
+1. Line graphs, decreasing lines show the filtering efficienncy quite nicely I think
+2. Bar graphs
+3. flowcharts (I'll likely ditch this option for time management reasons)
+
+I'm choosing to implement a colour scheme per host species, not per sample, and to match this to the data-input-table/figure.
+
+## lines
+One line per Sample, but split up per host:
+```{r}
+plot_gbase_sample <- ggplot(gbase.sample)
+plot_gbase_sample <- plot_gbase_sample + aes(y=bases,x=stage,group=sample,col=host)
+plot_gbase_sample <- plot_gbase_sample + geom_line(stat='identity')
+plot_gbase_sample <- plot_gbase_sample + theme_minimal()
+plot_gbase_sample <- plot_gbase_sample + geom_point()
+plot_gbase_sample <- plot_gbase_sample + theme(axis.text.x = element_text(angle = 45,hjust = 1))
+plot_gbase_sample <- plot_gbase_sample + facet_wrap( ~ host)
+plot_gbase_sample <- plot_gbase_sample + scale_color_discrete(type = c('#3633d7',
+                                                                       '#3633d7',
+                                                                       '#33c8d7',
+                                                                       '#33d76d',
+                                                                       '#a2d733',
+                                                                       '#a2d733',
+                                                                       '#a2d733',
+                                                                       '#f8b136',
+                                                                       '#d733a7'
+                                                                       )
+                                                              )
+plot_gbase_sample
+```
+
+Now all samples in one plot, and scaled to 100% for each sample individually.
+Using the raw numbers here becomes an ugly mess.
+What I like about this figure is that is shows nicely how the first filter is efficient in  __filiculoides__ and species that are phylogeneticaly close to it, and less so in further removed species.
+Second, and related to this, is that the second filter hardly does anything in the __filiculoides__ and is especially ifficient in further removed species.
+Ideally, I would have assembly size and effort in this same figure, related to the input data in some flowcharty way. 
+But this tangled up mess of lines does not allow for adding more complexity, at least not in a way in which I can effectively portray the data and my point.
+
+```{r}
+plot_gbase_host_relative <- ggplot(gbase.host.relative)
+plot_gbase_host_relative <- plot_gbase_host_relative + aes(y=bases,x=stage,group=host,col=host)
+plot_gbase_host_relative <- plot_gbase_host_relative + geom_line(stat='identity')
+plot_gbase_host_relative <- plot_gbase_host_relative + geom_point()
+plot_gbase_host_relative <- plot_gbase_host_relative + theme_minimal()
+plot_gbase_host_relative <- plot_gbase_host_relative + theme(axis.text.x = element_text(angle = 45,hjust = 1))
+plot_gbase_host_relative <- plot_gbase_host_relative + scale_y_continuous(lim=c(0,100))
+plot_gbase_host_relative <- plot_gbase_host_relative + scale_color_discrete(type = c('#3633d7','#3633d7','#33c8d7','#33d76d','#a2d733','#a2d733','#a2d733','#f8b136','#d733a7'))
+plot_gbase_host_relative
+```
+## bars
+In bar graphs, I like the solidity and room for more complexity that I can add. 
+However, using absolute numbers is a mess and the relative differences become hardly visible even in a big version of the figure.
+OK, I can let go of the matched y-axes, but then I might as well work with percentages. 
+
+```{r}
+plot_gbase_host <- ggplot(gbase.host)
+plot_gbase_host <- plot_gbase_host + aes(y=bases,fill=host,x=stage,group=host)
+plot_gbase_host <- plot_gbase_host + geom_bar(stat='identity',position='dodge')
+plot_gbase_host <- plot_gbase_host + facet_wrap(~host,scales = "free_y")
+#plot_gbase_host <- plot_gbase_host + facet_wrap(~host)
+plot_gbase_host <- plot_gbase_host + theme_minimal()
+plot_gbase_host <- plot_gbase_host + theme(axis.text.x = element_text(angle = 45,hjust = 1))
+plot_gbase_host <- plot_gbase_host + scale_fill_discrete(type = c('#3633d7',
+                                                                  '#3633d7',
+                                                                  '#33c8d7',
+                                                                  '#33d76d',
+                                                                  '#a2d733',
+                                                                  '#a2d733',
+                                                                  '#a2d733',
+                                                                  '#f8b136',
+                                                                  '#d733a7'
+                                                                  )
+                                                         )
+plot_gbase_host
+```
+
+So let's try percentages. 
+I dislike that there is no more mention of the input data discrete size, but in a way that's taken care of already in the table before.
+It's a pick-your-batles situation and I'm leaning towards percentages over free-y-axes just because I generally find these misleading... Ok I don't know. Anyway moving on.
+
+```{r}
+plot_gbase_host_relative <- ggplot(gbase.host.relative)
+plot_gbase_host_relative <- plot_gbase_host_relative + aes(y=bases,fill=host,x=stage,group=host)
+plot_gbase_host_relative <- plot_gbase_host_relative + geom_bar(stat='identity',position='dodge')
+#plot_gbase_host_relative <- plot_gbase_host_relative + geom_line(stat='identity')
+plot_gbase_host_relative <- plot_gbase_host_relative + facet_wrap(~host)
+plot_gbase_host_relative <- plot_gbase_host_relative + theme_minimal()
+plot_gbase_host_relative <- plot_gbase_host_relative + theme(axis.text.x = element_text(angle = 45,hjust = 1))
+plot_gbase_host_relative <- plot_gbase_host_relative + scale_fill_discrete(type = c('#3633d7',
+                                                                                    '#3633d7',
+                                                                                    '#33c8d7',
+                                                                                    '#33d76d',
+                                                                                    '#a2d733',
+                                                                                    '#a2d733',
+                                                                                    '#a2d733',
+                                                                                    '#f8b136',
+                                                                                    '#d733a7'
+                                                                                    )
+                                                                           )
+plot_gbase_host_relative
+```
+
+
+## Flowcharts
+Down the rabbit hole we go, let's do flowcharts in R:
+I'm following advice and using code from here: https://www.r-bloggers.com/2019/06/data-flow-visuals-alluvial-vs-ggalluvial-in-r/
+
+```{r}
+libs <- c('dplyr', 'stringr', 'forcats',     # wrangling
+          'knitr','kableExtra',               # table styling
+          'ggplot2','alluvial','ggalluvial')  # plots
+invisible(lapply(libs, library, character.only = TRUE))
+```
+
+```{r}
+gbase.flow <- dcast(data = gbase.sample,formula =  host + sample ~ stage, value.var = 'bases',fun.aggregate = sum)
+
+```
+
+Ok this is going to be too much work, I'm not in the mood to completely rework the table shape etctera.
+```{r}
+rabithole <-  ggplot(gbase.flow, aes(y = sample, axis1 = raw, axis2=trimmed))
+rabithole <- rabithole + geom_alluvium()
+#rabithole
+
+  # geom_alluvium(aes(fill = origin), aes.bind=TRUE, width = 1/12) +
+  # geom_stratum(width = 1/4, fill = "white", color = "black") +
+  # geom_text(stat = "stratum", label.strata = TRUE) +
+  # scale_x_discrete(limits = c("Origin", "Carrier", "Destination"),
+  #                  expand = c(.05, .05)) +
+  # scale_fill_manual(values = c("red", "orange", "blue")) +
+  # labs(y = "Cases") +
+  # theme_minimal() +
+  # theme(legend.position = "none") +
+  # ggtitle("NYC flights volume for top destinations and airlines")
+```
+
+# Plot assembly size and effort
+```{r}
+levels(read.stats$stage)
+```
+
+I'll select the data I want based on stage levels, then clean up unused factor levels.
+```{r}
+assem.stats        <- read.stats[ stage %in% c('assembly_singles_hostfiltered',
+                                               'assembly_singles_doublefiltered',
+                                               'assembly_hybrid_doublefiltered'
+                                               )]
+assem.stats$stage  <- factor(assem.stats$stage ,levels=c('assembly_singles_hostfiltered',
+                                                         'assembly_singles_doublefiltered',
+                                                         'assembly_hybrid_doublefiltered'
+                                                         )
+                       )
+assem.stats$metric <- factor(assem.stats$metric,levels=c('RAM',
+                                             'size'
+                                             )
+                       )
+assem.stats$host   <- factor(assem.stats$host ,levels=c("Azspnov_IRRI1",
+                                            "Azspnov_IRRI2",
+                                            "Azmic_IRRI",
+                                            "Azmex_IRRI",
+                                            "Azfil_lab",
+                                            "Azfil_minuscyano",
+                                            "Azfil_wild",
+                                            "Azrub_IRRI","Aznil_IRRI"
+                                            )
+                       )
+assem.stats$direction <- NULL
+assem.stats$value[assem.stats$metric == 'size'] <- assem.stats$value[assem.stats$metric == 'size'] / 1000000
+summary(assem.stats)
+```
+
+```{r}
+assem_bars <- ggplot(assem.stats)
+assem_bars <- assem_bars + aes(y=value,fill=host,x=stage,group=host)
+assem_bars <- assem_bars + geom_bar(stat='identity',position='dodge')
+#assem_bars <- assem_bars + geom_line(stat='identity')
+assem_bars <- assem_bars + facet_grid(metric~host,scales = 'free_y')
+assem_bars <- assem_bars + theme_classic()
+assem_bars <- assem_bars + theme(axis.text.x = element_text(angle = 45,hjust = 1))
+assem_bars <- assem_bars + scale_fill_discrete(type = c('#3633d7',
+                                                                                    '#3633d7',
+                                                                                    '#33c8d7',
+                                                                                    '#33d76d',
+                                                                                    '#a2d733',
+                                                                                    '#a2d733',
+                                                                                    '#a2d733',
+                                                                                    '#f8b136',
+                                                                                    '#d733a7'
+                                                                                    )
+                                                                           )
+assem_bars
+```
+
+Perhaps one major observation is that even a marginal filtering fraction can yield a huge decrease in assembly size and effort. 
+In terms of how I want to visualise this, I think I need to merge the tables again and work with facets to get everything into one figure.
+
+
+# Merge plots
+
+To merge plots in one 
+
+```{r}
+merge.stats <- gbase.sample
+merge.stats$metric <- factor('gbase',levels=c('gbase','RAM','size'))
+names(merge.stats)[names(merge.stats) == 'bases'] <- 'value'
+merge.stats <- rbind(merge.stats,assem.stats)
+summary(merge.stats)
+```
+
+Next, I'd like to reduce the stage factor levels a bit to make it easier to see what stages between assembly stats and read stats correspond.
+
+```{r}
+merge.stats$stage[merge.stats$stage == 'assembly_singles_hostfiltered'] <- 'filtered'
+merge.stats$stage[merge.stats$stage == 'assembly_singles_doublefiltered'] <- 'doublefiltered'
+merge.stats$stage <- factor(merge.stats$stage,levels=c('raw','trimmed','filtered','doublefiltered','hybrid-assembly'))
+merge.stats$stage[is.na(merge.stats$stage)] <- 'hybrid-assembly'
+```
+
+Now for plotting, it looks like this: I can choose to have separate bars for different samples (only azolla filiculoides) or one big bar summed up.
+
+```{r}
+merge_bars <- ggplot(merge.stats)
+merge_bars <- merge_bars + aes(y=value,fill=host,x=stage,group=host)
+#merge_bars <- merge_bars + geom_bar(stat='identity',position='dodge')
+merge_bars <- merge_bars +   stat_summary(fun.y = "sum", geom = "bar", position = "identity")
+#merge_bars <- merge_bars + geom_line(stat='identity')
+merge_bars <- merge_bars + facet_grid(metric~host,scales = 'free_y')
+merge_bars <- merge_bars + theme_classic()
+merge_bars <- merge_bars + theme(axis.text.x = element_text(angle = 45,hjust = 1))
+merge_bars <- merge_bars + scale_fill_discrete(type = c('#3633d7',
+                                                                                    '#3633d7',
+                                                                                    '#33c8d7',
+                                                                                    '#33d76d',
+                                                                                    '#a2d733',
+                                                                                    '#a2d733',
+                                                                                    '#a2d733',
+                                                                                    '#f8b136',
+                                                                                    '#d733a7'
+                                                                                    )
+                                                                           )
+merge_bars
+```
+
+## summed up per host
+
+```{r}
+merge.stats.host <- gbase.host
+merge.stats.host$metric <- factor('gbase',levels=c('gbase','RAM','size'))
+names(merge.stats.host)[names(merge.stats.host) == 'bases'] <- 'value'
+merge.stats.host <- rbind(merge.stats.host,assem.stats[,2:5])
+merge.stats.host$stage[merge.stats.host$stage == 'assembly_singles_hostfiltered'] <- 'filtered'
+merge.stats.host$stage[merge.stats.host$stage == 'assembly_singles_doublefiltered'] <- 'doublefiltered'
+merge.stats.host$stage <- factor(merge.stats.host$stage,levels=c('raw','trimmed','filtered','doublefiltered','hybrid-assembly'))
+merge.stats.host$stage[is.na(merge.stats.host$stage)] <- 'hybrid-assembly'
+```
+
+
+```{r}
+merge_bars <- ggplot(merge.stats.host)
+merge_bars <- merge_bars + aes(y=value,fill=host,x=stage,group=host)
+merge_bars <- merge_bars + geom_col(position='dodge',)
+#merge_bars <- merge_bars + geom_line(stat='identity')
+merge_bars <- merge_bars + facet_grid(metric~host,scales = 'free_y')
+merge_bars <- merge_bars + theme_classic()
+merge_bars <- merge_bars + theme(axis.text.x = element_text(angle = 45,hjust = 1))
+merge_bars <- merge_bars + scale_fill_discrete(type = c('#3633d7',
+                                                                                    '#3633d7',
+                                                                                    '#33c8d7',
+                                                                                    '#33d76d',
+                                                                                    '#a2d733',
+                                                                                    '#a2d733',
+                                                                                    '#a2d733',
+                                                                                    '#f8b136',
+                                                                                    '#d733a7'
+                                                                                    )
+                                                                           )
+merge_bars
+```
+
+ok wait, something is going very very wrong with these bars, they're clearly not summed up propperly and I don't quite understand why...
