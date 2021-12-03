@@ -109,67 +109,66 @@ rm(singlelibs,hybridlibs)
 # Assembly samples
 In this stats and taxonomy file there is information about `r length(levels(metrics$assembly))` types of assemblies being: `r levels(metrics$assembly)`
 Irrespective these assembly types there are `r length(levels(metrics$sample))` samples or 'hostcodes' als they are called in the Snakemake workflow.
+The single libraries table counts `r length(levels(metrics_single$sample))` samples in assembly types: `r levels(metrics_single$assembly)`.
 
 # Assembly size
-Let's plot the length distribution for the scaffolds and contigs assembled in the different assemblies. Contigs or scaffolds shorter than 2.5kbp are discarded by default in metabat2, the red vertical line indicates this separation. (ommitted for memmory usage & compute time)
-```{r lengthplot_linear, fig.height = 10, fig.width = 15}
-# lengthplot <- ggplot (metrics,aes(x=length,col=scaffolded,alpha=.4))
-# lengthplot <- lengthplot + geom_freqpoly(bins=50)
-# lengthplot <- lengthplot + facet_grid(assembly ~ sample)
-# lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
-# lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
-# lengthplot <- lengthplot + theme_classic()
-# lengthplot <- lengthplot + labs(y='count',x='sequence length')
-# lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
-# lengthplot <- lengthplot + theme(legend.position = "bottom",
-#                                  strip.text.x = element_text(angle = 80),
-#                                  axis.text.x = element_text(angle = 80,hjust = 1))
-# lengthplot
-```
 
-the double log10 axis exaggerates the amount of sequencing lost, ploted in a linear x-axis it is more fair to judge. (ommitted for memmory usage & compute time)
-```{r lengthplot_log10, fig.height = 10, fig.width = 15}
-# lengthplot <- ggplot(metrics,aes(x=length,col=scaffolded,alpha=.4))
-# lengthplot <- lengthplot + geom_freqpoly(bins=50)
-# lengthplot <- lengthplot + facet_grid(assembly ~ sample)
-# lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
-# #lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
-# lengthplot <- lengthplot + theme_classic()
-# lengthplot <- lengthplot + labs(y='count',x='sequence length')
-# lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
-# lengthplot <- lengthplot + theme(legend.position = "bottom",
-#                                  strip.text.x = element_text(angle = 80),
-#                                  axis.text.x = element_text(angle = 80,hjust = 1))
-# lengthplot
-```
-
-The difference between length distributions of scaffolds and contigs is minimal and distributed as expected. Plotting the lengths as boxplots however shows that the _Azolla filiculoides_ samples, those filtered for host DNA most efficiently, clearly have a better length distribution than the other samples do. Here I show only sequences longer than 2500bp.
-
-First, create a 2500+ subset.
-
-```{r subset to 2500}
-metrics2500 <- metrics[length >= 2500]
-```
-
-Just wondering how much data  I have, some numbers in total:
-
+## Assembly size
+Overall, looking at the scaffolded assemblies, I've assembled nearly 920mbase of DNA with a median size of 4.2kb.
+The size distribution is clearly skewed towards the short end of the spectrum, for the mean size is much bigger.
 ```{r}
-metrics2500[assembly == 'singles_doublefiltered', .(count=length(length), length_mb=sum(length)/1000000)]
+knitr::kable(
+  metrics[assembly == 'singles_doublefiltered' | assembly == 'hybrid_doublefiltered' , 
+          .(contig_count=length(length), 
+            length_mb=sum(length)/1000000, 
+            median_length_kb=median(length),
+            average_size_kb=mean(length)
+            ), 
+          .(assembly,scaffolded)]
+  ,digits = 0
+)
 ```
-
-and some numbers per sample:
-
+and the same numbers per sample:
 ```{r}
-metrics2500[assembly == 'singles_doublefiltered', .(count=length(length), length_mb=sum(length)/1000000),by=sample]
+knitr::kable(
+  metrics[assembly == 'singles_doublefiltered' & scaffolded == 'scaffolds', 
+          .(contig_count=length(length), 
+            length_mb=sum(length)/1000000, 
+            median_length_kb=median(length),
+            average_size_kb=mean(length)
+            ), 
+          sample]
+  ,digits = 0
+)
 ```
 
+## length distributions
+Let's plot the length distribution for the scaffolds and contigs assembled in the different assemblies.
+Contigs or scaffolds shorter than 2.5kbp are discarded by default in metabat2 and by default not loaded in this R script.
+```{r lengtt hplot_linear, fig.height = 8, fig.width = 15}
+lengthplot<- ggplot (metrics,aes(x=length,col=scaffolded,alpha=.4))
+lengthplot <- lengthplot + geom_freqpoly(bins=50)
+lengthplot <- lengthplot + facet_grid(assembly ~ sample)
+#lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
+lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
+lengthplot <- lengthplot + theme_classic()
+lengthplot <- lengthplot + labs(y='count',x='sequence length')
+lengthplot <- lengthplot + theme(legend.position = "bottom",
+                                strip.text.x = element_text(angle = 80),
+                                axis.text.x = element_text(angle = 80,hjust = 1))
+lengthplot
+```
 
-
-And plot:
+The difference between length distributions of scaffolds and contigs is minimal and distributed as expected; scaffold frequency lines peak a bit to the right of contig frequency lines.
+Plotting the lengths as boxplots however shows the subtle differences a bit better: the upper quartile often is a bit higher for scaffolded assemblies, or when it is lower, the scaffolded assemblies of more outliers in the high end of the boxplots.
+The lower end of the length distribution does not benefit from scaffolding as much, but also to such an extent that the scaffolded assemblies contain more scaffolds than the contig assemblies contain contigs.
+We'll learn later that the minuscyano samples are very lowly diverse and sufficiently saturated to cover all microbes with substantial depth.
+This is my explanaition for the substantial higher length distribution for minuscyano single library assemblies.
+The hybrid assemblies show less of a difference amongst each other, supporting the theory that the short contigs are caused by graph breaks of lowly abundant genomes.
 
 ```{r lengthboxplot_2500_log10, fig.height = 8, fig.width = 15}
 #names(metrics2500)
-lenghtbox <- ggplot(metrics2500,aes(y=length,x=sample,col=scaffolded,alpha=.4))
+lenghtbox <- ggplot(metrics,aes(y=length,x=sample,col=scaffolded,alpha=.4))
 lenghtbox <- lenghtbox + geom_boxplot()
 #lenghtbox <- lenghtbox + geom_violin(draw_quantiles = T)
 lenghtbox <- lenghtbox + facet_grid(assembly ~ . )
@@ -179,9 +178,13 @@ lenghtbox <- lenghtbox + theme(axis.text.x = element_text(angle = 45,hjust = 1))
 lenghtbox
 ```
 
+
+# Assembly filtering
+
+
 I wonder if scaffolds after the double filter are longer than if they are only filtered for host DNA. Plotting these as boxplots again. Naturally the distributions will differ for sequences identified by CAT as plant were filtered out. Hence, I plot these separatelly.
 ```{r lengthboxplot_2500+_perkingdom, fig.height = 10, fig.width = 15}
-lenghtbox <- ggplot(metrics2500[scaffolded == 'contigs'],
+lenghtbox <- ggplot(metrics[scaffolded == 'contigs'],
                     aes(y=length,col=assembly,alpha=.4)
                     )
 lenghtbox <- lenghtbox + facet_grid(superkingdom ~ sample)
