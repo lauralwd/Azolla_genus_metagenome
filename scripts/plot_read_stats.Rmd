@@ -155,12 +155,14 @@ But this tangled up mess of lines does not allow for adding more complexity, at 
 ```{r}
 plot_gbase_host_relative <- ggplot(gbase.host.relative)
 plot_gbase_host_relative <- plot_gbase_host_relative + aes(y=bases,x=stage,group=host,col=host)
-plot_gbase_host_relative <- plot_gbase_host_relative + geom_line(stat='identity')
-plot_gbase_host_relative <- plot_gbase_host_relative + geom_point()
+#plot_gbase_host_relative <- plot_gbase_host_relative + geom_line(stat='identity')
+#plot_gbase_host_relative <- plot_gbase_host_relative + geom_point()
+plot_gbase_host_relative <- plot_gbase_host_relative + geom_bar(stat='identity',position='dodge',aes(y=bases,x=stage,fill=host))
 plot_gbase_host_relative <- plot_gbase_host_relative + theme_minimal()
 plot_gbase_host_relative <- plot_gbase_host_relative + theme(axis.text.x = element_text(angle = 45,hjust = 1))
 plot_gbase_host_relative <- plot_gbase_host_relative + scale_y_continuous(lim=c(0,100))
 plot_gbase_host_relative <- plot_gbase_host_relative + scale_color_discrete(type = c('#3633d7','#3633d7','#33c8d7','#33d76d','#a2d733','#a2d733','#a2d733','#f8b136','#d733a7'))
+plot_gbase_host_relative <- plot_gbase_host_relative + scale_fill_discrete(type = c('#3633d7','#3633d7','#33c8d7','#33d76d','#a2d733','#a2d733','#a2d733','#f8b136','#d733a7'))
 plot_gbase_host_relative
 ```
 ## bars
@@ -290,6 +292,7 @@ summary(assem.stats)
 assem_bars <- ggplot(assem.stats)
 assem_bars <- assem_bars + aes(y=value,fill=host,x=stage,group=host)
 assem_bars <- assem_bars + geom_bar(stat='identity',position='dodge')
+assem_bars <- assem_bars + geom_text(aes(label=value))
 #assem_bars <- assem_bars + geom_line(stat='identity')
 assem_bars <- assem_bars + facet_grid(metric~host,scales = 'free_y')
 assem_bars <- assem_bars + theme_classic()
@@ -318,7 +321,7 @@ To merge plots in one
 
 ```{r}
 merge.stats <- gbase.sample
-merge.stats$metric <- factor('gbase',levels=c('gbase','RAM','size'))
+merge.stats$metric <- factor('gbase',levels=c('RAM','size','gbase'))
 names(merge.stats)[names(merge.stats) == 'bases'] <- 'value'
 merge.stats <- rbind(merge.stats,assem.stats)
 summary(merge.stats)
