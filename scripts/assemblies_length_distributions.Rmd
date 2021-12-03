@@ -11,7 +11,27 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
 ```
+
+
  
+# Aim
+In this document I aim to explore and discribe several metagenome assembly statistics for several metagenome assemblies derived from sequencing data of Azolla ferns. 
+The statistics I work with are contig/scaffold length, depth (abundance), taxonomy, and ORF count. 
+Later I'll add ORF length distributions as well, but that data needs to be generated first.
+The use of discribing metagenome assemblies as whole assemblies, is to compare these assemblies agnostic of the binning process (and choices made in that process).
+Based on just a best estimate of taxonomy and depth, similarities may be found and species diversity may be explored comparing all host species simultaneously.
+
+## TODO
+
+* make collapsible html page
+* make pdf output
+* ORF distributions per assembly
+* ORF distributions per assembly, per kingdom
+* rearange document to simultaneously process single and hybrid libraries
+* discribe packages used
+* CAT reference
+
+
 # import libraries and data for single library assemblies
 ```{r import libraries and data}
 #setwd
