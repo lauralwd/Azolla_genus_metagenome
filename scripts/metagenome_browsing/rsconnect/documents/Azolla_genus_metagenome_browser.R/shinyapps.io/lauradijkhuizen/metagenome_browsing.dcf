@@ -1,0 +1,13 @@
+name: metagenome_browsing
+title: metagenome_browsing
+username:
+account: lauradijkhuizen
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5204971
+bundleId: 5293225
+url: https://lauradijkhuizen.shinyapps.io/metagenome_browsing/
+when: 1637856689.50249
+lastSyncTime: 1637856689.50253
+asMultiple: FALSE
+asStatic: FALSE
