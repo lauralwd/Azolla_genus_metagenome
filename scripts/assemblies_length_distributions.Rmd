@@ -231,6 +231,8 @@ There might be no direct benefit, other than making a hybrid assembly feasible w
 
 # Taxonomy
 Diving further into the taxonomy of my samples, I'd like to plot them in coverage vs. length plots.
+
+## superkingdom
 First, I do this on the superkingdom level for scaffolds.
 ```{r tax_dotplot_kingdom, fig.height = 10, fig.width = 15 }
 length_dist <- ggplot(metrics[scaffolded == 'scaffolds'],aes(x=length,y=coverage,size=length,alpha=.001,col=superkingdom))
@@ -260,6 +262,7 @@ In the hostfiltered samples, it's clear that the unclassified contigs follow the
 I find this sufficient to filter them out of further graphs.
 The lower assembly limit for hybrid assemblies looks unlike what I expected.
 
+## phylum level
 Looking at the phylum level, these are the most dominant phyla in my sample (given the constraints mentioned above).
 ```{r}
 knitr::kable(
