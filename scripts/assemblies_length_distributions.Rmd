@@ -180,38 +180,54 @@ lenghtbox
 
 
 # Assembly filtering
+I wonder if scaffolds after the double filter are longer than if they are only filtered for host DNA. 
+First I plot this as a table, and later the length distributions in a graph.
 
+```{r}
+knitr::kable(
+  metrics[scaffolded == 'scaffolds' & assembly != 'hybrid_doublefiltered',
+          .(contig_count=length(length), 
+            length_mb=sum(length)/1000000, 
+            median_length_kb=median(length),
+            average_size_kb=mean(length)
+            ), 
+          .(superkingdom,assembly)]
+  ,digits = 0
+)
+```
+Based on this table, summing assembly sizes for all samples, the filtering had a negligible impact on bacterial assembly size, but drastically reduced eukaryotic assembly size.
+The not classified and empty category were also reduced in size, but not as drastic as the eukaryotic set.
+This makes perfect sense for I used that taxonomy indication to filter out reads again, what's surprising is that still eukaryotic contigs remain.
+Additionally, viruses and archaea are also reduced in assembly size. 
+This is not a wanted effect, so for these kingdoms specifically (if classified correctly) I'll refer to the original rather than the double filtered assemblies when that time comes.
+Based on these tables, assembly length and median/mean lenghts have not improved.
 
-I wonder if scaffolds after the double filter are longer than if they are only filtered for host DNA. Plotting these as boxplots again. Naturally the distributions will differ for sequences identified by CAT as plant were filtered out. Hence, I plot these separatelly.
+Now let's plot this as boxplots.
+Here, I'm splitting the contigs based on superkingdom, and for legibility, I'm not displaying contigs which were not classified.
+I do include archaea and viruses, even though their numbers are limited.
+Naturally the distributions will differ for sequences identified by CAT as plant were filtered out. Hence, I plot these separately.
 ```{r lengthboxplot_2500+_perkingdom, fig.height = 10, fig.width = 15}
-lenghtbox <- ggplot(metrics[scaffolded == 'contigs'],
-                    aes(y=length,col=assembly,alpha=.4)
+lenghtbox <- ggplot(metrics[scaffolded == 'scaffolds' & 
+                              assembly != 'hybrid_doublefiltered' & 
+                              superkingdom != '' & 
+                              superkingdom != 'not classified'],
+                    aes(y=length/1000,col=assembly,alpha=.4)
                     )
-lenghtbox <- lenghtbox + facet_grid(superkingdom ~ sample)
+lenghtbox <- lenghtbox + facet_grid(superkingdom ~ sample,scales = 'free_y',space = 'free_y',)
 #lenghtbox <- lenghtbox + geom_violin()
 lenghtbox <- lenghtbox + geom_boxplot()
 #lenghtbox <- lenghtbox + geom_freqpoly(inherit.aes = F, aes(x=length,col=assembly,alpha=.4),binsize=80 ) 
 lenghtbox <- lenghtbox + theme_classic()
 lenghtbox <- lenghtbox + scale_y_log10()
-lenghtbox <- lenghtbox + geom_vline(xintercept =0)
+#lenghtbox <- lenghtbox + geom_vline(xintercept =0)
 lenghtbox <- lenghtbox + theme(axis.text.x=element_text(angle = 90,hjust = 1),legend.position = "bottom")
 lenghtbox
 ```
-To my complete surprise, filtering out plant DNA from the first assembly, filtering the reads and then reassembling the plant DNA depleted short sequences, has not yielded longer scaffolds nor contigs for Bacteria. It is odd that no contigs of the hostfiltered assembly were assigned a super kingdom but all end up in 'root (no rank)' or in 'NA'.
 
-Looking at the raw numbers, the double filtering does yield a couple of thousands of extra sequences.
-```{r, results='asis'}
-knitr::kable(metrics[,length(length),by=c('assembly','scaffolded')])
-```
-
-Comparing scaffolds only, 300 kbp extra was assembled in bacterial sequences.
-```{r, results='asis'}
-knitr::kable(metrics[superkingdom == 'Bacteria' ,sum(length),by=c('assembly','scaffolded')])
-```
-
-
-Plotting length by rank in the assembly (synonymous to node nr) shows that the increase in sequence length occurs in 
-
+To my surprise, filtering out plant DNA from the first assembly, filtering the reads and then reassembling the plant DNA depleted short sequences, has not yielded longer scaffolds nor contigs for Bacteria. 
+In hindsight, it became apparent to me that the assembly graphs of these drastically different taxa would not overlap in the assembly process, hence not ambiguity (in bacterial contigs) is filtered in this process, therefore no longer bacterial contigs are spit out of the assembly.
+On the bright side of things, the double filter did effectively reduce the eukaryotic fraction of the assembly whilst not impacting the bacterial fraction.
+There might be no direct benefit, other than making a hybrid assembly feasible where that was not the case with unfiltered nor host_filtered samples due to RAM constraints.
 
 # Taxonomy
 
