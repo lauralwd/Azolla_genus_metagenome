@@ -209,8 +209,20 @@ length_dist <- length_dist + guides(col=guide_legend(ncol=5))
 length_dist <- length_dist + theme(legend.position = "bottom",
                                    strip.text.x = element_text(angle = 80),
                                    axis.text.x = element_text(angle = 80,hjust = 1))
-#length_dist
+length_dist
 ```
+
+
+```{r}
+ggplotly(p=length_dist)
+```
+
+
+```{r}
+metrics_temp[, .(uniques=length(genus)) , by=order]
+rm(metrics_temp)
+```
+
 
 
 ```{r}
