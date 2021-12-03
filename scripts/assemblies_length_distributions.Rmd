@@ -279,8 +279,15 @@ knitr::kable(
 )
 ```
 
-```{r tax_dotplot_phylum, fig.height = 15, fig.width = 15 }
-length_dist <- ggplot(metrics[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota' & superkingdom != '' & superkingdom != 'not classified'],
+```{r tax_dotplot_phylum, fig.height = 10, fig.width = 15 }
+
+temp_DT <- metrics[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota' & superkingdom != '' & superkingdom != 'not classified']
+subset <- as.matrix(temp_DT[,.(length_mb=sum(length)/1000000),by=phylum][length_mb >= 1][order(-rank(length_mb))][,"phylum"])
+`%notin%` <- Negate(`%in%`)
+temp_DT[phylum %notin% subset,'phylum'] <- 'low abundant'
+
+
+length_dist <- ggplot(temp_DT,
                       aes(x=length,y=coverage,size=length,alpha=.001,col=phylum))
 length_dist <- length_dist + facet_grid(assembly ~ sample,scales = 'free_x')
 length_dist <- length_dist + geom_point()
@@ -292,6 +299,7 @@ length_dist <- length_dist + theme(legend.position = "bottom",
                                    strip.text.x = element_text(angle = 80),
                                    axis.text.x = element_text(angle = 80,hjust = 1))
 length_dist
+rm(temp_DT)
 ```
 
 And save to a png file
