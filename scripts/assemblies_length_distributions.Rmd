@@ -94,8 +94,10 @@ metrics2500[assembly == 'singles_doublefiltered', .(count=length(length), length
 And plot:
 
 ```{r lengthboxplot_2500_log10, fig.height = 8, fig.width = 15}
+#names(metrics2500)
 lenghtbox <- ggplot(metrics2500,aes(y=length,x=sample,col=scaffolded,alpha=.4))
 lenghtbox <- lenghtbox + geom_boxplot()
+#lenghtbox <- lenghtbox + geom_violin(draw_quantiles = T)
 lenghtbox <- lenghtbox + facet_grid(assembly ~ . )
 lenghtbox <- lenghtbox + theme_classic()
 lenghtbox <- lenghtbox + scale_y_log10()
@@ -105,13 +107,13 @@ lenghtbox
 
 I wonder if scaffolds after the double filter are longer than if they are only filtered for host DNA. Plotting these as boxplots again. Naturally the distributions will differ for sequences identified by CAT as plant were filtered out. Hence, I plot these separatelly.
 ```{r lengthboxplot_2500+_perkingdom, fig.height = 10, fig.width = 15}
-lenghtbox <- ggplot(metrics2500,
-                    aes(y=length,x=sample,col=assembly,alpha=.4)
+lenghtbox <- ggplot(metrics2500[scaffolded == 'contigs'],
+                    aes(y=length,col=assembly,alpha=.4)
                     )
-lenghtbox <- lenghtbox + facet_grid(scaffolded ~ superkingdom)
+lenghtbox <- lenghtbox + facet_grid(superkingdom ~ sample)
 #lenghtbox <- lenghtbox + geom_violin()
 lenghtbox <- lenghtbox + geom_boxplot()
-
+#lenghtbox <- lenghtbox + geom_freqpoly(inherit.aes = F, aes(x=length,col=assembly,alpha=.4),binsize=80 ) 
 lenghtbox <- lenghtbox + theme_classic()
 lenghtbox <- lenghtbox + scale_y_log10()
 lenghtbox <- lenghtbox + geom_vline(xintercept =0)
