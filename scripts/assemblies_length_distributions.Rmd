@@ -231,8 +231,8 @@ ggsave(filename = "./coverage_overlength_distributions_per_assembly_order.png",
        device = 'png',
        dpi = 500,
        units = 'cm',
-       width = 29.7,
-       height = 42 )
+       width = 21/9*16,
+       height = 21 )
 ```
 
 
@@ -273,7 +273,7 @@ lengthplot <- lengthplot + theme_classic()
 lengthplot <- lengthplot + labs(y='count',x='sequence length')
 lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
 lengthplot <- lengthplot + theme(legend.position = "bottom",
-                                 strip.text.x = element_text(angle = 80),
+                                 strip.text.x = element_text(),
                                  axis.text.x = element_text(angle = 80,hjust = 1))
 lengthplot
 ```
