@@ -1,7 +1,7 @@
 ---
-title: "Assembly statistics"
+title: "Azolla genus wide metagenome assembly taxonomy and statistics"
 author: "Laura Dijkhuizen"
-date: "07/03/2019"
+date: "03/12/2021"
 output:
   pdf_document: default
   html_notebook: default
