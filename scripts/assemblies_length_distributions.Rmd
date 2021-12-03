@@ -34,39 +34,39 @@ rm(classes,header)
 
 # Assembly samples
 In this stats and taxonomy file there is information about `r length(levels(metrics$assembly))` types of assemblies being: `r levels(metrics$assembly)`
-Irespective these assembly types there are `r length(levels(metrics$sample))` samples or 'hostcodes' as they are called in the Snakemake workflow.
+Irrespective these assembly types there are `r length(levels(metrics$sample))` samples or 'hostcodes' als they are called in the Snakemake workflow.
 
 # Assembly length
-Let's plot the length distribution for the scaffolds and contigs assembled in the different assemblies. Contigs or scaffolds shorter than 2.5kbp are discarded by default in metabat2, the red vertical line indicates this separation.
+Let's plot the length distribution for the scaffolds and contigs assembled in the different assemblies. Contigs or scaffolds shorter than 2.5kbp are discarded by default in metabat2, the red vertical line indicates this separation. (ommitted for memmory usage & compute time)
 ```{r lengthplot_linear, fig.height = 10, fig.width = 15}
-lengthplot <- ggplot (metrics,aes(x=length,col=scaffolded,alpha=.4))
-lengthplot <- lengthplot + geom_freqpoly(bins=50)
-lengthplot <- lengthplot + facet_grid(assembly ~ sample)
-lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
-lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
-lengthplot <- lengthplot + theme_classic()
-lengthplot <- lengthplot + labs(y='count',x='sequence length')
-lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
-lengthplot <- lengthplot + theme(legend.position = "bottom",
-                                 strip.text.x = element_text(angle = 80),
-                                 axis.text.x = element_text(angle = 80,hjust = 1))
-lengthplot
+# lengthplot <- ggplot (metrics,aes(x=length,col=scaffolded,alpha=.4))
+# lengthplot <- lengthplot + geom_freqpoly(bins=50)
+# lengthplot <- lengthplot + facet_grid(assembly ~ sample)
+# lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
+# lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
+# lengthplot <- lengthplot + theme_classic()
+# lengthplot <- lengthplot + labs(y='count',x='sequence length')
+# lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
+# lengthplot <- lengthplot + theme(legend.position = "bottom",
+#                                  strip.text.x = element_text(angle = 80),
+#                                  axis.text.x = element_text(angle = 80,hjust = 1))
+# lengthplot
 ```
 
-the double log10 axis slightly exagerates the amount of sequencing lost, ploted in a linear x-axis it is more fair to judge.
+the double log10 axis exaggerates the amount of sequencing lost, ploted in a linear x-axis it is more fair to judge. (ommitted for memmory usage & compute time)
 ```{r lengthplot_log10, fig.height = 10, fig.width = 15}
-lengthplot <- ggplot(metrics,aes(x=length,col=scaffolded,alpha=.4))
-lengthplot <- lengthplot + geom_freqpoly(bins=50)
-lengthplot <- lengthplot + facet_grid(assembly ~ sample)
-lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
-#lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
-lengthplot <- lengthplot + theme_classic()
-lengthplot <- lengthplot + labs(y='count',x='sequence length')
-lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
-lengthplot <- lengthplot + theme(legend.position = "bottom",
-                                 strip.text.x = element_text(angle = 80),
-                                 axis.text.x = element_text(angle = 80,hjust = 1))
-lengthplot
+# lengthplot <- ggplot(metrics,aes(x=length,col=scaffolded,alpha=.4))
+# lengthplot <- lengthplot + geom_freqpoly(bins=50)
+# lengthplot <- lengthplot + facet_grid(assembly ~ sample)
+# lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
+# #lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
+# lengthplot <- lengthplot + theme_classic()
+# lengthplot <- lengthplot + labs(y='count',x='sequence length')
+# lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
+# lengthplot <- lengthplot + theme(legend.position = "bottom",
+#                                  strip.text.x = element_text(angle = 80),
+#                                  axis.text.x = element_text(angle = 80,hjust = 1))
+# lengthplot
 ```
 
 The difference between length distributions of scaffolds and contigs is minimal and distributed as expected. Plotting the lengths as boxplots however shows that the _Azolla filiculoides_ samples, those filtered for host DNA most efficiently, clearly have a better length distribution than the other samples do. Here I show only sequences longer than 2500bp.
