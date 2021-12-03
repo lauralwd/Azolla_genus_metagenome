@@ -9,3 +9,9 @@ references/
 data/
 *.pdf
 *.html
+
+# R stuff
+.RData
+.Rhistory
+.Rproj.user/
+
