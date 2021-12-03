@@ -190,9 +190,16 @@ ggsave(filename = "./coverage_overlength_distributions_per_assembly_phylum.png",
 ```
 
 
-```{r tax_dotplot_order, fig.height = 20, fig.width = 15 }
-length_dist <- ggplot(metrics2500[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota'],aes(x=length,y=coverage,size=length,alpha=.001,col=order))
-length_dist <- length_dist + facet_grid(assembly ~ sample,scales = 'free_x')
+```{r tax_dotplot_order, fig.height = 10, fig.width = 15 }
+metrics_temp <- metrics2500[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota' & assembly == 'singles_doublefiltered']
+droplist <- metrics_temp[, .(uniques=length(genus)) < 10, by=order]$order[ metrics_temp[, .(uniques=length(genus)) < 50, by=order]$V1 == T ]
+droplist <- as.character(droplist)
+metrics_temp[order == "Chromatiales" | order == "Salinisphaerales" | order == "Neisseriales" | order == "Enterobacterales"  | order == "Bacteroidales" | order ==  "Solirubrobacterales"  | order ==  "Vibrionales" | order ==   "Sneathiellales"   | order ==       "Methylococcales"   | order == "Candidatus Babeliales*" | order == "Streptomycetales"  | order == "Nitrospirales"   | order ==   "Corynebacteriales"  | order ==  "Chloroflexales"  | order ==    "Selenomonadales"  | order ==   "Lactobacillales"  | order ==   "Alteromonadales"  | order == "Oceanospirillales"   | order == "Cellvibrionales"  | order ==   "Geodermatophilales"  | order ==  "Ortervirales"     | order ==   "Aeromonadales"  | order ==     "Myxococcales"  | order == "Chroococcales"   | order ==    "Entomoplasmatales"   | order ==   "Chroococcidiopsidales" | order ==  "Solibacterales"  | order == "Planctomycetales"  | order == "Desulfovibrionales" | order == "Pseudonocardiales" | order ==  "Verrucomicrobiales"   | order ==  "Chlorobiales"  | order ==    "Clostridiales"  | order ==  "Marinilabiliales"  | order ==  "Holosporales"   | order == "Desulfuromonadales" | order ==   "Silvanigrellales"  | order ==   "Acidiferrobacterales"  | order == "Capsulimonadales*"   | order == "Pseudomonadales" | order == "Xanthomonadales" | order ==  "Rhodobacterales" | order =="Flavobacteriales"  | order =="Propionibacteriales" | order == "Synechococcales" | order == "Frankiales", order:= c('other')]
+
+library(plotly)
+
+length_dist <- ggplot(metrics_temp,aes(x=length,y=coverage,size=length,alpha=.001,col=order))
+length_dist <- length_dist + facet_grid( ~ sample,scales = 'free_x')
 length_dist <- length_dist + geom_point()
 length_dist <- length_dist + scale_x_log10()
 length_dist <- length_dist + scale_y_log10()
