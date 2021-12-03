@@ -20,6 +20,7 @@ The statistics I work with are contig/scaffold length, depth (abundance), taxono
 Later I'll add ORF length distributions as well, but that data needs to be generated first.
 The use of discribing metagenome assemblies as whole assemblies, is to compare these assemblies agnostic of the binning process (and choices made in that process).
 Based on just a best estimate of taxonomy and depth, similarities may be found and species diversity may be explored comparing all host species simultaneously.
+Secondly, I aim to evaluate whether the extra filtering, then reassembly step improved the assembly.
 
 ## TODO
 
