@@ -313,7 +313,58 @@ ggsave(filename = "./coverage_overlength_distributions_per_assembly_phylum.png",
        height = 29.7 )
 ```
 
+## Order level
+Finally, we'll look at the same data at the order level to see if we can differentiate the proteobacteria a bit.
+```{r}
+knitr::kable(
+  metrics[scaffolded == 'scaffolds' & 
+            superkingdom != 'Eukaryota' & 
+            superkingdom != '' & 
+            superkingdom != 'not classified' &
+            assembly == 'singles_doublefiltered',
+          .(contig_count=length(length), 
+            length_mb=sum(length)/1000000
+            ), 
+          .(order)][length_mb >= 1][order(-rank(length_mb))]
+  ,digits = 0
+)
+```
 
+```{r tax_dotplot_phylum, fig.height = 15, fig.width = 15 }
+
+temp_DT <- metrics[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota' & superkingdom != '' & superkingdom != 'not classified']
+subset <- as.matrix(temp_DT[,.(length_mb=sum(length)/1000000),by=order][length_mb >= 1][order(-rank(length_mb))][,"order"])
+`%notin%` <- Negate(`%in%`)
+temp_DT[order %notin% subset,'order'] <- 'low abundant'
+
+
+length_dist <- ggplot(temp_DT,
+                      aes(x=length,y=coverage,size=length,alpha=.001,col=order))
+length_dist <- length_dist + facet_grid(assembly ~ sample,scales = 'free_x')
+length_dist <- length_dist + geom_point()
+length_dist <- length_dist + scale_x_log10()
+length_dist <- length_dist + scale_y_log10()
+length_dist <- length_dist + labs(x='contig length',y='contig coverage')
+length_dist <- length_dist + theme_classic()
+length_dist <- length_dist + theme(legend.position = "bottom",
+                                   strip.text.x = element_text(angle = 80),
+                                   axis.text.x = element_text(angle = 80,hjust = 1))
+length_dist
+rm(temp_DT)
+```
+
+And save to a png file
+```{r}
+ggsave(filename = "./coverage_overlength_distributions_per_assembly_order.png",
+       plot = length_dist,
+       device = 'png',
+       dpi = 500,
+       units = 'cm',
+       width = 42,
+       height = 29.7 )
+```
+
+### Shiny app
 For further taxonomy stuff, refer to the R shiny app.
 
 
