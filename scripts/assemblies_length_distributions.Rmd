@@ -48,7 +48,7 @@ library(data.table)
 library(ggplot2)
 header <-  c('assembly', 'sample', 'scaffolded', 'node',    'length',  'coverage', 'ORFs',    'ORFs_classified', 'superkingdom', 'phylum', 'class',  'order',  'family', 'genus', 'species')
 classes <- c('factor',   'factor', 'factor',     'numeric', 'numeric', 'numeric',  'numeric', 'numeric',         'factor',       'factor', 'factor', 'factor', 'factor', 'factor', 'factor')
-metrics <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly_stats_and_taxonomy.tab",
+metrics_single <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly_stats_and_taxonomy.tab",
                  sep = '\t',
                  fill = TRUE,
                  header = F,
@@ -69,17 +69,47 @@ metrics_hybrid <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome
                  col.names = header,
                  colClasses = classes
 )[length >= 2500]
-rm(classes,header)
 ```
 
-## Merge data
+## Data export
+Next, for convenience, I'd like to merge the two datasets, and write them back to a smaller file to use for a shiny app later on.
+```{r}
+fwrite(x = metrics_single,file = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly_stats_and_taxonomy_2500.tab",sep="\t",append = F,quote = F,col.names = F)
+fwrite(x = metrics_hybrid,file = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly_stats_and_taxonomy_2500.tab",    sep="\t",append = T,quote = F,col.names = F)
+```
+And afterwards, I test if the data imports cleanly:
+```{r}
+metrics <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly_stats_and_taxonomy_2500.tab", 
+                 sep = '\t',
+                 fill = TRUE,
+                 header = F,
+                 stringsAsFactors = T,
+                 data.table = T,
+                 col.names = header,
+                 colClasses = classes
+)
+```
 
+For testing purposes, this is how the data is cleaned in the shiny app:
+```{r}
+singlelibs <- c("Azfil_lab_250", "Azfil_lab_500", "Azfil_lab_800", "Azfil_minuscyano_170", "Azfil_minuscyano_350", "Azfil_wild_galgw_E_1", "Azfil_wild_galgw_E_2", "Azfil_wild_galgw_E_3", "Azfil_wild_galgw_P_2", "Azfil_wild_galgw_P_3", "Azfil_wild_galgw_P_4") 
+hybridlibs <- c('Azfil_wild', 'Azfil_minuscyano', 'Azfil_lab')
+metrics$assemblytype <- factor(x = 'single library',levels = c('single library','hybrid library','partial library'))
+metrics[sample %in% singlelibs]$assemblytype <- 'partial library'
+metrics[sample %in% hybridlibs]$assemblytype <- 'hybrid library'
+```
+
+cleanup:
+```{r}
+rm(classes,header)
+rm(singlelibs,hybridlibs)
+```
 
 # Assembly samples
 In this stats and taxonomy file there is information about `r length(levels(metrics$assembly))` types of assemblies being: `r levels(metrics$assembly)`
 Irrespective these assembly types there are `r length(levels(metrics$sample))` samples or 'hostcodes' als they are called in the Snakemake workflow.
 
-# Assembly length
+# Assembly size
 Let's plot the length distribution for the scaffolds and contigs assembled in the different assemblies. Contigs or scaffolds shorter than 2.5kbp are discarded by default in metabat2, the red vertical line indicates this separation. (ommitted for memmory usage & compute time)
 ```{r lengthplot_linear, fig.height = 10, fig.width = 15}
 # lengthplot <- ggplot (metrics,aes(x=length,col=scaffolded,alpha=.4))
@@ -444,25 +474,6 @@ ggsave(filename = "./coverage_hybrid_overlength_distributions_per_assembly_order
        height = 29.7 )
 ```
 
-```{r}
-library(data.table)
-fwrite(x = metrics[length > 2500],file = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly_stats_and_taxonomy_2500.tab",sep="\t",append = F,quote = F,col.names = F)
-fwrite(x = metrics2500_hybrid,file = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly_stats_and_taxonomy_2500.tab",    sep="\t",append = T,quote = F,col.names = F)
-```
 
-
-```{r}
-header <-  c('assembly', 'sample', 'scaffolded', 'node',    'length',  'coverage', 'ORFs',    'ORFs_classified', 'superkingdom', 'phylum', 'class',  'order',  'family', 'genus', 'species')
-classes <- c('factor',   'factor', 'factor',     'numeric', 'numeric', 'numeric',  'numeric', 'numeric',         'factor',       'factor', 'factor', 'factor', 'factor', 'factor', 'factor')
-metrics_shiny <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly_stats_and_taxonomy_2500.tab", 
-                 sep = '\t',
-                 fill = TRUE,
-                 header = F,
-                 stringsAsFactors = T,
-                 data.table = T,
-                 col.names = header,
-                 colClasses = classes
-)
-```
 
 
