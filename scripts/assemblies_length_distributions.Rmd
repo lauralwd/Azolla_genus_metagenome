@@ -77,6 +77,20 @@ First, create a 2500+ subset.
 metrics2500 <- metrics[length >= 2500]
 ```
 
+Just wondering how much data  I have, some numbers in total:
+
+```{r}
+metrics2500[assembly == 'singles_doublefiltered', .(count=length(length), length_mb=sum(length)/1000000)]
+```
+
+and some numbers per sample:
+
+```{r}
+metrics2500[assembly == 'singles_doublefiltered', .(count=length(length), length_mb=sum(length)/1000000),by=sample]
+```
+
+
+
 And plot:
 
 ```{r lengthboxplot_2500_log10, fig.height = 8, fig.width = 15}
