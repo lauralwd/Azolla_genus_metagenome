@@ -230,9 +230,10 @@ On the bright side of things, the double filter did effectively reduce the eukar
 There might be no direct benefit, other than making a hybrid assembly feasible where that was not the case with unfiltered nor host_filtered samples due to RAM constraints.
 
 # Taxonomy
-
+Diving further into the taxonomy of my samples, I'd like to plot them in coverage vs. length plots.
+First, I do this on the superkingdom level for scaffolds.
 ```{r tax_dotplot_kingdom, fig.height = 10, fig.width = 15 }
-length_dist <- ggplot(metrics2500[scaffolded == 'scaffolds'],aes(x=length,y=coverage,size=length,alpha=.001,col=superkingdom))
+length_dist <- ggplot(metrics[scaffolded == 'scaffolds'],aes(x=length,y=coverage,size=length,alpha=.001,col=superkingdom))
 length_dist <- length_dist + facet_grid(assembly ~ sample,scales = 'free_x')
 length_dist <- length_dist + geom_point()
 length_dist <- length_dist + scale_x_log10()
@@ -255,10 +256,29 @@ ggsave(filename = "./coverage_overlength_distributions_per_assembly_kingdom.png"
        height = 29.7 )
 ```
 
-Take out all eukaryota and plot the remaing phyla
+In the hostfiltered samples, it's clear that the unclassified contigs follow the eukaryotic (plant) profile. 
+I find this sufficient to filter them out of further graphs.
+The lower assembly limit for hybrid assemblies looks unlike what I expected.
+
+Looking at the phylum level, these are the most dominant phyla in my sample (given the constraints mentioned above).
+```{r}
+knitr::kable(
+  metrics[scaffolded == 'scaffolds' & 
+            superkingdom != 'Eukaryota' & 
+            superkingdom != '' & 
+            superkingdom != 'not classified' &
+            assembly == 'singles_doublefiltered',
+          .(contig_count=length(length), 
+            length_mb=sum(length)/1000000
+            ), 
+          .(phylum)][length_mb >= 1][order(-rank(length_mb))]
+  ,digits = 0
+)
+```
 
 ```{r tax_dotplot_phylum, fig.height = 15, fig.width = 15 }
-length_dist <- ggplot(metrics2500[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota'],aes(x=length,y=coverage,size=length,alpha=.001,col=phylum))
+length_dist <- ggplot(metrics[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota' & superkingdom != '' & superkingdom != 'not classified'],
+                      aes(x=length,y=coverage,size=length,alpha=.001,col=phylum))
 length_dist <- length_dist + facet_grid(assembly ~ sample,scales = 'free_x')
 length_dist <- length_dist + geom_point()
 length_dist <- length_dist + scale_x_log10()
@@ -283,216 +303,7 @@ ggsave(filename = "./coverage_overlength_distributions_per_assembly_phylum.png",
 ```
 
 
-```{r tax_dotplot_order, fig.height = 10, fig.width = 15 }
-metrics_temp <- metrics2500[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota' & assembly == 'singles_doublefiltered']
-droplist <- metrics_temp[, .(uniques=length(genus)) < 10, by=order]$order[ metrics_temp[, .(uniques=length(genus)) < 50, by=order]$V1 == T ]
-droplist <- as.character(droplist)
-metrics_temp[order == "Chromatiales" | order == "Salinisphaerales" | order == "Neisseriales" | order == "Enterobacterales"  | order == "Bacteroidales" | order ==  "Solirubrobacterales"  | order ==  "Vibrionales" | order ==   "Sneathiellales"   | order ==       "Methylococcales"   | order == "Candidatus Babeliales*" | order == "Streptomycetales"  | order == "Nitrospirales"   | order ==   "Corynebacteriales"  | order ==  "Chloroflexales"  | order ==    "Selenomonadales"  | order ==   "Lactobacillales"  | order ==   "Alteromonadales"  | order == "Oceanospirillales"   | order == "Cellvibrionales"  | order ==   "Geodermatophilales"  | order ==  "Ortervirales"     | order ==   "Aeromonadales"  | order ==     "Myxococcales"  | order == "Chroococcales"   | order ==    "Entomoplasmatales"   | order ==   "Chroococcidiopsidales" | order ==  "Solibacterales"  | order == "Planctomycetales"  | order == "Desulfovibrionales" | order == "Pseudonocardiales" | order ==  "Verrucomicrobiales"   | order ==  "Chlorobiales"  | order ==    "Clostridiales"  | order ==  "Marinilabiliales"  | order ==  "Holosporales"   | order == "Desulfuromonadales" | order ==   "Silvanigrellales"  | order ==   "Acidiferrobacterales"  | order == "Capsulimonadales*"   | order == "Pseudomonadales" | order == "Xanthomonadales" | order ==  "Rhodobacterales" | order =="Flavobacteriales"  | order =="Propionibacteriales" | order == "Synechococcales" | order == "Frankiales", order:= c('other')]
-
-library(plotly)
-
-length_dist <- ggplot(metrics_temp,aes(x=length,y=coverage,size=length,alpha=.001,col=order))
-length_dist <- length_dist + facet_grid( ~ sample,scales = 'free_x')
-length_dist <- length_dist + geom_point()
-length_dist <- length_dist + scale_x_log10()
-length_dist <- length_dist + scale_y_log10()
-length_dist <- length_dist + labs(x='contig length',y='contig coverage')
-length_dist <- length_dist + theme_classic()
-length_dist <- length_dist + guides(col=guide_legend(ncol=5))
-length_dist <- length_dist + theme(legend.position = "bottom",
-                                   strip.text.x = element_text(angle = 80),
-                                   axis.text.x = element_text(angle = 80,hjust = 1))
-length_dist
-```
-
-
-```{r}
-ggplotly(p=length_dist)
-```
-
-
-```{r}
-metrics_temp[, .(uniques=length(genus)) , by=order]
-rm(metrics_temp)
-```
-
-
-
-```{r}
-ggsave(filename = "./coverage_overlength_distributions_per_assembly_order.png",
-       plot = length_dist,
-       device = 'png',
-       dpi = 500,
-       units = 'cm',
-       width = 21/9*16,
-       height = 21 )
-```
-
-
-
-
-# Assembly samples
-In this stats and taxonomy file there is information about `r length(levels(metrics$assembly))` types of assemblies being: `r levels(metrics$assembly)`
-Irespective these assembly types there are `r length(levels(metrics$sample))` samples or 'hostcodes' as they are called in the Snakemake workflow.
-
-# Assembly length
-Let's plot the length distribution for the scaffolds and contigs assembled in the different assemblies. Contigs or scaffolds shorter than 2.5kbp are discarded by default in metabat2, the red vertical line indicates this separation.
-```{r lengthplot_linear_hybrid, fig.height = 5, fig.width = 10}
-lengthplot <- ggplot (metrics_hybrid,aes(x=length,col=scaffolded,alpha=.4))
-lengthplot <- lengthplot + geom_freqpoly(bins=50)
-lengthplot <- lengthplot + facet_grid(assembly ~ sample)
-lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
-lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
-lengthplot <- lengthplot + theme_classic()
-lengthplot <- lengthplot + labs(y='count',x='sequence length')
-lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
-lengthplot <- lengthplot + theme(legend.position = "bottom",
-                                 strip.text.x = element_text(),
-                                 axis.text.x = element_text(angle = 80,hjust = 1))
-lengthplot
-```
-
-the double log10 axis slightly exagerates the amount of sequencing lost, ploted in a linear x-axis it is more fair to judge.
-```{r lengthplot_log10_hybrid, fig.height = 5, fig.width = 10}
-lengthplot <- ggplot(metrics_hybrid,aes(x=length,col=scaffolded,alpha=.4))
-lengthplot <- lengthplot + geom_freqpoly(bins=50)
-lengthplot <- lengthplot + facet_grid(assembly ~ sample)
-lengthplot <- lengthplot + scale_y_continuous(trans = 'log10')
-#lengthplot <- lengthplot + scale_x_continuous(trans = 'log10')
-lengthplot <- lengthplot + theme_classic()
-lengthplot <- lengthplot + labs(y='count',x='sequence length')
-lengthplot <- lengthplot + geom_vline(xintercept = 2500,colour='red')
-lengthplot <- lengthplot + theme(legend.position = "bottom",
-                                 strip.text.x = element_text(angle = 80),
-                                 axis.text.x = element_text(angle = 80,hjust = 1))
-lengthplot
-```
-
-
-Create a 2500+ subset.
-
-```{r subset to 2500 hybrid}
-metrics2500_hybrid <- metrics_hybrid[length >= 2500]
-```
-
-And plot:
-
-```{r lengthboxplot_2500_log10_hybrid, fig.height = 5, fig.width = 8}
-lenghtbox <- ggplot(metrics2500_hybrid,aes(y=length,x=sample,col=scaffolded,alpha=.4))
-lenghtbox <- lenghtbox + geom_boxplot()
-lenghtbox <- lenghtbox + facet_grid(assembly ~ . )
-lenghtbox <- lenghtbox + theme_classic()
-lenghtbox <- lenghtbox + scale_y_log10()
-lenghtbox <- lenghtbox + theme(axis.text.x = element_text(angle = 45,hjust = 1))
-lenghtbox
-```
-
-```{r lengthboxplot_2500+_perkingdom_hybrid, fig.height = 10, fig.width = 10}
-lenghtbox <- ggplot(metrics2500_hybrid,
-                    aes(y=length,x=sample,col=sample,alpha=.4)
-                    )
-lenghtbox <- lenghtbox + facet_grid(scaffolded ~ superkingdom)
-#lenghtbox <- lenghtbox + geom_violin()
-lenghtbox <- lenghtbox + geom_boxplot()
-
-lenghtbox <- lenghtbox + theme_classic()
-lenghtbox <- lenghtbox + scale_y_log10()
-lenghtbox <- lenghtbox + geom_vline(xintercept =0)
-lenghtbox <- lenghtbox + theme(axis.text.x=element_text(angle = 90,hjust = 1),legend.position = "bottom")
-lenghtbox
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Taxonomy
-
-```{r tax_dotplot_kingdom_hybrid, fig.height = 8, fig.width = 8 }
-length_dist <- ggplot(metrics2500_hybrid[scaffolded == 'scaffolds'],aes(x=length,y=coverage,size=length,alpha=.001,col=superkingdom))
-length_dist <- length_dist + facet_grid(assembly ~ sample,scales = 'free_x')
-length_dist <- length_dist + geom_point()
-length_dist <- length_dist + scale_x_log10()
-length_dist <- length_dist + scale_y_log10()
-length_dist <- length_dist + labs(x='contig length',y='contig coverage')
-length_dist <- length_dist + theme_classic()
-length_dist <- length_dist + theme(legend.position = "bottom",
-                                   strip.text.x = element_text(angle = 80),
-                                   axis.text.x = element_text(angle = 80,hjust = 1))
-length_dist
-```
-And save to a png file
-```{r tax_dotplot_kingdom_png_hybrid}
-ggsave(filename = "./coverage_hybrid_overlength_distributions_per_assembly_kingdom.png",
-       plot = length_dist,
-       device = 'png',
-       dpi = 500,
-       units = 'cm',
-       width = 42,
-       height = 29.7 )
-```
-
-Take out all eukaryota and plot the remaing phyla
-
-```{r tax_dotplot_phylum_hybrid, fig.height = 10, fig.width = 8 }
-length_dist <- ggplot(metrics2500_hybrid[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota'],aes(x=length,y=coverage,size=length,alpha=.001,col=phylum))
-length_dist <- length_dist + facet_grid(assembly ~ sample,scales = 'free_x')
-length_dist <- length_dist + geom_point()
-length_dist <- length_dist + scale_x_log10()
-length_dist <- length_dist + scale_y_log10()
-length_dist <- length_dist + labs(x='contig length',y='contig coverage')
-length_dist <- length_dist + theme_classic()
-length_dist <- length_dist + theme(legend.position = "bottom",
-                                   strip.text.x = element_text(angle = 80),
-                                   axis.text.x = element_text(angle = 80,hjust = 1))
-length_dist
-```
-
-And save to a png file
-```{r}
-ggsave(filename = "./coverage_hybrid_overlength_distributions_per_assembly_phylum.png",
-       plot = length_dist,
-       device = 'png',
-       dpi = 500,
-       units = 'cm',
-       width = 42,
-       height = 29.7 )
-```
-
-
-```{r tax_dotplot_order_hybrid, fig.height = 10, fig.width = 10 }
-length_dist <- ggplot(metrics2500_hybrid[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota'],aes(x=length,y=coverage,size=length,alpha=.001,col=order))
-length_dist <- length_dist + facet_grid(. ~ sample,scales = 'free_x')
-length_dist <- length_dist + geom_point()
-length_dist <- length_dist + scale_x_log10()
-length_dist <- length_dist + scale_y_log10()
-length_dist <- length_dist + labs(x='contig length',y='contig coverage')
-length_dist <- length_dist + theme_classic()
-length_dist <- length_dist + guides(col=guide_legend(ncol=5))
-length_dist <- length_dist + theme(legend.position = "bottom")
-length_dist
-```
-
-
-```{r}
-ggsave(filename = "./coverage_hybrid_overlength_distributions_per_assembly_order.png",
-       plot = length_dist,
-       device = 'png',
-       dpi = 500,
-       units = 'cm',
-       width = 42,
-       height = 29.7 )
-```
+For further taxonomy stuff, refer to the R shiny app.
 
 
 # packages
