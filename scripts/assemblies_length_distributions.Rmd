@@ -25,13 +25,13 @@ Secondly, I aim to evaluate whether the extra filtering, then reassembly step im
 ## TODO
 
 * make collapsible html page
-* make pdf output
+* ~~make pdf output~~
 * ORF distributions per assembly
 * ORF distributions per assembly, per kingdom
-* rearange document to simultaneously process single and hybrid libraries
+* ~~rearange document to simultaneously process single and hybrid libraries~~
 * discribe packages used
 * CAT reference
-* plot kmer depth vs backmap depth
+* plot kmer depth vs backmapped depth
 
 
 # import data 
@@ -128,7 +128,9 @@ knitr::kable(
   ,digits = 0
 )
 ```
+
 and the same numbers per sample:
+
 ```{r}
 knitr::kable(
   metrics[assembly == 'singles_doublefiltered' & scaffolded == 'scaffolds', 
@@ -195,6 +197,8 @@ knitr::kable(
   ,digits = 0
 )
 ```
+
+
 Based on this table, summing assembly sizes for all samples, the filtering had a negligible impact on bacterial assembly size, but drastically reduced eukaryotic assembly size.
 The not classified and empty category were also reduced in size, but not as drastic as the eukaryotic set.
 This makes perfect sense for I used that taxonomy indication to filter out reads again, what's surprising is that still eukaryotic contigs remain.
@@ -330,7 +334,7 @@ knitr::kable(
 )
 ```
 
-```{r tax_dotplot_phylum, fig.height = 15, fig.width = 15 }
+```{r tax_dotplot_order, fig.height = 15, fig.width = 15 }
 
 temp_DT <- metrics[scaffolded == 'scaffolds' & superkingdom != 'Eukaryota' & superkingdom != '' & superkingdom != 'not classified']
 subset <- as.matrix(temp_DT[,.(length_mb=sum(length)/1000000),by=order][length_mb >= 1][order(-rank(length_mb))][,"order"])
