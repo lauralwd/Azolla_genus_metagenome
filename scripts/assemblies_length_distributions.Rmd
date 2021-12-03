@@ -30,9 +30,17 @@ Based on just a best estimate of taxonomy and depth, similarities may be found a
 * rearange document to simultaneously process single and hybrid libraries
 * discribe packages used
 * CAT reference
+* plot kmer depth vs backmap depth
 
 
-# import libraries and data for single library assemblies
+# import data 
+Contig/scaffold length and depth is taken from the headers of the Spades metagenome assembly output. 
+This may not be as 'nice' as mapping the original reads to the assembly file, but it is substantially quicker and in my experience it works very well.
+During import, I discard any contigs that are shorter than 2500bp for I consider them too short for binning.
+Binning software usually discards short contigs anyway, 2500bp is the threshold used by metabat2.
+
+The original data is stored in separate files for single library assemblies and hybrid assemblies. Here I import both:
+
 ```{r import libraries and data}
 #setwd
 setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
@@ -48,9 +56,24 @@ metrics <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/analys
                  data.table = T,
                  col.names = header,
                  colClasses = classes
-)
+)[length >= 2500]
+```
+And now the hybrid file:
+```{r import libraries and data hybrid}
+metrics_hybrid <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly-hybrid_stats_and_taxonomy.tab",
+                 sep = '\t',
+                 fill = TRUE,
+                 header = F,
+                 stringsAsFactors = T,
+                 data.table = T,
+                 col.names = header,
+                 colClasses = classes
+)[length >= 2500]
 rm(classes,header)
 ```
+
+## Merge data
+
 
 # Assembly samples
 In this stats and taxonomy file there is information about `r length(levels(metrics$assembly))` types of assemblies being: `r levels(metrics$assembly)`
@@ -256,25 +279,6 @@ ggsave(filename = "./coverage_overlength_distributions_per_assembly_order.png",
 ```
 
 
-# import libraries and data for hybrid assemblies
-```{r import libraries and data hybrid}
-#setwd
-setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
-library(data.table)
-library(ggplot2)
-header <-  c('assembly', 'sample', 'scaffolded', 'node',    'length',  'coverage', 'ORFs',    'ORFs_classified', 'superkingdom', 'phylum', 'class',  'order',  'family', 'genus', 'species')
-classes <- c('factor',   'factor', 'factor',     'numeric', 'numeric', 'numeric',  'numeric', 'numeric',         'factor',       'factor', 'factor', 'factor', 'factor', 'factor', 'factor')
-metrics_hybrid <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly-hybrid_stats_and_taxonomy.tab",
-                 sep = '\t',
-                 fill = TRUE,
-                 header = F,
-                 stringsAsFactors = T,
-                 data.table = T,
-                 col.names = header,
-                 colClasses = classes
-)
-rm(classes,header)
-```
 
 
 # Assembly samples
