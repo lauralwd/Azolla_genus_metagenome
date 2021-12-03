@@ -419,3 +419,26 @@ ggsave(filename = "./coverage_hybrid_overlength_distributions_per_assembly_order
        width = 42,
        height = 29.7 )
 ```
+
+```{r}
+library(data.table)
+fwrite(x = metrics[length > 2500],file = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly_stats_and_taxonomy_2500.tab",sep="\t",append = F,quote = F,col.names = F)
+fwrite(x = metrics2500_hybrid,file = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly_stats_and_taxonomy_2500.tab",    sep="\t",append = T,quote = F,col.names = F)
+```
+
+
+```{r}
+header <-  c('assembly', 'sample', 'scaffolded', 'node',    'length',  'coverage', 'ORFs',    'ORFs_classified', 'superkingdom', 'phylum', 'class',  'order',  'family', 'genus', 'species')
+classes <- c('factor',   'factor', 'factor',     'numeric', 'numeric', 'numeric',  'numeric', 'numeric',         'factor',       'factor', 'factor', 'factor', 'factor', 'factor', 'factor')
+metrics_shiny <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/assembly_stats_and_taxonomy_2500.tab", 
+                 sep = '\t',
+                 fill = TRUE,
+                 header = F,
+                 stringsAsFactors = T,
+                 data.table = T,
+                 col.names = header,
+                 colClasses = classes
+)
+```
+
+
