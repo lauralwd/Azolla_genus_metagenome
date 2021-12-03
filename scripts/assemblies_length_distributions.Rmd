@@ -476,5 +476,10 @@ ggsave(filename = "./coverage_hybrid_overlength_distributions_per_assembly_order
 ```
 
 
+# packages
+* datatable
+* ggplot2
+* kable
 
+# Bash script
 
