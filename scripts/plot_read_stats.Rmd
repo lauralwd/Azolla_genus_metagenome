@@ -398,3 +398,44 @@ merge_bars
 ```
 
 ok wait, something is going very very wrong with these bars, they're clearly not summed up propperly and I don't quite understand why...
+
+
+## per sample separately
+
+```{r}
+temp.stats <- merge.stats
+temp.stats$value[merge.stats$metric=='RAM']  <- merge.stats$value[merge.stats$metric=='RAM']/100 #100 GB
+temp.stats$value[merge.stats$metric=='size'] <- merge.stats$value[merge.stats$metric=='size']/50 #10mb of assembled data
+merge_bars <- ggplot(temp.stats)
+merge_bars <- merge_bars + aes(y=value,fill=host,x=stage,group=sample)
+merge_bars <- merge_bars + geom_col(position='dodge',)
+merge_bars <- merge_bars + facet_grid(metric~host,scales = 'free_y',)
+#merge_bars <- merge_bars + facet_grid(metric~host)
+merge_bars <- merge_bars + theme_classic()
+merge_bars <- merge_bars + theme(axis.text.x = element_text(angle = 45,hjust = 1),
+                                 legend.position = "bottom"
+                                 )
+merge_bars <- merge_bars + scale_fill_discrete(type = c('#3633d7',
+                                                                                    '#3633d7',
+                                                                                    '#33c8d7',
+                                                                                    '#33d76d',
+                                                                                    '#a2d733',
+                                                                                    '#a2d733',
+                                                                                    '#a2d733',
+                                                                                    '#f8b136',
+                                                                                    '#d733a7'
+                                                                                    )
+                                                                           )
+merge_bars
+```
+
+```{r}
+ggsave(filename = "merge_bars.svg",plot = merge_bars,device = "svg",path = "/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/",units = 'mm', width = 180)
+```
+
+For sake of transparency, here is the bash script that prepared the original table that was loaded in R at the beginning of this document.
+
+```{bash}
+cat collect_reads_stats.bash
+```
+
