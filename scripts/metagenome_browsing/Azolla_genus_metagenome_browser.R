@@ -143,9 +143,11 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-           plotOutput("plot",click = "plot_click",width = '100%',height = '1000px'),
-           verbatimTextOutput("info"),
-           tableOutput(outputId = 'tableout')
+          plotOutput("plot",click = "plot_click",width = '100%',height = '1000px'),
+          h2('more details'),
+          verbatimTextOutput("info"),
+          h2('Taxa present at this filter'),
+          tableOutput(outputId = 'tableout')
         )
     )
 )
