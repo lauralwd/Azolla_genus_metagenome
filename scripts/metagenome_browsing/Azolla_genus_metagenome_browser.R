@@ -117,14 +117,6 @@ ui <- fluidPage(
                                choices = as.list(levels(metrics_shiny$superkingdom)),
                                selected = list('NA','','not classified')
             ),
-#            sliderInput(inputId = 'transparency',
-#                        label = "Dot transparency",
-#                        min = 1,
-#                        max = 1000,
-#                        value = 1,
-#                        round = T,
-#                        step = 50
-#                        ),
             sliderInput(inputId = 'minORFs_classified',
                         label = "Minimum ORFs classified by CAT",
                         min = 0,
