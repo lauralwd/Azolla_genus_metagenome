@@ -156,6 +156,8 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   `%notin%` <- Negate(`%in%`)
+  
+## First, define a function containing the dataset, filtered according to input settings.
   metrics_subset <- shiny::reactive({
     dt <- metrics_shiny[scaffolded == input$format &
                         superkingdom %notin% input$filter & 
@@ -170,6 +172,8 @@ server <- function(input, output) {
     #  by=get(input$taxonomy)][length_mb <= 1]$tax_filtered <- 'not classified'
     
     })
+  
+## Second, using the pre-filtered data, a plot is defined with ggplot2
   output$plot <- renderPlot({
       length_dist <- ggplot(metrics_subset(),
                             aes_string(x='length',
@@ -195,8 +199,12 @@ server <- function(input, output) {
                                          )
       length_dist
     })
-    output$info <- renderText({paste0(input$plot_click)})
-    
+## third, an interactive window is defined which appears when the plot is clicked.
+## this plot wil display details on the clicked contigs
+    output$info <- renderText({
+      levels(metrics_subset()$taxonomy)
+      paste0(input$plot_click)})
+## fourth, a table is rendered displaying the top 14 taxa at the given filter, their contig count and total size in Mbase
     output$tableout<- renderTable({
       as.matrix(metrics_subset()[,
                       .(contig_count=length(length), 
