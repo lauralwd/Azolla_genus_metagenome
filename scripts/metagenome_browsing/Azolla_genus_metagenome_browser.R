@@ -132,8 +132,12 @@ ui <- fluidPage(
                         value = 5,
                         round = T,
                         step = 1
-                        )
-
+                        ),
+            sliderInput(inputId = 'minTaxSize',
+                        label = 'Minimum size of a taxonomic group to be displayed in the plot (in Mbase)',
+                        min = 0,
+                        max = 100,
+                        value = 2)
         ),
 
         # Show a plot of the generated distribution
@@ -161,7 +165,7 @@ server <- function(input, output) {
     
     low_abundant <- dt[,
                        .(length_mb=sum(length)/1000000),
-                       .(get(input$taxonomy))][length_mb <= 10][,1] 
+                       .(get(input$taxonomy))][length_mb <= input$minTaxSize][,1] 
     low_abundant <- as.matrix(low_abundant)
     dt[taxonomy %in% low_abundant, 'taxonomy'] <- 'low abundant'
     dt
