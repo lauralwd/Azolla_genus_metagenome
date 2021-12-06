@@ -26,6 +26,23 @@ hybridlibs <- c('Azfil_wild', 'Azfil_minuscyano', 'Azfil_lab')
 metrics_shiny$assemblytype <- factor(x = 'single library',levels = c('single library','hybrid library','partial library'))
 metrics_shiny[sample %in% singlelibs]$assemblytype <- 'partial library'
 metrics_shiny[sample %in% hybridlibs]$assemblytype <- 'hybrid library'
+# Make a separate factor to indicate species name rather than only a library code
+metrics_shiny$species <- factor(x = '*A. filiculoides*',
+                                levels = c('*A. caroliniana*',
+                                           '*A. microphylla*',
+                                           '*A. mexicana*',
+                                           '*A. filiculoides*',
+                                           '*A. rubra*',
+                                           '*A. pinnata*',
+                                           '*A. nilotica*'
+                                           )
+                                )
+metrics_shiny[sample %in% c('Azmex_IRRI_486')]$species <- '*A. mexicana*'
+metrics_shiny[sample %in% c('Azmic_IRRI_456')]$species <- '*A. microphylla*'
+metrics_shiny[sample %in% c('Aznil_IRRI_479')]$species <- '*A. nilotica*'
+metrics_shiny[sample %in% c('Azrub_IRRI_479')]$species <- '*A. rubra*'
+metrics_shiny[sample %in% c('Azspnov_IRRI1_472')]$species <- '*A. caroliniana*'
+metrics_shiny[sample %in% c('Azspnov_IRRI2_489')]$species <- '*A. caroliniana*'
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
