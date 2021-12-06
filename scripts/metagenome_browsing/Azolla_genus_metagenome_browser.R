@@ -147,8 +147,8 @@ ui <- fluidPage(
         # Show a plot of the generated distribution
         mainPanel(
            plotOutput("plot",click = "plot_click",width = '100%',height = '1000px'),
-           verbatimTextOutput("info")
-          
+           verbatimTextOutput("info"),
+           tableOutput(outputId = 'tableout')
         )
     )
 )
