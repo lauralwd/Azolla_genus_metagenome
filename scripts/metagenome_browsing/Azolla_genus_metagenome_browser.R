@@ -166,11 +166,13 @@ server <- function(input, output) {
                         assembly != input$filterstage &
                         assemblytype != input$assemblylevel]
     dt[, taxonomy := get(input$taxonomy)]
-    dt
-    #dt[,
-    #  .(length_mb=sum(length)/1000000),
-    #  by=get(input$taxonomy)][length_mb <= 1]$tax_filtered <- 'not classified'
     
+    low_abundant <- dt[,
+                       .(length_mb=sum(length)/1000000),
+                       .(get(input$taxonomy))][length_mb <= 10][,1] 
+    low_abundant <- as.matrix(low_abundant)
+    dt[taxonomy %in% low_abundant, 'taxonomy'] <- 'low abundant'
+    dt
     })
   
 ## Second, using the pre-filtered data, a plot is defined with ggplot2
