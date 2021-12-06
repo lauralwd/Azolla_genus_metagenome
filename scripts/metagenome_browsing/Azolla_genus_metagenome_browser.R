@@ -179,8 +179,11 @@ server <- function(input, output) {
                                         )
       length_dist <- length_dist + theme_classic()
       length_dist <- length_dist + theme(legend.position = "bottom",
-                                         axis.text.x = element_text(angle = 80,hjust = 1))
                                          strip.text = element_markdown(size = 12),
+                                         axis.text.x = element_text(angle = 80,hjust = 1,size = 12),
+                                         axis.text.y = element_text(size = 12),
+                                         legend.text = element_text(size = 12)
+                                         )
       length_dist
     })
     output$info <- renderText({paste0(input$plot_click)})
