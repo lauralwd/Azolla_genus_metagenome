@@ -156,18 +156,22 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   `%notin%` <- Negate(`%in%`)
-    output$plot <- renderPlot({
-      length_dist <- ggplot(metrics_shiny[scaffolded == input$format &
-                                          superkingdom %notin% input$filter & 
-                                          ORFs_classified >= input$minORFs_classified &
-                                          ORFs >= input$minORFs &
-                                          assembly != input$filterstage &
-                                          assemblytype != input$assemblylevel  ],
+  metrics_subset <- shiny::reactive({
+    dt <- metrics_shiny[scaffolded == input$format &
+                        superkingdom %notin% input$filter & 
+                        ORFs_classified >= input$minORFs_classified &
+                        ORFs >= input$minORFs &
+                        assembly != input$filterstage &
+                        assemblytype != input$assemblylevel]
+    dt
+    })
+  output$plot <- renderPlot({
+      length_dist <- ggplot(metrics_subset(),
                             aes_string(x='length',
                                        y='coverage',
                                        size=input$dotsize,
                                        alpha=0.001,
-                                       col=input$taxonomy
+                                       col='taxonomy'
                                        )
                             )
       length_dist <- length_dist + facet_grid(assembly ~ species + sample)
