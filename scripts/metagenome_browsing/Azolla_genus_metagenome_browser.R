@@ -137,7 +137,8 @@ ui <- fluidPage(
                         label = 'Minimum size of a taxonomic group to be displayed in the plot (in Mbase)',
                         min = 0,
                         max = 100,
-                        value = 2)
+                        value = 2),
+            uiOutput("filter_fine")
         ),
 
         # Show a plot of the generated distribution
@@ -170,6 +171,12 @@ server <- function(input, output) {
     dt[taxonomy %in% low_abundant, 'taxonomy'] <- 'low abundant'
     dt
     })
+  output$filter_fine <- renderUI({
+    checkboxGroupInput(inputId = "fine_filter",
+                       label = "Select taxa to omit from the plot",
+                       choices = factor(levels(metrics_subset()[,'taxonomy']))
+                       )
+  })
   
 ## Second, using the pre-filtered data, a plot is defined with ggplot2
   output$plot <- renderPlot({
