@@ -16,16 +16,41 @@ metrics_shiny <- fread(input = "assembly_stats_and_taxonomy_2500.tab", # -hybrid
                  col.names = header,
                  colClasses = classes
 )
-levels(metrics_shiny$assembly) <- c('doublefiltered','doublefiltered','singlefiltered')
+levels(metrics_shiny$assembly) <- c('doublefiltered',
+                                    'doublefiltered',
+                                    'singlefiltered'
+                                    )
 levels(metrics_shiny$superkingdom)
 
+# polish metadata
 
-
-singlelibs <- c("Azfil_lab_250", "Azfil_lab_500", "Azfil_lab_800", "Azfil_minuscyano_170", "Azfil_minuscyano_350", "Azfil_wild_galgw_E_1", "Azfil_wild_galgw_E_2", "Azfil_wild_galgw_E_3", "Azfil_wild_galgw_P_2", "Azfil_wild_galgw_P_3", "Azfil_wild_galgw_P_4") 
-hybridlibs <- c('Azfil_wild', 'Azfil_minuscyano', 'Azfil_lab')
-metrics_shiny$assemblytype <- factor(x = 'single library',levels = c('single library','hybrid library','partial library'))
+# make a separate factor to distinct hybrid assemblies from single library assemblies:
+singlelibs <- c("Azfil_lab_250", 
+                "Azfil_lab_500", 
+                "Azfil_lab_800", 
+                "Azfil_minuscyano_170",
+                "Azfil_minuscyano_350", 
+                "Azfil_wild_galgw_E_1", 
+                "Azfil_wild_galgw_E_2", 
+                "Azfil_wild_galgw_E_3", 
+                "Azfil_wild_galgw_P_2", 
+                "Azfil_wild_galgw_P_3", 
+                "Azfil_wild_galgw_P_4"
+                )
+hybridlibs <- c('Azfil_wild', 
+                'Azfil_minuscyano', 
+                'Azfil_lab'
+                )
+metrics_shiny$assemblytype <- factor(x = 'single library',
+                                     levels = c('single library',
+                                                'hybrid library',
+                                                'partial library'
+                                                )
+                                     )
 metrics_shiny[sample %in% singlelibs]$assemblytype <- 'partial library'
 metrics_shiny[sample %in% hybridlibs]$assemblytype <- 'hybrid library'
+rm(singlelibs,hybridlibs)
+
 # Make a separate factor to indicate species name rather than only a library code
 metrics_shiny$species <- factor(x = '*A. filiculoides*',
                                 levels = c('*A. caroliniana*',
