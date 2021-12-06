@@ -170,7 +170,7 @@ server <- function(input, output) {
                                        col=input$taxonomy
                                        )
                             )
-      length_dist <- length_dist + facet_grid(assembly ~ sample)
+      length_dist <- length_dist + facet_grid(assembly ~ species + sample)
       length_dist <- length_dist + geom_point()
       length_dist <- length_dist + scale_x_log10()
       length_dist <- length_dist + scale_y_log10()
