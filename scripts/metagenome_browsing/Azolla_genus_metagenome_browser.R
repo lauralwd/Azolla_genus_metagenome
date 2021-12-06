@@ -184,6 +184,16 @@ server <- function(input, output) {
       length_dist
     })
     output$info <- renderText({paste0(input$plot_click)})
+    
+    output$tableout<- renderTable({
+      as.matrix(metrics_subset()[,
+                      .(contig_count=length(length), 
+                     length_mb=sum(length)/1000000
+                     ), 
+                     by=eval(input$taxonomy)]
+                [length_mb >= 1]
+                [order(-rank(length_mb))]
+    )})
 }
 
 
