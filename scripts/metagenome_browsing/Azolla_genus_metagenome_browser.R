@@ -242,10 +242,15 @@ server <- function(input, output) {
 ## fourth, a table is rendered displaying the top 14 taxa at the given filter, their contig count and total size in Mbase
     output$tableout<- renderTable({
       as.matrix(metrics_subset()[,
-                      .(contig_count=length(length), 
-                     length_mb=sum(length)/1000000
-                     ), 
-                     by=eval(input$taxonomy)]
+                                 .(contig_count=length(length), 
+                                   length_mb=sum(length)/1000000,
+                                   ORF_count=sum(ORFs),
+                                   ORFs_classified=sum(ORFs_classified),
+                                   mean_coverage=mean(coverage),
+                                   var_coverage=var(coverage)
+                                   ),
+                                 by=c(eval(input$taxonomy),
+                                      'assembly')]
                 [length_mb >= 1]
                 [order(-rank(length_mb))]
     )})
