@@ -181,7 +181,8 @@ server <- function(input, output) {
   output$filter_fine <- renderUI({
     checkboxGroupInput(inputId = "fine_filter",
                        label = "Select taxa to omit from the plot",
-                       choices = factor(levels(metrics_subset()[,'taxonomy']))
+                       choices = as.list(levels(metrics_subset()[,'taxonomy'])),
+                       
                        )
   })
   
