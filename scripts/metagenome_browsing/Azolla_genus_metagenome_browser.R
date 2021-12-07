@@ -203,11 +203,15 @@ server <- function(input, output) {
     dt[taxonomy %in% low_abundant, 'taxonomy'] <- 'low abundant'
     dt
     })
+  
+  
   output$filter_fine <- renderUI({
+    tax_list <- unique(metrics_subset()[,taxonomy])
+    choices <- as.character(tax_list)
+    names(choices) <-  tax_list
     checkboxGroupInput(inputId = "fine_filter",
                        label = "Select taxa to omit from the plot",
-                       choices = as.list(levels(metrics_subset()[,'taxonomy'])),
-                       
+                       choices = choices
                        )
   })
   
