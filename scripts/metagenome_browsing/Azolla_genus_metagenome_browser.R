@@ -7,7 +7,7 @@ library(ggtext)       # for markdown parsing inside ggplot
 # import data
 header <-  c('assembly', 'sample', 'scaffolded', 'node',    'length',  'coverage', 'ORFs',    'ORFs_classified', 'superkingdom', 'phylum', 'class',  'order',  'family', 'genus', 'species')
 classes <- c('factor',   'factor', 'factor',     'numeric', 'numeric', 'numeric',  'numeric', 'numeric',         'factor',       'factor', 'factor', 'factor', 'factor', 'factor', 'factor')
-metrics_shiny <- fread(input = "assembly_stats_and_taxonomy_2500.tab", # -hybrid_stats_and_taxonomy.tab", #  _stats_and_taxonomy_2500.tab
+metrics_shiny <- fread(input = "assembly_stats_and_taxonomy_2500.tab",
                  sep = '\t',
                  fill = TRUE,
                  header = F,
@@ -19,8 +19,7 @@ metrics_shiny <- fread(input = "assembly_stats_and_taxonomy_2500.tab", # -hybrid
 levels(metrics_shiny$assembly) <- c('doublefiltered',
                                     'doublefiltered',
                                     'singlefiltered'
-                                    )
-levels(metrics_shiny$superkingdom)
+)
 
 # polish metadata
 
@@ -36,17 +35,20 @@ singlelibs <- c("Azfil_lab_250",
                 "Azfil_wild_galgw_P_2", 
                 "Azfil_wild_galgw_P_3", 
                 "Azfil_wild_galgw_P_4"
-                )
+)
+
 hybridlibs <- c('Azfil_wild', 
                 'Azfil_minuscyano', 
                 'Azfil_lab'
-                )
+)
+
 metrics_shiny$assemblytype <- factor(x = 'single library',
                                      levels = c('single library',
                                                 'hybrid library',
                                                 'partial library'
                                                 )
-                                     )
+)
+
 metrics_shiny[sample %in% singlelibs]$assemblytype <- 'partial library'
 metrics_shiny[sample %in% hybridlibs]$assemblytype <- 'hybrid library'
 rm(singlelibs,hybridlibs)
@@ -61,7 +63,8 @@ metrics_shiny$hostspecies <- factor(x = '*A. filiculoides*',
                                            '*A. pinnata*',
                                            '*A. nilotica*'
                                            )
-                                )
+)
+
 metrics_shiny[sample %in% c('Azmex_IRRI_486')]$hostspecies <- '*A. mexicana*'
 metrics_shiny[sample %in% c('Azmic_IRRI_456')]$hostspecies <- '*A. microphylla*'
 metrics_shiny[sample %in% c('Aznil_IRRI_479')]$hostspecies <- '*A. nilotica*'
@@ -70,8 +73,8 @@ metrics_shiny[sample %in% c('Azspnov_IRRI1_472')]$hostspecies <- '*A. carolinian
 metrics_shiny[sample %in% c('Azspnov_IRRI2_489')]$hostspecies <- '*A. caroliniana*'
 
 # Define UI
-ui <- fluidPage(
 
+ui <- fluidPage(
 ## Application title
     titlePanel("Azolla genus metagenome assembly browser"),
     markdown("This R Shiny application is associated with the [Azolla genus metagenome project](https://github.com/lauralwd/Azolla_genus_metagenome) by [Laura Dijkhuizen](https://www.uu.nl/medewerkers/lwdijkhuizen). 
@@ -104,7 +107,7 @@ ui <- fluidPage(
                         choices = as.list(levels(metrics_shiny$scaffolded)),
                         selected = "scaffolds"
             ),
-          h3("Second, choose how to colour the the dotplot:"),
+            h3("Second, choose how to colour the the dotplot:"),
             selectInput("taxonomy","Taxonomy level:",
                         choices = list("superkingdom" = "superkingdom",
                                        "phylum" = "phylum",
@@ -117,13 +120,13 @@ ui <- fluidPage(
                                        ),
                         selected = "order"
                         ),
-          selectInput("dotsize","Dot size represents:",
+            selectInput("dotsize","Dot size represents:",
                         choices = list("Open reading frames" = "ORFs",
                                        "Open reading frames classified" = "ORFs_classified",
                                        "Contig/scaffold length" = "length"
                         )
                       ),
-          h3("Third, filter the data displayed:"),
+            h3("Third, filter the data displayed:"),
             checkboxGroupInput(inputId = 'filter',label = "Remove taxa on superkingdom level",
                                choices = as.list(levels(metrics_shiny$superkingdom)),
                                selected = list('NA','','not classified')
@@ -154,7 +157,11 @@ ui <- fluidPage(
 
 ## The main panel
         mainPanel(
-          plotOutput("plot",hover = "plot_hover",click = "plot_click",width = '100%',height = '1000px'),
+          plotOutput("plot",hover = "plot_hover",
+                     click = "plot_click",
+                     width = '100%',
+                     height = '1000px'
+                     ),
           markdown("**Figure legend:** Metagenome assemblies of 6 species of the fern genus *Azolla* (horizontal panels).
                    Sequencing data were derived from three public projects:
                    first, the ['Azolla genome project'](https://doi.org/10.1038/s41477-018-0188-8) data: [PRJNA430527](https://www.ebi.ac.uk/ena/browser/view/PRJNA430527)
@@ -182,7 +189,8 @@ ui <- fluidPage(
           markdown("Select a rectangle in the plot to see more information about a particular set of contigs or scaffolds:
                    **in development**"),
           h2('Taxa table'),
-          markdown("Taxa present at the second stage of filtering in this side panel are displayed in this table by taxonomic group and assembly filter stage (hostfiltered or doublefiltered)."),
+          markdown("Taxa present at the second stage of filtering in this side panel are displayed in this table by taxonomic group and assembly filter stage (hostfiltered or doublefiltered).
+                   Only groups that amount to more than 1Mbase are shown."),
           tableOutput(outputId = 'tableout')
         )
     )
@@ -209,8 +217,7 @@ server <- function(input, output) {
     dt[taxonomy %in% low_abundant, 'taxonomy'] <- 'low abundant'
     dt
     })
-  
-  
+
   output$filter_fine <- renderUI({
     tax_list <- unique(metrics_subset()[,taxonomy])
     choices <- as.character(tax_list[order(tax_list)])
@@ -248,6 +255,7 @@ server <- function(input, output) {
                                          )
       length_dist
     })
+  
 ## third, an interactive window is defined which appears when the plot is clicked.
 ## this plot wil display details on the clicked contigs
     output$info <- renderText({
@@ -258,8 +266,9 @@ server <- function(input, output) {
                                       coverage >= input$plot_hover[[2]] -10 &
                                       coverage <= input$plot_hover[[2]] +10 
                                     ]
-      paste0(as.character(unique(click_data[,taxonomy]))
-             )})
+      paste0(as.character(unique(click_data[,taxonomy])))
+      })
+    
 ## fourth, a table is rendered displaying the top 14 taxa at the given filter, their contig count and total size in Mbase
     output$tableout<- renderTable({
       as.matrix(metrics_subset()[,
@@ -274,11 +283,10 @@ server <- function(input, output) {
                                       'assembly')]
                 [length_mb >= 1]
                 [order(-rank(length_mb))]
-    )})
+      )
+    })
 }
 
-
-
-
 # Run the application 
+
 shinyApp(ui = ui, server = server)
