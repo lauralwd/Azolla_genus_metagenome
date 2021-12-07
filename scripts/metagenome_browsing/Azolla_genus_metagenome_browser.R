@@ -75,11 +75,12 @@ ui <- fluidPage(
     # Application title
     titlePanel("Azolla genus metagenome assembly browser"),
     markdown("This R Shiny application is associated with the [Azolla genus metagenome project](https://github.com/lauralwd/Azolla_genus_metagenome) by [Laura Dijkhuizen](https://www.uu.nl/medewerkers/lwdijkhuizen). 
-             It aims to display in one glance the similarities between several metagenome assemblies derived from public sequencing data of plants of the genus *Azolla*, known for it's specific endophytic microbiome.
-             The assembled contigs and scaffolds are augmented with taxonomy estimations by [CAT](https://github.com/dutilh/CAT), then plotted in a dotplot by contig/scaffold length (x) and depth in the assembly graph (y).
-             The user of the app may manipulate the input assemblies of the plot, and filter by taxonomy metadata.
-             The code for this app falls under the [license](https://github.com/lauralwd/Azolla_genus_metagenome/blob/master/LICENSE) of the github repository in which it is made public.
-             For further information, please read the info paragraph at the bottom of this page."),
+             It aims to reveal similarities amongst metagenome assemblies in a single glance.
+             Assemblies were derived from public sequencing data of *Azolla* plants, known for their endophytic microbes and systematic vertical transmission of those microbes across generations of plants.
+             The assembled contigs and scaffolds are augmented with taxonomy estimations by [CAT](https://github.com/dutilh/CAT), then plotted in a dot-plot by contig/scaffold length (x) and depth in the assembly graph (y).
+             The app user may manipulate the input assemblies of the plot and filter by taxonomy metadata.
+             The code for this app falls under the [license](https://github.com/lauralwd/Azolla_genus_metagenome/blob/master/LICENSE) of the Github repository in which it is made public.
+             Please read the info paragraph at the bottom of this page for further information."),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
