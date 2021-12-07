@@ -106,13 +106,14 @@ ui <- fluidPage(
             ),
           h3("Second, choose how to colour the the dotplot:"),
             selectInput("taxonomy","Taxonomy level:",
-                        choices = list("superkingdom",
-                                       "phylum",
-                                       "class",
-                                       "order",
-                                       "family",
-                                       "genus",
-                                       "species" 
+                        choices = list("superkingdom" = "superkingdom",
+                                       "phylum" = "phylum",
+                                       "class" = "class",
+                                       "order" = "order",
+                                       "family" = "family",
+                                       "genus" = "genus",
+                                       "species" = "species",
+                                       "single colour" = "assembly"
                                        ),
                         selected = "order"
                         ),
