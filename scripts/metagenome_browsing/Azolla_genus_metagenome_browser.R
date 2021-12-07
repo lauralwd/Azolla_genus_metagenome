@@ -217,7 +217,8 @@ server <- function(input, output) {
   
 ## Second, using the pre-filtered data, a plot is defined with ggplot2
   output$plot <- renderPlot({
-      length_dist <- ggplot(metrics_subset(),
+    `%notin%` <- Negate(`%in%`)
+      length_dist <- ggplot(metrics_subset()[taxonomy %notin% input$fine_filter],
                             aes_string(x='length',
                                        y='coverage',
                                        size=input$dotsize,
