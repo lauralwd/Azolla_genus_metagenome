@@ -75,7 +75,7 @@ ui <- fluidPage(
     # Application title
     titlePanel("Azolla genus metagenome assembly browser"),
     markdown("This R Shiny application is associated with the [Azolla genus metagenome project](https://github.com/lauralwd/Azolla_genus_metagenome) by [Laura Dijkhuizen](https://www.uu.nl/medewerkers/lwdijkhuizen). 
-             It displays several metagenome assemblies derived from public sequencing data of plants of the genus *Azolla*, known for it's specific endophytic microbiome.
+             It aims to display in one glance the similarities between several metagenome assemblies derived from public sequencing data of plants of the genus *Azolla*, known for it's specific endophytic microbiome.
              The assembled contigs and scaffolds are augmented with taxonomy estimations by [CAT](https://github.com/dutilh/CAT), then plotted in a dotplot by contig/scaffold length (x) and depth in the assembly graph (y).
              The user of the app may manipulate the input assemblies of the plot, and filter by taxonomy metadata.
              The code for this app falls under the [license](https://github.com/lauralwd/Azolla_genus_metagenome/blob/master/LICENSE) of the github repository in which it is made public.
