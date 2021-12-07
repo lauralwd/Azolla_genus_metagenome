@@ -167,7 +167,7 @@ ui <- fluidPage(
                    Only of the doublefiltered data, hybrid assemblies were generated per plant accession (hybrid assemblies; assemblies using more than one sequencing library as input).
                    Using CAT output, a table can be generated with contig/scaffold length, depth, details on open reading frames (ORFs) and details on taxonomy.
                    To this end, [this particular script](https://github.com/lauralwd/Azolla_genus_metagenome/blob/master/scripts/make_assembly_stats_and_taxonomy.bash) was used available at the project [Github repository](https://github.com/lauralwd/Azolla_genus_metagenome).
-                   The graph displays the metagenome assemblies as a dot-plot with contig/scaffold length on the x-axis and depth in the assembly graph on the y-axis; the latter is log10 transformed.
+                   The graph displays the metagenome assemblies as a dot-plot with contig/scaffold length on the x-axis and depth in the assembly graph on the y-axis; both are log10 transformed.
                    By default, dot colour represents the order, and the size represents ORF count but a user can manipulate both.
                    For clarity, contigs/scaffolds without ORFs found (classified 'blank'), and contigs scaffolds with ORFs found but without taxonomy (classified 'not classified') are filtered out before displaying the plot.
                    Second, noisy contigs/scaffolds are omitted by default for clarity. 
