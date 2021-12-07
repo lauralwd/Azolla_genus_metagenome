@@ -251,8 +251,15 @@ server <- function(input, output) {
 ## third, an interactive window is defined which appears when the plot is clicked.
 ## this plot wil display details on the clicked contigs
     output$info <- renderText({
-      levels(metrics_subset()$taxonomy)
-      paste0(input$plot_click)})
+      click_data <- metrics_subset()[ assembly == input$plot_hover[[8]] &
+                                      sample   == input$plot_hover[[6]] &
+                                      length   >= input$plot_hover[[1]] -10 &
+                                      length   <= input$plot_hover[[1]] +10 & 
+                                      coverage >= input$plot_hover[[2]] -10 &
+                                      coverage <= input$plot_hover[[2]] +10 
+                                    ]
+      paste0(as.character(unique(click_data[,taxonomy]))
+             )})
 ## fourth, a table is rendered displaying the top 14 taxa at the given filter, their contig count and total size in Mbase
     output$tableout<- renderTable({
       as.matrix(metrics_subset()[,
