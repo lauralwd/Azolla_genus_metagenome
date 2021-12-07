@@ -78,6 +78,7 @@ ui <- fluidPage(
              It displays several metagenome assemblies derived from public sequencing data of plants of the genus *Azolla*, known for it's specific endophytic microbiome.
              The assembled contigs and scaffolds are augmented with taxonomy estimations by [CAT](https://github.com/dutilh/CAT), then plotted in a dotplot by contig/scaffold length (x) and depth in the assembly graph (y).
              The user of the app may manipulate the input assemblies of the plot, and filter by taxonomy metadata.
+             The code for this app falls under the [license](https://github.com/lauralwd/Azolla_genus_metagenome/blob/master/LICENSE) of the github repository in which it is made public.
              For further information, please read the info paragraph at the bottom of this page."),
 
     # Sidebar with a slider input for number of bins 
