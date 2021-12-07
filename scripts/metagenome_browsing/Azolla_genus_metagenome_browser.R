@@ -1,8 +1,8 @@
 # load libraries
-library(shiny)
-library(ggplot2)
-library(data.table)
-library(ggtext)
+library(shiny)        # basic shiny 
+library(ggplot2)      # my favourite graphing library
+library(data.table)   # for efficient handling of very big tables
+library(ggtext)       # for markdown parsing inside ggplot
 
 # import data
 header <-  c('assembly', 'sample', 'scaffolded', 'node',    'length',  'coverage', 'ORFs',    'ORFs_classified', 'superkingdom', 'phylum', 'class',  'order',  'family', 'genus', 'species')
