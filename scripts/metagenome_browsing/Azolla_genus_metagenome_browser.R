@@ -231,6 +231,7 @@ server <- function(input, output) {
       length_dist <- length_dist + theme(legend.position = "bottom",
                                          text = element_text(size = 12),
                                          strip.text = element_markdown(size = 12),
+                                         legend.text = element_text(size = 12),
                                          axis.text.x = element_text(angle = 80,hjust = 1,size = 12)
                                          )
       length_dist
