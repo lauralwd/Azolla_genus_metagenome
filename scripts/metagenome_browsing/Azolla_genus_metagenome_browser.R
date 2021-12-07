@@ -152,9 +152,29 @@ ui <- fluidPage(
         # Show a plot of the generated distribution
         mainPanel(
           plotOutput("plot",click = "plot_click",width = '100%',height = '1000px'),
-          h2('more details'),
-          verbatimTextOutput("info"),
-          h2('Taxa present at this filter'),
+          markdown("**Figure legend:** Metagenome assemblies of 6 species of the fern genus *Azolla* (horizontal panels).
+                   Sequencing data was derived from three public projects:
+                   first, the ['azolla genome project'](https://doi.org/10.1038/s41477-018-0188-8) data: [PRJNA430527](https://www.ebi.ac.uk/ena/browser/view/PRJNA430527)
+                   second, the ['foul play in the pocket paper'](https://doi.org/10.1111/nph.14843) data: [PRJEB19522](https://www.ebi.ac.uk/ena/browser/view/PRJEB19522)
+                   third, the original sequencing data for [the *Nostoc azollae*](https://doi.org/10.1371/journal.pone.0011486) genome paper: [PRJNA30807](https://www.ebi.ac.uk/ena/browser/view/PRJNA30807)
+                   .
+                   Sequencing reads of the former two projects was rid of host plant DNA reads by mapping to the *Azolla filiculoides* genome version 1.1 available at [fernbase.org](https://fernbase.org/ftp/Azolla_filiculoides/Azolla_asm_v1.1/).
+                   The remaining reads were assembled with SPAdes in metagenome mode, resulting contigs and scaffolds were then assigned an approximate taxonomy with the Contig Annotation Tool [(CAT)](https://github.com/dutilh/CAT).
+                   Contigs assigned 'Eukaryote' were then used for a second filtering step of the previously filtered data, then assembled again with SPAdes, and assigned taxonomy again with CAT.
+                   Hence the datasets are termed 'hostfiltered' and 'doublefiltered' (vertical panels). 
+                   Only of the doublefiltered data, hybrid assemblies were generated per plant accession (hybrid assemblies; assemblies using more than one sequencing library as input).
+                   Using CAT output, a table can be generated with contig/scaffold length, depth, details on open reading frames (ORFs) and details on taxonomy.
+                   To this end, [this particular script](https://github.com/lauralwd/Azolla_genus_metagenome/blob/master/scripts/make_assembly_stats_and_taxonomy.bash) was used available at the project [github repository](https://github.com/lauralwd/Azolla_genus_metagenome).
+                   The graph displays the metagenome assemblies as a dotplot with contig/scaffold length on the x-axis, and depth in the assembly graph on the y-axis, the latter is log10 transformed.
+                   By default dot colour represents the order, and the size represents ORF count, but both can be manipulated by the user.
+                   For clarity, contigs/scaffolds without ORFs found (classified 'blank') and contigs scaffolds with ORFs found, but without taxonomy (classified 'not classified') are filtered out before displaying the plot.
+                   Second, noisy contigs/scaffolds are ommitted by default for clarity. 
+                   The default threshold for noisy is when contigs/scaffolds have fewer than 5 ORFs classified, or when a taxonomic group amounts to less than 2Mbase in the entire figure.
+                   "),
+#          h2('more details'),
+#          verbatimTextOutput("info"),
+          h2('Taxa table'),
+          markdown("Taxa present at the second stage of filtering are displayed in this table by contig count and total size in mbases."),
           tableOutput(outputId = 'tableout')
         )
     )
