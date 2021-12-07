@@ -83,21 +83,27 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
-            selectInput("filterstage","Choose a filter stage of the assembly data",
+          h3("First, choose input data to plot in the graph:"),
+            selectInput("filterstage","Filter stage of the assembly data:",
                         choices = list("host filtered" = "doublefiltered",
                                        "double filtered" = "singlefiltered",
                                        "both" = " "
                         ),
                         selected = "singlefiltered"
             ),
-            selectInput("assemblylevel","Choose an assembly strategy",
+            selectInput("assemblylevel","Assembly strategy:",
                         choices = list("Single library assemblies" = "hybrid library",
                                        "Hybrid assemblies" = "partial library",
                                        "All assemblies" = " "
                         ),
                         selected = "partial library"
             ),
-            selectInput("taxonomy","Choose a taxonomy level to colour the dotplot",
+            selectInput("format","Contigs or scaffolds:",
+                        choices = as.list(levels(metrics_shiny$scaffolded)),
+                        selected = "scaffolds"
+            ),
+          h3("Second, choose how to colour the the dotplot:"),
+            selectInput("taxonomy","Taxonomy level:",
                         choices = list("superkingdom",
                                        "phylum",
                                        "class",
@@ -108,16 +114,13 @@ ui <- fluidPage(
                                        ),
                         selected = "order"
                         ),
-            selectInput("format","Choose contigs or scaffolds as assembly output",
-                        choices = as.list(levels(metrics_shiny$scaffolded)),
-                        selected = "scaffolds"
-            ),            
-                        selectInput("dotsize","Choose what is represented by the size of the dots",
+          selectInput("dotsize","Dot size represents:",
                         choices = list("Open reading frames" = "ORFs",
                                        "Open reading frames classified" = "ORFs_classified",
                                        "Contig/scaffold length" = "length"
                         )
-            ),
+                      ),
+          h3("Third, filter the data displayed:"),
             checkboxGroupInput(inputId = 'filter',label = "Remove taxa on superkingdom level",
                                choices = as.list(levels(metrics_shiny$superkingdom)),
                                selected = list('NA','','not classified')
