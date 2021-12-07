@@ -24,7 +24,7 @@ levels(metrics_shiny$superkingdom)
 
 # polish metadata
 
-# make a separate factor to distinct hybrid assemblies from single library assemblies:
+## make a separate factor to distinct hybrid assemblies from single library assemblies:
 singlelibs <- c("Azfil_lab_250", 
                 "Azfil_lab_500", 
                 "Azfil_lab_800", 
@@ -51,7 +51,7 @@ metrics_shiny[sample %in% singlelibs]$assemblytype <- 'partial library'
 metrics_shiny[sample %in% hybridlibs]$assemblytype <- 'hybrid library'
 rm(singlelibs,hybridlibs)
 
-# Make a separate factor to indicate species name rather than only a library code
+## Make a separate factor to indicate species name rather than only a library code
 metrics_shiny$hostspecies <- factor(x = '*A. filiculoides*',
                                 levels = c('*A. caroliniana*',
                                            '*A. microphylla*',
@@ -69,10 +69,10 @@ metrics_shiny[sample %in% c('Azrub_IRRI_479')]$hostspecies <- '*A. rubra*'
 metrics_shiny[sample %in% c('Azspnov_IRRI1_472')]$hostspecies <- '*A. caroliniana*'
 metrics_shiny[sample %in% c('Azspnov_IRRI2_489')]$hostspecies <- '*A. caroliniana*'
 
-# Define UI for application that draws a histogram
+# Define UI
 ui <- fluidPage(
 
-    # Application title
+## Application title
     titlePanel("Azolla genus metagenome assembly browser"),
     markdown("This R Shiny application is associated with the [Azolla genus metagenome project](https://github.com/lauralwd/Azolla_genus_metagenome) by [Laura Dijkhuizen](https://www.uu.nl/medewerkers/lwdijkhuizen). 
              It aims to reveal similarities amongst metagenome assemblies in a single glance.
@@ -82,7 +82,7 @@ ui <- fluidPage(
              The code for this app falls under the [license](https://github.com/lauralwd/Azolla_genus_metagenome/blob/master/LICENSE) of the Github repository in which it is made public.
              Please read the info paragraph at the bottom of this page for further information."),
 
-    # Sidebar with a slider input for number of bins 
+## Sidebar 
     sidebarLayout(
         sidebarPanel(
           h3("First, choose input data to plot in the graph:"),
@@ -151,7 +151,7 @@ ui <- fluidPage(
             uiOutput("filter_fine")
         ),
 
-        # Show a plot of the generated distribution
+## The main panel
         mainPanel(
           plotOutput("plot",click = "plot_click",width = '100%',height = '1000px'),
           markdown("**Figure legend:** Metagenome assemblies of 6 species of the fern genus *Azolla* (horizontal panels).
@@ -182,11 +182,11 @@ ui <- fluidPage(
     )
 )
 
-# Define server logic required to draw a histogram
+# Define the server backbone
 server <- function(input, output) {
   `%notin%` <- Negate(`%in%`)
   
-## First, define a function containing the dataset, filtered according to input settings.
+## First, define a function containing the data set, filtered according to input settings.
   metrics_subset <- shiny::reactive({
     dt <- metrics_shiny[scaffolded == input$format &
                         superkingdom %notin% input$filter & 
@@ -215,7 +215,7 @@ server <- function(input, output) {
                        )
   })
   
-## Second, using the pre-filtered data, a plot is defined with ggplot2
+## Second, using the pre-filtered data, a plot is build with ggplot2
   output$plot <- renderPlot({
     `%notin%` <- Negate(`%in%`)
       length_dist <- ggplot(metrics_subset()[taxonomy %notin% input$fine_filter],
