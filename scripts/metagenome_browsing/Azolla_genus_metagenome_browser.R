@@ -52,7 +52,7 @@ metrics_shiny[sample %in% hybridlibs]$assemblytype <- 'hybrid library'
 rm(singlelibs,hybridlibs)
 
 # Make a separate factor to indicate species name rather than only a library code
-metrics_shiny$species <- factor(x = '*A. filiculoides*',
+metrics_shiny$hostspecies <- factor(x = '*A. filiculoides*',
                                 levels = c('*A. caroliniana*',
                                            '*A. microphylla*',
                                            '*A. mexicana*',
@@ -62,12 +62,12 @@ metrics_shiny$species <- factor(x = '*A. filiculoides*',
                                            '*A. nilotica*'
                                            )
                                 )
-metrics_shiny[sample %in% c('Azmex_IRRI_486')]$species <- '*A. mexicana*'
-metrics_shiny[sample %in% c('Azmic_IRRI_456')]$species <- '*A. microphylla*'
-metrics_shiny[sample %in% c('Aznil_IRRI_479')]$species <- '*A. nilotica*'
-metrics_shiny[sample %in% c('Azrub_IRRI_479')]$species <- '*A. rubra*'
-metrics_shiny[sample %in% c('Azspnov_IRRI1_472')]$species <- '*A. caroliniana*'
-metrics_shiny[sample %in% c('Azspnov_IRRI2_489')]$species <- '*A. caroliniana*'
+metrics_shiny[sample %in% c('Azmex_IRRI_486')]$hostspecies <- '*A. mexicana*'
+metrics_shiny[sample %in% c('Azmic_IRRI_456')]$hostspecies <- '*A. microphylla*'
+metrics_shiny[sample %in% c('Aznil_IRRI_479')]$hostspecies <- '*A. nilotica*'
+metrics_shiny[sample %in% c('Azrub_IRRI_479')]$hostspecies <- '*A. rubra*'
+metrics_shiny[sample %in% c('Azspnov_IRRI1_472')]$hostspecies <- '*A. caroliniana*'
+metrics_shiny[sample %in% c('Azspnov_IRRI2_489')]$hostspecies <- '*A. caroliniana*'
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -221,7 +221,7 @@ server <- function(input, output) {
                                        col='taxonomy'
                                        )
                             )
-      length_dist <- length_dist + facet_grid(assembly ~ species + sample)
+      length_dist <- length_dist + facet_grid(assembly ~ hostspecies + sample)
       length_dist <- length_dist + geom_point()
       length_dist <- length_dist + scale_x_log10()
       length_dist <- length_dist + scale_y_log10()
