@@ -259,14 +259,15 @@ server <- function(input, output) {
 ## third, an interactive window is defined which appears when the plot is clicked.
 ## this plot wil display details on the clicked contigs
     output$info <- renderText({
-      click_data <- metrics_subset()[ assembly == input$plot_hover[[8]] &
-                                      sample   == input$plot_hover[[6]] &
-                                      length   >= input$plot_hover[[1]] -10 &
-                                      length   <= input$plot_hover[[1]] +10 & 
-                                      coverage >= input$plot_hover[[2]] -10 &
-                                      coverage <= input$plot_hover[[2]] +10 
-                                    ]
-      paste0(as.character(unique(click_data[,taxonomy])))
+      req(input$plot_hover) 
+      hover_data <- nearPoints(df = metrics_subset()[assembly == input$plot_hover[[8]] &
+                                                     sample   == input$plot_hover[[6]] &
+                                                     taxonomy %notin% input$fine_filter],
+                                xvar = 'length',
+                                yvar = 'coverage',
+                                coordinfo = input$plot_hover
+                                )
+      paste0(as.character(unique(hover_data[,taxonomy])))
       })
     
 ## fourth, a table is rendered displaying the top 14 taxa at the given filter, their contig count and total size in Mbase
