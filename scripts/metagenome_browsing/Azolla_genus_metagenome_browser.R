@@ -162,6 +162,8 @@ ui <- fluidPage(
                      width = '100%',
                      height = '1000px'
                      ),
+          markdown("Hover over the plot to see more information about any particular contig or scaffold:"),
+          verbatimTextOutput("info"),
           markdown("**Figure legend:** Metagenome assemblies of 6 species of the fern genus *Azolla* (horizontal panels).
                    Sequencing data were derived from three public projects:
                    first, the ['Azolla genome project'](https://doi.org/10.1038/s41477-018-0188-8) data: [PRJNA430527](https://www.ebi.ac.uk/ena/browser/view/PRJNA430527)
@@ -181,10 +183,6 @@ ui <- fluidPage(
                    Second, noisy contigs/scaffolds are omitted by default for clarity. 
                    The default threshold for noisy is when contigs/scaffolds have fewer than 5 ORFs classified or when a taxonomic group amounts to less than 2Mbase in the entire figure.
                    "),
-          h2('Contig details'),
-          markdown("Hover over the plot to see more information about any particular contig or scaffold:
-                   **in development**"),
-          verbatimTextOutput("info"),
           h2('Selection details'),
           markdown("Select a rectangle in the plot to see more information about a particular set of contigs or scaffolds:
                    **in development**"),
