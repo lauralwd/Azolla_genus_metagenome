@@ -190,8 +190,7 @@ ui <- fluidPage(
           h2('Selection details'),
           uiOutput("brush_info"),
           h2('Taxa table'),
-          markdown("Taxa present at the second stage of filtering in this side panel are displayed in this table by taxonomic group and assembly filter stage (hostfiltered or doublefiltered).
-                   Only groups that amount to more than 1Mbase are shown."),
+          markdown("Taxa size in Mbase are split up by sample and taxon level in this table. Only groups that amount to more than 1Mbase are shown."),
           tableOutput(outputId = 'tableout')
       )
     )
@@ -334,19 +333,23 @@ server <- function(input, output) {
     
 ## fifth, a table is rendered displaying the top 14 taxa at the given filter, their contig count and total size in Mbase
     output$tableout<- renderTable({
-      as.matrix(metrics_subset()[,
-                                 .(contig_count    = length(length), 
-                                   length_mb       = round( sum(length)/1000000),
-                                   ORF_count       = sum(ORFs),
-                                   ORFs_classified = sum(ORFs_classified),
-                                   mean_coverage   = round(mean(coverage),2),
-                                   sd_coverage    = round(sd(coverage),2)
+      df_long <- (metrics_subset()[taxonomy %notin% input$fine_filter,
+                                 .(length_mb       = round( sum(length)/1000000)
+                                   #ORF_count       = sum(ORFs),
+                                   #ORFs_classified = sum(ORFs_classified)
                                    ),
                                  by=c(eval(input$taxonomy),
-                                      'assembly')]
-                [length_mb >= 1]
-                [order(-rank(length_mb))]
+                                      'assembly',
+                                      'sample')]
+                                [length_mb >= 1]
+                                [order(-rank(length_mb))]
       )
+      as.matrix(dcast.data.table(data = df_long
+                                 ,formula = assembly + order ~ sample
+                                 ,fun.aggregate = sum
+                                 ,value.var = 'length_mb'
+                                 )
+                )
     })
 }
 
