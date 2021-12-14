@@ -234,6 +234,7 @@ server <- function(input, output) {
   plotcontainer <- reactiveValues()
   output$plot <- renderPlot({
     `%notin%` <- Negate(`%in%`)
+      textsize <- 12
       dotplot <- ggplot(metrics_subset()[taxonomy %notin% input$fine_filter],
                             aes_string(x='length',
                                        y='coverage',
@@ -253,12 +254,14 @@ server <- function(input, output) {
       dotplot <- dotplot + theme_classic()
       dotplot <- dotplot + theme(legend.position = "bottom",
                                  legend.justification = 'center',
-                                 text = element_text(size = 12),
-                                 strip.text  = element_markdown(size = 12),
-                                 legend.text = element_text(size = 12),
-                                 axis.text.x = element_text(angle = 40,hjust = 1,size = 12),
-                                 axis.text.y = element_text(size = 12),
-                                 axis.title  = element_text(size = 12)
+                                 legend.direction = 'horizontal',
+                                 legend.box = 'vertical',
+                                 text = element_text(size = textsize),
+                                 strip.text  = element_markdown(size = 10),
+                                 legend.text = element_text(size = textsize),
+                                 axis.text.x = element_text(angle = 40,hjust = 1,size = textsize),
+                                 axis.text.y = element_text(textsize),
+                                 axis.title  = element_text(textsize)
                                  )
       #dotplot <- dotplot + annotation_logticks()
       plotcontainer$plot <- dotplot
