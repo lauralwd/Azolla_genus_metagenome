@@ -254,9 +254,11 @@ server <- function(input, output) {
       dotplot <- dotplot + theme(legend.position = "bottom",
                                  legend.justification = 'center',
                                  text = element_text(size = 12),
-                                 strip.text = element_markdown(size = 12),
+                                 strip.text  = element_markdown(size = 12),
                                  legend.text = element_text(size = 12),
-                                 axis.text.x = element_text(angle = 40,hjust = 1,size = 12)
+                                 axis.text.x = element_text(angle = 40,hjust = 1,size = 12),
+                                 axis.text.y = element_text(size = 12),
+                                 axis.title  = element_text(size = 12)
                                  )
       #dotplot <- dotplot + annotation_logticks()
       plotcontainer$plot <- dotplot
