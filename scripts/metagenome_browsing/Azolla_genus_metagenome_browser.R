@@ -225,7 +225,8 @@ server <- function(input, output) {
     names(choices) <-  tax_list[order(tax_list)]
     checkboxGroupInput(inputId = "fine_filter",
                        label = "Select taxa to omit from the plot",
-                       choices = choices
+                       choices = choices,
+                       selected = list('low abundant','not classified')
                        )
   })
   
