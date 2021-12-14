@@ -231,6 +231,7 @@ server <- function(input, output) {
   })
   
 ## Second, using the pre-filtered data, a plot is build with ggplot2
+  plotcontainer <- reactiveValues()
   output$plot <- renderPlot({
     `%notin%` <- Negate(`%in%`)
       dotplot <- ggplot(metrics_subset()[taxonomy %notin% input$fine_filter],
@@ -257,6 +258,7 @@ server <- function(input, output) {
                                          axis.text.x = element_text(angle = 80,hjust = 1,size = 12)
                                          )
       #dotplot <- dotplot + annotation_logticks()
+      plotcontainer$plot <- dotplot
       dotplot
     })
   
