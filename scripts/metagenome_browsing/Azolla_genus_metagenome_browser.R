@@ -275,6 +275,7 @@ server <- function(input, output) {
 
     output$hover_info <- renderUI({
       hover <- input$plot_hover
+      if (length(hover$x) == 0) return(NULL)
       point <- nearPoints(df = metrics_subset()[assembly == input$plot_hover[[8]] &
                                                 sample   == input$plot_hover[[6]] &
                                                 taxonomy %notin% input$fine_filter],
@@ -283,15 +284,13 @@ server <- function(input, output) {
                           coordinfo = input$plot_hover,
                           addDist = TRUE)
       
-      if (nrow(point) == 0) return(NULL)
+      #left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
+      #top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
+      #left_px <- log10(hover$range$left + left_pct * (hover$range$right - hover$range$left))
+      #top_px <- log10(hover$range$top + top_pct * (hover$range$bottom - hover$range$top))
       
-      left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
-      top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
-      left_px <- log10(hover$range$left + left_pct * (hover$range$right - hover$range$left))
-      top_px <- log10(hover$range$top + top_pct * (hover$range$bottom - hover$range$top))
-      
-      style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
-                      "left:", left_px + 2, "px; top:", top_px + 2, "px;")
+      #style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
+      #                "left:", left_px + 2, "px; top:", top_px + 2, "px;")
       
       wellPanel(#style = style,
                 p(HTML(
