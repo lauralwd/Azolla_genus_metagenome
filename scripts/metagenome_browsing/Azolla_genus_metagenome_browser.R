@@ -255,6 +255,7 @@ server <- function(input, output) {
                                          legend.text = element_text(size = 12),
                                          axis.text.x = element_text(angle = 80,hjust = 1,size = 12)
                                          )
+      #dotplot <- dotplot + annotation_logticks()
       dotplot
     })
   
