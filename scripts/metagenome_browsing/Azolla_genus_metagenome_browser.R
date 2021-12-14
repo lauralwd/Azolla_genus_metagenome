@@ -362,9 +362,14 @@ server <- function(input, output) {
       content  = function(file){
         ggsave(filename = file
              ,plot = plotcontainer$plot
-             ,device = 'svg'
+             ,device = 'svg' 
              ,width = unit(x = 18,units = 'cm')
              ,height = unit(x = 14,units = 'cm')
+             ,scale = .55 # somehow I don't get the right dimensions out and this is an approximate fix...
+             # for landscape format and png:
+             #,device = 'png'
+             #,width = unit(x = 27,units = 'cm')
+             #,height = unit(x = 18,units = 'cm')
              ,dpi = 400)
       }
     )
