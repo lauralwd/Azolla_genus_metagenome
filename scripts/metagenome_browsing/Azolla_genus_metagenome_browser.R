@@ -152,13 +152,13 @@ ui <- fluidPage(
                         min = 0,
                         max = 100,
                         value = 2),
-            uiOutput("filter_fine"),
-          width = 3
+            uiOutput("filter_fine")
+          #width = 3
         ),
 
 ## The main panel
     mainPanel(
-      width = 7,
+      #width = 7,
       div(style = "position:relative",
           plotOutput("plot",hover = "plot_hover",
                      click = "plot_click",
