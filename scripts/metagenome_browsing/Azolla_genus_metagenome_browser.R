@@ -190,7 +190,7 @@ ui <- fluidPage(
           uiOutput("brush_info"),
           h2('Taxa table'),
           markdown("Taxa size in Mbase are split up by sample and taxon level in this table. Only groups that amount to more than 1Mbase are shown."),
-          tableOutput(outputId = 'tableout')
+          dataTableOutput(outputId = 'tableout')
       )
     )
 )
@@ -291,7 +291,7 @@ server <- function(input, output) {
     })
     
 ## fourth, calculate a table based on brush info
-    output$brush_info <- renderUI({
+    output$brush_info <- renderUI({  
       brush <- input$plot_brush
       # if no square/brush is drawn, return this instruction:
       if (is.null(brush)) return(markdown("Select a rectangle in the plot to see more information about a particular set of contigs or scaffolds"))
@@ -305,7 +305,7 @@ server <- function(input, output) {
                                  taxonomy %notin% input$fine_filter
                                  ]
       # render final table
-      renderTable(as.matrix(
+      renderDataTable({
       square[,
              .(contig_count    = length(length), 
                length_mb       = round( sum(length)/1000000),
@@ -315,11 +315,15 @@ server <- function(input, output) {
                sd_coverage    = round(sd(coverage),2)
              ),
              by='taxonomy']
-      ))
-    })    
+    },
+    options = list(scrollX = TRUE,
+                   paging = F,
+                   searching = F)
+    )
+    })
     
 ## fifth, a table is rendered displaying the top 14 taxa at the given filter, their contig count and total size in Mbase
-    output$tableout<- renderTable({
+    output$tableout<- renderDataTable({
       df_long <- (metrics_subset()[taxonomy %notin% input$fine_filter,
                                  .(length_mb       = round( sum(length)/1000000)
                                    #ORF_count       = sum(ORFs),
@@ -331,13 +335,17 @@ server <- function(input, output) {
                                 [length_mb >= 1]
                                 [order(-rank(length_mb))]
       )
-      as.matrix(dcast.data.table(data = df_long
-                                 ,formula = assembly + taxonomy ~ sample
-                                 ,fun.aggregate = sum
-                                 ,value.var = 'length_mb'
-                                 )
-                )
-    })
+      df_cast <- dcast.data.table(data = df_long
+                                  ,formula = assembly + taxonomy ~ sample
+                                  ,fun.aggregate = sum
+                                  ,value.var = 'length_mb'
+                                  )
+      df_cast
+    },
+    options = list(scrollX = TRUE,
+                   paging = F
+                   )
+    )
 }
 
 # Run the application 
