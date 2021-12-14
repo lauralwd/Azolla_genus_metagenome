@@ -303,7 +303,35 @@ server <- function(input, output) {
       )
     })
     
-## fourth, a table is rendered displaying the top 14 taxa at the given filter, their contig count and total size in Mbase
+## fourth, calculate a table based on brush info
+    output$brush_info <- renderUI({
+      brush <- input$plot_brush
+      # if no square/brush is drawn, return this instruction:
+      if (is.null(brush)) return(markdown("Select a rectangle in the plot to see more information about a particular set of contigs or scaffolds"))
+      # subset data table according to brush dimensions and panel and taxonomy fine filter
+      square <- metrics_subset()[assembly == brush[[7]] &
+                                 sample   == brush[[5]] &
+                                 length   >= brush$xmin &
+                                 length   <= brush$xmax &
+                                 coverage >= brush$ymin &
+                                 coverage <= brush$ymax &
+                                 taxonomy %notin% input$fine_filter
+                                 ]
+      # render final table
+      renderTable(
+      square[,
+             .(contig_count    = length(length), 
+               length_mb       = round( sum(length)/1000000),
+               ORF_count       = sum(ORFs),
+               ORFs_classified = sum(ORFs_classified),
+               mean_coverage   = round(mean(coverage),2),
+               sd_coverage    = round(sd(coverage),2)
+             ),
+             by='taxonomy']
+      )
+    })    
+    
+## fifth, a table is rendered displaying the top 14 taxa at the given filter, their contig count and total size in Mbase
     output$tableout<- renderTable({
       as.matrix(metrics_subset()[,
                                  .(contig_count    = length(length), 
