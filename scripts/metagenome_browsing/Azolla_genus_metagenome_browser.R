@@ -233,7 +233,7 @@ server <- function(input, output) {
 ## Second, using the pre-filtered data, a plot is build with ggplot2
   output$plot <- renderPlot({
     `%notin%` <- Negate(`%in%`)
-      length_dist <- ggplot(metrics_subset()[taxonomy %notin% input$fine_filter],
+      dotplot <- ggplot(metrics_subset()[taxonomy %notin% input$fine_filter],
                             aes_string(x='length',
                                        y='coverage',
                                        size=input$dotsize,
@@ -241,21 +241,21 @@ server <- function(input, output) {
                                        col='taxonomy'
                                        )
                             )
-      length_dist <- length_dist + facet_grid(assembly ~ hostspecies + sample)
-      length_dist <- length_dist + geom_point()
-      length_dist <- length_dist + scale_x_log10()
-      length_dist <- length_dist + scale_y_log10()
-      length_dist <- length_dist + labs(x='contig length',
+      dotplot <- dotplot + facet_grid(assembly ~ hostspecies + sample)
+      dotplot <- dotplot + geom_point()
+      dotplot <- dotplot + scale_x_log10()
+      dotplot <- dotplot + scale_y_log10()
+      dotplot <- dotplot + labs(x='contig length',
                                         y='contig coverage'
                                         )
-      length_dist <- length_dist + theme_classic()
-      length_dist <- length_dist + theme(legend.position = "bottom",
+      dotplot <- dotplot + theme_classic()
+      dotplot <- dotplot + theme(legend.position = "bottom",
                                          text = element_text(size = 12),
                                          strip.text = element_markdown(size = 12),
                                          legend.text = element_text(size = 12),
                                          axis.text.x = element_text(angle = 80,hjust = 1,size = 12)
                                          )
-      length_dist
+      dotplot
     })
   
 ## third, an interactive window is defined which appears when the plot is clicked.
