@@ -162,6 +162,7 @@ ui <- fluidPage(
       div(style = "position:relative",
           plotOutput("plot",hover = "plot_hover",
                      click = "plot_click",
+                     brush = "plot_brush",
                      width = '100%',
                      height = '1000px'
                      ),
@@ -187,8 +188,7 @@ ui <- fluidPage(
                    The default threshold for noisy is when contigs/scaffolds have fewer than 5 ORFs classified or when a taxonomic group amounts to less than 2Mbase in the entire figure.
                    "),
           h2('Selection details'),
-          markdown("Select a rectangle in the plot to see more information about a particular set of contigs or scaffolds:
-                   **in development**"),
+          uiOutput("brush_info"),
           h2('Taxa table'),
           markdown("Taxa present at the second stage of filtering in this side panel are displayed in this table by taxonomic group and assembly filter stage (hostfiltered or doublefiltered).
                    Only groups that amount to more than 1Mbase are shown."),
