@@ -339,14 +339,14 @@ server <- function(input, output) {
                                    #ORF_count       = sum(ORFs),
                                    #ORFs_classified = sum(ORFs_classified)
                                    ),
-                                 by=c(eval(input$taxonomy),
+                                 by=c('taxonomy', #by=c(eval(input$taxonomy),
                                       'assembly',
                                       'sample')]
                                 [length_mb >= 1]
                                 [order(-rank(length_mb))]
       )
       as.matrix(dcast.data.table(data = df_long
-                                 ,formula = assembly + order ~ sample
+                                 ,formula = assembly + taxonomy ~ sample
                                  ,fun.aggregate = sum
                                  ,value.var = 'length_mb'
                                  )
