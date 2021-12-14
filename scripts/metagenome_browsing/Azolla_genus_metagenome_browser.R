@@ -274,8 +274,9 @@ server <- function(input, output) {
 
     output$hover_info <- renderUI({
       hover <- input$plot_hover
+      # if pointer is outside plot (no x cord) then return markdown element with hover instructions
       if (length(hover$x) == 0) return(markdown("Hover over the plot to see more information about any particular contig or scaffold:"))
-      
+      # subset data table according to hover pane, taxonomy fine filter, and hover coordinates
       point <- nearPoints(df = metrics_subset()[assembly == input$plot_hover[[8]] &
                                                 sample   == input$plot_hover[[6]] &
                                                 taxonomy %notin% input$fine_filter],
@@ -284,6 +285,7 @@ server <- function(input, output) {
                           coordinfo = input$plot_hover,
                           addDist = TRUE)
       
+      # bellow section should allow to show tooltip on the plot near hovering location, but this currently does not work well.
       #left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
       #top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
       #left_px <- log10(hover$range$left + left_pct * (hover$range$right - hover$range$left))
