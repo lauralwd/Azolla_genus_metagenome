@@ -83,7 +83,7 @@ ui <- fluidPage(
              The assembled contigs and scaffolds are augmented with taxonomy estimations by [CAT](https://github.com/dutilh/CAT), then plotted in a dot-plot by contig/scaffold length (x) and depth in the assembly graph (y).
              The app user may manipulate the input assemblies of the plot and filter by taxonomy metadata.
              The [code for this app](https://github.com/lauralwd/Azolla_genus_metagenome/blob/master/scripts/metagenome_browsing/Azolla_genus_metagenome_browser.R) falls under the [license](https://github.com/lauralwd/Azolla_genus_metagenome/blob/master/LICENSE) of the Github repository in which it is made public.
-             Please read the info paragraph at the bottom of this page for further information."),
+             Please read the figure legend below for further information."),
 
 ## Sidebar 
     sidebarLayout(
