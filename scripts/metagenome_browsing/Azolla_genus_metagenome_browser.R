@@ -152,7 +152,8 @@ ui <- fluidPage(
                         min = 0,
                         max = 100,
                         value = 2),
-            uiOutput("filter_fine")
+            uiOutput("filter_fine"),
+          downloadButton('downloadPlot','Download plot svg')
           #width = 3
         ),
 
