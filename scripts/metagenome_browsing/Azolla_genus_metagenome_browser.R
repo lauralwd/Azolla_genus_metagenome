@@ -152,17 +152,21 @@ ui <- fluidPage(
                         min = 0,
                         max = 100,
                         value = 2),
-            uiOutput("filter_fine")
+            uiOutput("filter_fine"),
+          width = 3
         ),
 
 ## The main panel
-        mainPanel(
+    mainPanel(
+      width = 7,
+      div(style = "position:relative",
           plotOutput("plot",hover = "plot_hover",
                      click = "plot_click",
                      width = '100%',
                      height = '1000px'
                      ),
           markdown("Hover over the plot to see more information about any particular contig or scaffold:"),
+          uiOutput("hover_info"),
           verbatimTextOutput("info"),
           markdown("**Figure legend:** Metagenome assemblies of 6 species of the fern genus *Azolla* (horizontal panels).
                    Sequencing data were derived from three public projects:
@@ -190,8 +194,9 @@ ui <- fluidPage(
           markdown("Taxa present at the second stage of filtering in this side panel are displayed in this table by taxonomic group and assembly filter stage (hostfiltered or doublefiltered).
                    Only groups that amount to more than 1Mbase are shown."),
           tableOutput(outputId = 'tableout')
-        )
+      )
     )
+)
 )
 
 # Define the server backbone
