@@ -350,6 +350,18 @@ server <- function(input, output) {
                    paging = F
                    )
     )
+## sixth, render a png/svg for downloading (file format is hardcoded, sorry)
+    output$downloadPlot <- downloadHandler(
+      filename = function(){ paste('Azolla_genus_metagenome','-',input$taxonomy, '.svg', sep='') },
+      content  = function(file){
+        ggsave(filename = file
+             ,plot = plotcontainer$plot
+             ,device = 'svg'
+             ,width = unit(x = 18,units = 'cm')
+             ,height = unit(x = 14,units = 'cm')
+             ,dpi = 400)
+      }
+    )
 }
 
 # Run the application 
