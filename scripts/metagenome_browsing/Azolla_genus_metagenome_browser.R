@@ -165,7 +165,6 @@ ui <- fluidPage(
                      width = '100%',
                      height = '1000px'
                      ),
-          markdown("Hover over the plot to see more information about any particular contig or scaffold:"),
           uiOutput("hover_info"),
           #verbatimTextOutput("info"),
           markdown("**Figure legend:** Metagenome assemblies of 6 species of the fern genus *Azolla* (horizontal panels).
@@ -275,7 +274,8 @@ server <- function(input, output) {
 
     output$hover_info <- renderUI({
       hover <- input$plot_hover
-      if (length(hover$x) == 0) return(NULL)
+      if (length(hover$x) == 0) return(markdown("Hover over the plot to see more information about any particular contig or scaffold:"))
+      
       point <- nearPoints(df = metrics_subset()[assembly == input$plot_hover[[8]] &
                                                 sample   == input$plot_hover[[6]] &
                                                 taxonomy %notin% input$fine_filter],
