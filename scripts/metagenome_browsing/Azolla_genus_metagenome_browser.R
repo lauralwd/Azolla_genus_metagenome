@@ -167,7 +167,7 @@ ui <- fluidPage(
                      ),
           markdown("Hover over the plot to see more information about any particular contig or scaffold:"),
           uiOutput("hover_info"),
-          verbatimTextOutput("info"),
+          #verbatimTextOutput("info"),
           markdown("**Figure legend:** Metagenome assemblies of 6 species of the fern genus *Azolla* (horizontal panels).
                    Sequencing data were derived from three public projects:
                    first, the ['Azolla genome project'](https://doi.org/10.1038/s41477-018-0188-8) data: [PRJNA430527](https://www.ebi.ac.uk/ena/browser/view/PRJNA430527)
@@ -261,17 +261,17 @@ server <- function(input, output) {
   
 ## third, an interactive window is defined which appears when the plot is clicked.
 ## this plot wil display details on the clicked contigs
-    output$info <- renderText({
-      req(input$plot_hover) 
-      hover_data <- nearPoints(df = metrics_subset()[assembly == input$plot_hover[[8]] &
-                                                     sample   == input$plot_hover[[6]] &
-                                                     taxonomy %notin% input$fine_filter],
-                                xvar = 'length',
-                                yvar = 'coverage',
-                                coordinfo = input$plot_hover
-                                )
-      paste0(as.character(unique(hover_data[,taxonomy])))
-      })
+    # output$info <- renderText({
+    #   req(input$plot_hover) 
+    #   hover_data <- nearPoints(df = metrics_subset()[assembly == input$plot_hover[[8]] &
+    #                                                  sample   == input$plot_hover[[6]] &
+    #                                                  taxonomy %notin% input$fine_filter],
+    #                             xvar = 'length',
+    #                             yvar = 'coverage',
+    #                             coordinfo = input$plot_hover
+    #                             )
+    #   paste0(as.character(unique(hover_data[,taxonomy])))
+    #   })
 
     output$hover_info <- renderUI({
       hover <- input$plot_hover
