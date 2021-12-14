@@ -319,7 +319,7 @@ server <- function(input, output) {
                                  taxonomy %notin% input$fine_filter
                                  ]
       # render final table
-      renderTable(
+      renderTable(as.matrix(
       square[,
              .(contig_count    = length(length), 
                length_mb       = round( sum(length)/1000000),
@@ -329,7 +329,7 @@ server <- function(input, output) {
                sd_coverage    = round(sd(coverage),2)
              ),
              by='taxonomy']
-      )
+      ))
     })    
     
 ## fifth, a table is rendered displaying the top 14 taxa at the given filter, their contig count and total size in Mbase
