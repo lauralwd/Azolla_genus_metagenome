@@ -244,6 +244,7 @@ server <- function(input, output) {
       dotplot <- dotplot + geom_point()
       dotplot <- dotplot + scale_x_log10()
       dotplot <- dotplot + scale_y_log10()
+      dotplot <- dotplot + scale_alpha(guide = F)
       dotplot <- dotplot + labs(x='contig length',
                                         y='contig coverage'
                                         )
