@@ -69,7 +69,7 @@ rule all_exported_bins:
 
 rule all_exported_bins_refined_checkm:
   input:
-    expand("data/curated_bins/{collection}/{hostcode}_checkm/{hostcode}.checkm_out",collection='refined',hostcode=REFINED)
+    expand("data/curated_bins/{collection}/{hostcode}/{hostcode}.checkm_out.txt", collection='refined', hostcode=REFINED),
 
 rule trim:
   input:
@@ -1270,10 +1270,11 @@ rule collect_bins_in_folder:
 
 rule checkm_curated_bins:
   input:
+    folder="data/curated_bins/{collection}/{hostcode}",
     bins="data/curated_bins/{collection}/{hostcode}_bin-fastas",
     set_root="references/checkm_data_setroot.done"
   output:
-    table="data/curated_bins/{collection}/{hostcode}_checkm/{hostcode}.checkm_out"
+    table="data/curated_bins/{collection}/{hostcode}/{hostcode}.checkm_out.txt"
   params:
     options="-x fa --pplacer_threads=12 --tab_table",
     dir=lambda w:expand("data/curated_bins/{collection}/{hostcode}/checkm/{hostcode}",collection=w.collection,hostcode=w.hostcode)
