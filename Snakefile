@@ -67,9 +67,10 @@ rule all_exported_bins:
   output:
     touch("data/curated_bins/{collection}.exported")
 
-rule all_exported_bins_refined_checkm:
+rule all_exported_bins_refined_checkm_BAT:
   input:
     expand("data/curated_bins/{collection}/{hostcode}/{hostcode}.checkm_out.txt", collection='refined', hostcode=REFINED),
+    expand("data/curated_bins/{collection}/{hostcode}/{hostcode}.BAT.names.txt" , collection='refined', hostcode=REFINED)
 
 rule trim:
   input:
@@ -1291,6 +1292,44 @@ rule checkm_curated_bins:
     fi
     checkm lineage_wf -t {threads} {params.options} {input.bins} {params.dir} -f {output.table} > {log.stdout} 2> {log.stderr}
     """
+
+rule BAT_curated_bins:
+  input:
+    bindir="data/curated_bins/{collection}/{hostcode}_bin-fastas",
+    dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-27.nr.dmnd",
+    db=  "references/CAT_customised_20190108/CAT_database_customised",
+    tf=  "references/CAT_customised_20190108/taxonomy_customised"
+  output:
+    "data/curated_bins/{collection}/{hostcode}/BAT/{hostcode}.BAT.bin2classification.txt"
+  params:
+    options= " -s '.fa' ",
+    prefix=lambda w : expand( "data/curated_bins/{collection}/{hostcode}/BAT/{hostcode}.BAT" , collection=w.collection, hostcode=w.hostcode)
+  threads: 12
+  conda:
+    "envs/cat.yaml"
+  log:
+    stdout="logs/BAT_{collection}_{hostcode}.stdout",
+    stderr="logs/BAT_{collection}_{hostcode}.stderr"
+  shell:
+    "CAT bins -n {threads} -b {input.bindir} -d {input.db} -t {input.tf} {params.options} -o {params.prefix} > {log.stdout} 2> {log.stderr}"
+
+rule BAT_add_names_curated_bins:
+  input:
+    i="data/curated_bins/{collection}/{hostcode}/BAT/{hostcode}.BAT.bin2classification.txt",
+    tf="references/CAT_customised_20190108/taxonomy_customised"
+  output:
+    "data/curated_bins/{collection}/{hostcode}/{hostcode}.BAT.names.txt"
+  params:
+    "--only_official"
+  log:
+    stdout="logs/BAT_bins-{collection}_classification_taxonomy_{hostcode}.stdout",
+    stderr="logs/BAT_bins-{collection}_classification_taxonomy_{hostcode}.stderr"
+  threads: 1
+  conda:
+    "envs/cat.yaml"
+  shell:
+    "CAT add_names {params} -i {input.i} -t {input.tf} -o {output} > {log.stdout} 2> {log.stderr}"
+
 rule fastq_length:
   input:
     "{folder}/{file}.fastq.gz"
