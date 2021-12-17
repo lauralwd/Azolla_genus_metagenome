@@ -67,6 +67,10 @@ rule all_exported_bins:
   output:
     touch("data/curated_bins/{collection}.exported")
 
+rule all_exported_bins_refined_checkm:
+  input:
+    expand("data/curated_bins/{collection}/{hostcode}_checkm/{hostcode}.checkm_out",collection='refined',hostcode=REFINED)
+
 rule trim:
   input:
     expand("data/sequencing_genomic_trimmed/{hostcode}_R{PE}.fastq.gz",hostcode=HOSTCODES,PE=DIRECTIONS)
