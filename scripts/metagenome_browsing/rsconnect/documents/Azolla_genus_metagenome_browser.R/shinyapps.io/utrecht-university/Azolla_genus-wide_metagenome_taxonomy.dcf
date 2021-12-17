@@ -1,0 +1,13 @@
+name: Azolla_genus-wide_metagenome_taxonomy
+title: Azolla_genus-wide_metagenome_taxonomy
+username:
+account: utrecht-university
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5261508
+bundleId: 5371344
+url: https://utrecht-university.shinyapps.io/Azolla_genus-wide_metagenome_taxonomy/
+when: 1639489859.79368
+lastSyncTime: 1639489859.79369
+asMultiple: FALSE
+asStatic: FALSE

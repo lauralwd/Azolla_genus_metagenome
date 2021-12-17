@@ -5,9 +5,9 @@ account: lauradijkhuizen
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5204971
-bundleId: 5293225
+bundleId: 5371367
 url: https://lauradijkhuizen.shinyapps.io/metagenome_browsing/
-when: 1637856689.50249
-lastSyncTime: 1637856689.50253
+when: 1639490275.19104
+lastSyncTime: 1639490275.19105
 asMultiple: FALSE
 asStatic: FALSE
