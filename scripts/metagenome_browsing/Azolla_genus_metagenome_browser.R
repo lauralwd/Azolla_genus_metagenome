@@ -358,16 +358,17 @@ server <- function(input, output) {
     )
 ## sixth, render a png/svg for downloading (file format is hardcoded, sorry)
     output$downloadPlot <- downloadHandler(
-      filename = function(){ paste('Azolla_genus_metagenome','-',input$taxonomy, '.svg', sep='') },
+      #filename = function(){ paste('Azolla_genus_metagenome','-',input$taxonomy, '.svg', sep='') },
+      filename = function(){ paste('Azolla_genus_metagenome','-',input$taxonomy, '.png', sep='') },
       content  = function(file){
         ggsave(filename = file
              ,plot = plotcontainer$plot
-             ,device = 'svg' 
+             #,device = 'svg' 
              ,width = unit(x = 18,units = 'cm')
              ,height = unit(x = 14,units = 'cm')
              ,scale = .55 # somehow I don't get the right dimensions out and this is an approximate fix...
              # for landscape format and png:
-             #,device = 'png'
+             ,device = 'png'
              #,width = unit(x = 27,units = 'cm')
              #,height = unit(x = 18,units = 'cm')
              ,dpi = 400)
