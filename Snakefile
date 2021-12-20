@@ -1353,7 +1353,7 @@ rule collect_curated_bin_info:
           <(head -n1 {input.BAT}     | tr ' ' '_' | sed "s/\#_bin\t//g"  ) \
           > {output.tab}
     join {output.tmp}                                                         \
-         <(sed -E 's/-contigs\.fa//g' {input.BAT} | tail -n +2 | tr ' ' "_" ) \
+         <(sed -E 's/-contigs\.fa//g' {input.BAT} | tail -n +2 | sed  's/\:\ [01]\.[0-9][0-9]//g' | tr ' ' "_" ) \
          -j 1 -t "\t"                                                         \
           >> {output.tab} 2>> {log.stderr}
     """
