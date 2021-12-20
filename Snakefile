@@ -1261,7 +1261,7 @@ rule collect_bins_in_folder:
   input:
     "data/curated_bins/{collection}/{hostcode}"
   output:
-    directory("data/curated_bins/{collection}/{hostcode}_bin-fastas")
+    directory("data/curated_bins/{collection}/{hostcode}.bin-fastas")
   shell:
     """
     if [ ! -d {output} ]
@@ -1273,7 +1273,7 @@ rule collect_bins_in_folder:
 rule checkm_curated_bins:
   input:
     folder="data/curated_bins/{collection}/{hostcode}",
-    bins="data/curated_bins/{collection}/{hostcode}_bin-fastas",
+    bins="data/curated_bins/{collection}/{hostcode}.bin-fastas",
     set_root="references/checkm_data_setroot.done"
   output:
     table="data/curated_bins/{collection}/{hostcode}/{hostcode}.checkm_out.txt"
@@ -1296,7 +1296,7 @@ rule checkm_curated_bins:
 
 rule BAT_curated_bins:
   input:
-    bindir="data/curated_bins/{collection}/{hostcode}_bin-fastas",
+    bindir="data/curated_bins/{collection}/{hostcode}.bin-fastas",
     dmnd="references/CAT_customised_20190108/CAT_database_customised/2019-03-27.nr.dmnd",
     db=  "references/CAT_customised_20190108/CAT_database_customised",
     tf=  "references/CAT_customised_20190108/taxonomy_customised"
@@ -1330,6 +1330,52 @@ rule BAT_add_names_curated_bins:
     "envs/cat.yaml"
   shell:
     "CAT add_names {params} -i {input.i} -t {input.tf} -o {output} > {log.stdout} 2> {log.stderr}"
+
+rule collect_curated_bin_info:
+  input:
+    anvio="data/curated_bins/{collection}/{hostcode}/bins_summary.txt" ,
+    checkm= "data/curated_bins/{collection}/{hostcode}/{hostcode}.checkm_out.txt",
+    BAT=    "data/curated_bins/{collection}/{hostcode}/{hostcode}.BAT.names.txt"
+  output:
+    tmp = temp("data/curated_bins/{collection}/bin_info.{hostcode}.tmp"),
+    tab =      "data/curated_bins/{collection}/bin_info.{hostcode}.tab"
+  threads: 1
+  log:
+    stderr="logs/collect_curated_bin_info-{collection}_{hostcode}.stderr"
+  shell:
+    """
+    join <(tail -n +2 {input.anvio} )                                        \
+         <(sed -E 's/-contigs//g' {input.checkm} | tail -n +2 | tr ' ' "_")  \
+         -j 1 -t "\t"                                                        \
+         > {output.tmp} 2>  {log.stderr}
+    paste <(head -n1 {input.anvio}   | tr ' ' '_') \
+          <(head -n1 {input.checkm}  | tr ' ' '_' | sed "s/Bin_Id\t//g") \
+          <(head -n1 {input.BAT}     | tr ' ' '_' | sed "s/\#_bin//g"  ) \
+          > {output.tab}
+    join {output.tmp}                                                         \
+         <(sed -E 's/-contigs\.fa//g' {input.BAT} | tail -n +2 | tr ' ' "_" ) \
+         -j 1 -t "\t"                                                         \
+          >> {output.tab} 2>> {log.stderr}
+    """
+
+rule merge_curated_bin_info:
+  input:
+    expand("data/curated_bins/{{collection}}/bin_info.{hostcode}.tab", hostcode=REFINED)
+  output:
+    "data/curated_bins/{collection}.bin_info.tab"
+  shell:
+    """
+    # get array in bash:
+    tabs=( {input} )
+    # extract header and modify:
+    head -n 1 ${{tabs[0]}} | sed -E "s/^/Sample\t/"> {output}
+    # get content of all other files, add sample column, and discard header
+    for t in ${{tabs[@]}}
+    do  name=$(echo $t | rev | cut -f 1 -d '/' | rev | cut -f 2 -d '.')
+        sed -E "s/^/$name\t/" $t | tail -n +2 >> {output}
+    done
+
+    """
 
 rule fastq_length:
   input:
