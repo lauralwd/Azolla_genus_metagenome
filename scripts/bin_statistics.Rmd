@@ -1,0 +1,76 @@
+---
+title: "Statistics on Bins in the Azolla metagenome project"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+Import the data:
+```{r}
+setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
+library(data.table)
+library(ggplot2)
+bins <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/data/curated_bins/refined.bin_info.tab",
+              sep = '\t',
+              fill = TRUE,
+              header = T,
+              stringsAsFactors = T,
+              data.table = T
+)
+```
+
+Scroll through the whole table here:
+```{r}
+bins
+```
+
+Now, look at a smaller table with all bins, their origin sample, size, completion and redundancy:
+```{r}
+bins[,
+     .(length_mb     = round(sum(total_length/1000000),2),
+       anvio_compl   = round(sum(percent_completion),0),
+       anvio_redun   = round(sum(percent_redundancy),0),
+       checkm_compl  = round(sum(Completeness),0),
+       checkm_redun  = round(sum(Contamination),0)
+       ),
+     by=c('Sample', 'bins')
+     ]
+```
+
+Next, pivot sample origin versus taxonomy and either count bins, or display size in mbase
+
+First, count bins in class:
+```{r}
+dcast.data.table(data = bins[class != NA | class != 'no_support']
+                 ,formula = Sample ~ class 
+                 ,fun.aggregate = length
+                 ,value.var = 'total_length'
+                 )
+```
+
+Second, count bins in order and show only orders that have more than 5 bins over the entire genus metagenome.
+```{r,}
+#knitr::kable(
+tmpdt <- dcast.data.table(data = bins[order != NA | order != 'no_support']
+                          ,formula = order ~ Sample
+                          ,fun.aggregate = length
+                          ,value.var = 'total_length'
+                          )
+#data.table::all
+#knitr::kable(tmpdt)
+threshold <- 5
+vector <- (apply(X = tmpdt[,2:length(tmpdt)],MARGIN = 1,FUN = 'sum') >= threshold)
+tmpdt[vector]
+```
+
+Now select the bins from azfil lab that meet the above threshold (and remove the nostocales for now)
+```{r}
+#interesting orders:
+i_orders <- tmpdt[(vector & order != 'Nostocales')]$order
+
+bins[Sample == 'Azfil_lab' &
+     order  %in% i_orders  ]$bins
+```
+
