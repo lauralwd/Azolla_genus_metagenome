@@ -1350,7 +1350,7 @@ rule collect_curated_bin_info:
          > {output.tmp} 2>  {log.stderr}
     paste <(head -n1 {input.anvio}   | tr ' ' '_') \
           <(head -n1 {input.checkm}  | tr ' ' '_' | sed "s/Bin_Id\t//g") \
-          <(head -n1 {input.BAT}     | tr ' ' '_' | sed "s/\#_bin//g"  ) \
+          <(head -n1 {input.BAT}     | tr ' ' '_' | sed "s/\#_bin\t//g"  ) \
           > {output.tab}
     join {output.tmp}                                                         \
          <(sed -E 's/-contigs\.fa//g' {input.BAT} | tail -n +2 | tr ' ' "_" ) \
