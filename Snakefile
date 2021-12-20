@@ -1245,7 +1245,8 @@ rule extract_curated_bins_from_anvio:
   input:
     unpack(get_single_or_hibrid_anvi_profile_for_export)
   output:
-    "data/curated_bins/{collection}/{hostcode}"
+    dir="data/curated_bins/{collection}/{hostcode}",
+    sum="data/curated_bins/{collection}/{hostcode}/bins_summary.txt" 
   params:
     collection = lambda w:expand("-C {collection}",collection=w.collection)
   conda:
