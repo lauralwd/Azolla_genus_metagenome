@@ -1255,7 +1255,7 @@ rule extract_curated_bins_from_anvio:
     stdout="logs/anvi-export-bins-{collection}-{hostcode}.stdout",
     stderr="logs/anvi-export-bins-{collection}-{hostcode}.stderr"
   shell:
-    "anvi-summarize -p {input.profile} -c {input.contigdb} {params.collection} -o {output} > {log.stdout} 2> {log.stderr}"
+    "anvi-summarize -p {input.profile} -c {input.contigdb} {params.collection} -o {output.dir} > {log.stdout} 2> {log.stderr}"
 
 rule collect_bins_in_folder:
   input:
