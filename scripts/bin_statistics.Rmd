@@ -39,6 +39,17 @@ bins[,
      ]
 ```
 
+How many bins do we have per sample
+```{r}
+
+bins_per_sample <- bins[,
+                        .(bincount=length(bins)),
+                        by='Sample'
+                        ]
+bins_per_sample[order(-bins_per_sample[,2])]
+```
+
+
 Next, pivot sample origin versus taxonomy and either count bins, or display size in mbase
 
 First, count bins in class:
@@ -72,5 +83,19 @@ i_orders <- tmpdt[(vector & order != 'Nostocales')]$order
 
 bins[Sample == 'Azfil_lab' &
      order  %in% i_orders  ]$bins
+```
+
+Now let's look at that table with all bins again, but filter for the orders we defined above
+
+```{r}
+bins[order %in% i_orders,
+     .(length_mb     = round(sum(total_length/1000000),2),
+       anvio_compl   = round(sum(percent_completion),0),
+       anvio_redun   = round(sum(percent_redundancy),0),
+       checkm_compl  = round(sum(Completeness),0),
+       checkm_redun  = round(sum(Contamination),0)
+       ),
+     by=c('Sample', 'bins')
+     ]
 ```
 
