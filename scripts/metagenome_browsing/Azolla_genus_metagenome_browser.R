@@ -76,7 +76,7 @@ metrics_shiny[sample %in% c('Azspnov_IRRI2_489')]$hostspecies <- '*A. carolinian
 
 ui <- fluidPage(
 ## Application title
-    titlePanel("Azolla genus metagenome assembly browser"),
+    titlePanel("Azolla genus metagenome taxonomy browser"),
     markdown("This R Shiny application is associated with the [Azolla genus metagenome project](https://github.com/lauralwd/Azolla_genus_metagenome) by [Laura Dijkhuizen](https://www.uu.nl/medewerkers/lwdijkhuizen). 
              It aims to reveal similarities amongst metagenome assemblies in a single glance.
              Assemblies were derived from public sequencing data of *Azolla* plants, known for their endophytic microbes and systematic vertical transmission of those microbes across generations of plants.
