@@ -217,7 +217,7 @@ server <- function(input, output) {
     low_abundant <- as.matrix(low_abundant)
     dt[taxonomy %in% low_abundant, 'taxonomy'] <- 'low abundant'
     dt
-    })
+    }) %>% debounce(2000)
 
   output$filter_fine <- renderUI({
     tax_list <- unique(metrics_subset()[,taxonomy])
