@@ -35,10 +35,13 @@ names(azfil_wild_abundance) <- sub('assembly_hybrid_doublefiltered_sample_Azfil_
                                    names(azfil_wild_abundance)
                                    )
 
-azfil_wild_abundance[,.(bin=bins,
-                        ratio_leaf_over_plant=((Azfil_wild_galgw_E_1+Azfil_wild_galgw_E_2+Azfil_wild_galgw_E_3)/3)
-                                             /((Azfil_wild_galgw_P_2+Azfil_wild_galgw_P_3+Azfil_wild_galgw_P_4)/3),
-                        pacbio_mean_coverage=pacbio_reads)]
+Azfil_ratios <- azfil_wild_abundance[,.(bin=bins,
+                                        ratio_leaf_over_plant=((Azfil_wild_galgw_E_1+Azfil_wild_galgw_E_2+Azfil_wild_galgw_E_3)/3)
+                                                             /((Azfil_wild_galgw_P_2+Azfil_wild_galgw_P_3+Azfil_wild_galgw_P_4)/3),
+                                        pacbio_mean_coverage=pacbio_reads)]
+Azfil_ratios[,.(bin,
+                ratio_leaf_over_plant=round(ratio_leaf_over_plant,2),
+                pacbio_mean_coverage=round(pacbio_mean_coverage,2))]
 ```
 
 Scroll through the whole table here:
