@@ -3,8 +3,10 @@ title: "Azolla genus wide metagenome assembly taxonomy and statistics"
 author: "Laura Dijkhuizen"
 date: "03/12/2021"
 output:
-  pdf_document: default
+  html_document:
+    df_print: paged
   html_notebook: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -369,7 +371,7 @@ ggsave(filename = "./coverage_overlength_distributions_per_assembly_order.png",
 ```
 
 ### Shiny app
-For further taxonomy stuff, refer to the R shiny app.
+For further taxonomy stuff, refer to the R shiny app: https://utrecht-university.shinyapps.io/Azolla_genus-wide_metagenome_taxonomy/
 
 
 # packages
@@ -378,4 +380,8 @@ For further taxonomy stuff, refer to the R shiny app.
 * kable
 
 # Bash script
+```{bash}
+cat ../scripts/make_assembly_stats_and_taxonomy.bash
+```
+
 
