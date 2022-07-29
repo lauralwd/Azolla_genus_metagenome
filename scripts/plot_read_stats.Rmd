@@ -1,9 +1,9 @@
 ---
 title: "Data filtering figure"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 # Aim
@@ -165,6 +165,43 @@ plot_gbase_host_relative <- plot_gbase_host_relative + scale_color_discrete(type
 plot_gbase_host_relative <- plot_gbase_host_relative + scale_fill_discrete(type = c('#3633d7','#3633d7','#33c8d7','#33d76d','#a2d733','#a2d733','#a2d733','#f8b136','#d733a7'))
 plot_gbase_host_relative
 ```
+Let's get some percentages here, first for the trimmed stage:
+
+```{r}
+gbase.host.relative[stage == 'trimmed.rel','bases']
+summary(gbase.host.relative[stage == 'trimmed.rel','bases'])
+```
+
+
+Now let's do the same for the hostfiltered stage:
+```{r}
+temp <- data.frame(round(100-gbase.host.relative[stage == 'filtered.rel','bases'],2))
+row.names(temp) <- as.character(gbase.host.relative[stage == 'filtered.rel']$host)
+temp
+rm(temp)
+```
+
+
+And finally for the double filtered stage:
+```{r}
+temp <- data.frame(100-gbase.host.relative[stage == 'filtered.rel','bases'])
+row.names(temp) <- as.character(gbase.host.relative[stage == 'filtered.rel']$host)
+temp$double1 <- as.numeric(100-gbase.host.relative[stage == 'doublefiltered.rel']$bases,2)
+temp$double <- temp$double1 - temp$bases
+temp$double1 <- NULL ; temp$bases <- NULL
+temp
+rm(temp)
+```
+ And finally how much percent is left after both stages:
+ 
+```{r}
+temp <- data.frame(round(100-gbase.host.relative[stage == 'doublefiltered.rel','bases'],2))
+row.names(temp) <- as.character(gbase.host.relative[stage == 'doublefiltered.rel']$host)
+temp
+rm(temp)
+```
+
+
 ## bars
 In bar graphs, I like the solidity and room for more complexity that I can add. 
 However, using absolute numbers is a mess and the relative differences become hardly visible even in a big version of the figure.
@@ -314,6 +351,22 @@ assem_bars
 Perhaps one major observation is that even a marginal filtering fraction can yield a huge decrease in assembly size and effort. 
 In terms of how I want to visualise this, I think I need to merge the tables again and work with facets to get everything into one figure.
 
+### Some percentages and numbers on assembly sizes:
+```{r}
+temp <- assem.stats[stage == 'assembly_singles_hostfiltered' & metric == 'size' & host !='Azfil_wild' & host != 'Azfil_minuscyano'][,c(1,2,5)]
+names(temp) <- c('sample','host','hostfiltered_size')
+temp$doublefilteredsize <-assem.stats[stage == 'assembly_singles_doublefiltered' & metric == 'size' & host !='Azfil_wild' & host != 'Azfil_minuscyano']$value
+temp$doublefilter_effect <- temp$hostfiltered_size -temp$doublefilteredsize
+temp$doublefilter_effect_rel <- temp$doublefilter_effect / temp$hostfiltered_size * 100
+temp[,c(3,4,5,6)] <- round(temp[,c(3,4,5,6)],2)
+temp
+rm(temp)
+```
+
+
+```{r}
+assem.stats[stage == 'assembly_hybrid_doublefiltered' & metric == 'size' ]
+```
 
 # Merge plots
 
