@@ -64,12 +64,27 @@ bins[,
 
 How many bins do we have per sample
 ```{r}
-
 bins_per_sample <- bins[,
                         .(bincount=length(bins)),
                         by='Sample'
                         ]
 bins_per_sample[order(-bins_per_sample[,2])]
+```
+
+How many bins do we have per sample with sufficient quality according to anvio
+```{r}
+bins[(percent_completion > 70 & percent_redundancy < 20),
+                        .(bincount=length(bins)),
+                        by='Sample'
+                        ][order(-bins_per_sample[,2])]
+```
+
+How many bins do we have per sample with sufficient quality according to CheckM
+```{r}
+bins[(Completeness > 70 & Contamination < 20),
+                        .(bincount=length(bins)),
+                        by='Sample'
+                        ][order(-bins_per_sample[,2])]
 ```
 
 
