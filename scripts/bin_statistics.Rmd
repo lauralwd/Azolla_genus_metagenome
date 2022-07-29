@@ -87,7 +87,44 @@ bins[(Completeness > 70 & Contamination < 20),
                         ][order(-bins_per_sample[,2])]
 ```
 
+## bin vs metagenome size
 
+get metagenome size stuff from assembly file with bash, selecting only for contigs of 2500bp and higher.
+
+```{bash}
+cd /stor/azolla_metagenome/Azolla_genus_metagenome
+fastas=( data/assembly_*doublefiltered/*/scaffolds.fasta )
+for f in ${fastas[@]}
+do  echo $f':' $(                    \
+    cat $f                           \
+    | egrep -o 'length_[0-9]+'       \
+    | sed 's/length_//g'             \
+    | awk '$1 > 2500  {print $1 ;}'  \
+    | awk '{s+=$1} END {print s/1000000}' )
+done
+```
+
+```{r}
+fraction_binned <- bins[,
+                        .(binned_mb     = round(sum(total_length/1000000),2)
+                          ),
+                        by=c('Sample')
+                        ]
+fraction_binned$assembly_mb <- c(56.9081,
+                                 115.874,
+                                 36.5311,
+                                 179.447,
+                                 104.468,
+                                 100.126,
+                                  95.626,
+                                  90.133,
+                                  79.409
+                                )
+fraction_binned$fraction <- round(fraction_binned$binned_mb / fraction_binned$assembly_mb * 100)
+fraction_binned
+```
+
+# Bin taxonomy
 Next, pivot sample origin versus taxonomy and either count bins, or display size in mbase
 
 First, count bins in class:
