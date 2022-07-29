@@ -21,6 +21,26 @@ bins <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/data/cura
 )
 ```
 
+
+```{r}
+azfil_wild_abundance <- fread(input = "../data/curated_bins/refined/Azfil_wild/bins_across_samples/mean_coverage.txt",
+                              sep = '\t',
+                              header= T,
+                              stringsAsFactors = T,
+                              data.table = T,
+                              fill= T
+                              )
+names(azfil_wild_abundance) <- sub('assembly_hybrid_doublefiltered_sample_Azfil_wild_binningsignal_',
+                                   '',
+                                   names(azfil_wild_abundance)
+                                   )
+
+azfil_wild_abundance[,.(bin=bins,
+                        ratio_leaf_over_plant=((Azfil_wild_galgw_E_1+Azfil_wild_galgw_E_2+Azfil_wild_galgw_E_3)/3)
+                                             /((Azfil_wild_galgw_P_2+Azfil_wild_galgw_P_3+Azfil_wild_galgw_P_4)/3),
+                        pacbio_mean_coverage=pacbio_reads)]
+```
+
 Scroll through the whole table here:
 ```{r}
 bins
