@@ -245,8 +245,9 @@ server <- function(input, output) {
                             )
       dotplot <- dotplot + facet_grid(assembly ~ hostspecies + sample)
       dotplot <- dotplot + geom_point()
-      dotplot <- dotplot + scale_x_log10()
-      dotplot <- dotplot + scale_y_log10()
+      dotplot <- dotplot + scale_x_log10(limits = c(10000,1000000))
+      dotplot <- dotplot + scale_y_log10(limits = c(0.05,10000))
+      dotplot <- dotplot + scale_color_brewer(type = 'qual',palette = 'Set1' ,input$taxonomy)
       dotplot <- dotplot + scale_alpha(guide = F)
       dotplot <- dotplot + labs(x='contig length',
                                         y='contig coverage'
