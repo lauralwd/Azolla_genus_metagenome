@@ -5,9 +5,9 @@ account: utrecht-university
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5261508
-bundleId: 5371344
+bundleId: 5773737
 url: https://utrecht-university.shinyapps.io/Azolla_genus-wide_metagenome_taxonomy/
-when: 1639489859.79368
-lastSyncTime: 1639489859.79369
+when: 1649326691.77636
+lastSyncTime: 1649326691.77637
 asMultiple: FALSE
 asStatic: FALSE
