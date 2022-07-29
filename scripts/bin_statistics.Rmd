@@ -8,8 +8,8 @@ output:
 ---
 
 Import the data:
-```{r}
-setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
+```{r, knitr root.dir="/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/"}
+#setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
 library(data.table)
 library(ggplot2)
 bins <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/data/curated_bins/refined.bin_info.tab",
