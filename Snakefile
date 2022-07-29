@@ -1377,6 +1377,25 @@ rule merge_curated_bin_info:
 
     """
 
+rule collect_binning_stats:
+  input:
+    expand("data/curated_bins/{collection}.bin_info.tab", collection=['refined','metabat2','CONCOCT'])
+  output:
+    "data/curated_bins/summary.bin_info.tab"
+  shell:
+    """
+    # get array in bash:
+    tabs=( {input} )
+    # extract header and modify:
+    head -n 1 ${{tabs[0]}} | sed -E "s/^/Collection\t/"> {output}
+    # get content of all other files, add sample column, and discard header
+    for t in ${{tabs[@]}}
+    do  name=$(echo $t | rev | cut -f 1 -d '/' | rev | cut -f 1 -d '.')
+        sed -E "s/^/$name\t/" $t | tail -n +2 >> {output}
+    done
+
+    """
+
 rule fastq_length:
   input:
     "{folder}/{file}.fastq.gz"
