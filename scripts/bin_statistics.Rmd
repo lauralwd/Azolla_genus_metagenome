@@ -7,6 +7,8 @@ output:
   pdf_document: default
 ---
 
+
+# Get the data
 Import the data:
 ```{r, knitr root.dir="/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/"}
 #setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
@@ -21,7 +23,8 @@ bins <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/data/cura
 )
 ```
 
-
+# A.fil wild sample
+First, I'm interested in calculating differential abundance in the _Azolla filiculoides_ wild samples:
 ```{r}
 azfil_wild_abundance <- fread(input = "../data/curated_bins/refined/Azfil_wild/bins_across_samples/mean_coverage.txt",
                               sep = '\t',
@@ -44,11 +47,7 @@ Azfil_ratios[,.(bin,
                 pacbio_mean_coverage=round(pacbio_mean_coverage,2))]
 ```
 
-Scroll through the whole table here:
-```{r}
-bins
-```
-
+# Tabulate all bins, size and QC
 Now, look at a smaller table with all bins, their origin sample, size, completion and redundancy:
 ```{r}
 bins[,
@@ -62,6 +61,7 @@ bins[,
      ]
 ```
 
+## Look at bins per sample
 How many bins do we have per sample
 ```{r}
 bins_per_sample <- bins[,
