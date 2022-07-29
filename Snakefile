@@ -1250,7 +1250,7 @@ rule extract_curated_bins_from_anvio:
   params:
     collection = lambda w:expand("-C {collection}",collection=w.collection)
   conda:
-    "envs/anvio.yaml"
+    "envs/anvio6.yaml"
   log:
     stdout="logs/anvi-export-bins-{collection}-{hostcode}.stdout",
     stderr="logs/anvi-export-bins-{collection}-{hostcode}.stderr"
