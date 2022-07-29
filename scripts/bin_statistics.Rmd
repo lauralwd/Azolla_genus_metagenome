@@ -10,7 +10,7 @@ output:
 
 # Get the data
 Import the data:
-```{r, knitr root.dir="/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/"}
+```{r, root.dir="/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/"}
 #setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
 library(data.table)
 library(ggplot2)
@@ -50,7 +50,7 @@ Azfil_ratios[,.(bin,
 # Tabulate all bins, size and QC
 Now, look at a smaller table with all bins, their origin sample, size, completion and redundancy:
 ```{r}
-bins[,
+bins[(Sample != 'Azfil_wild'),
      .(length_mb     = round(sum(total_length/1000000),2),
        anvio_compl   = round(sum(percent_completion),0),
        anvio_redun   = round(sum(percent_redundancy),0),
