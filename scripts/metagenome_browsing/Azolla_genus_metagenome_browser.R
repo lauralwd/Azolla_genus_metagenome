@@ -208,7 +208,7 @@ server <- function(input, output) {
                         ORFs_classified >= input$minORFs_classified &
                         ORFs >= input$minORFs &
                         assembly != input$filterstage &
-                        assemblytype != input$assemblylevel]
+                        assemblytype != input$assemblylevel] 
     dt[, taxonomy := get(input$taxonomy)]
     
     low_abundant <- dt[,
@@ -228,13 +228,18 @@ server <- function(input, output) {
                        choices = choices,
                        selected = list('low abundant','not classified')
                        )
-  })
+  }) 
   
 ## Second, using the pre-filtered data, a plot is build with ggplot2
-  plotcontainer <- reactiveValues()
+  plotcontainer <- reactiveValues() 
   output$plot <- renderPlot({
     `%notin%` <- Negate(`%in%`)
       textsize <- 12
+      xlabel <- 'contig length'
+      ylabel <- 'contig coverage'
+      if(input$format == 'scaffolds'){xlabel <- 'scaffold length' 
+                                       ylabel <- 'scaffold coverage'} 
+      
       dotplot <- ggplot(metrics_subset()[taxonomy %notin% input$fine_filter],
                             aes_string(x='length',
                                        y='coverage',
@@ -247,10 +252,10 @@ server <- function(input, output) {
       dotplot <- dotplot + geom_point()
       dotplot <- dotplot + scale_x_log10(limits = c(10000,1000000))
       dotplot <- dotplot + scale_y_log10(limits = c(0.05,10000))
-      dotplot <- dotplot + scale_color_brewer(type = 'qual',palette = 'Set1' ,input$taxonomy)
+#      dotplot <- dotplot + scale_color_brewer(type = 'qual',palette = 'Set1' ,input$taxonomy)
       dotplot <- dotplot + scale_alpha(guide = F)
-      dotplot <- dotplot + labs(x='contig length',
-                                        y='contig coverage'
+      dotplot <- dotplot + labs(x=xlabel,
+                                y=ylabel
                                         )
       dotplot <- dotplot + theme_classic()
       dotplot <- dotplot + theme(legend.position = "bottom",
