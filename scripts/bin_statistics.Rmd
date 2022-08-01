@@ -65,7 +65,8 @@ bins[(Sample == 'Azfil_wild'),
 # Tabulate all bins, size and QC
 Now, look at a smaller table with all bins, their origin sample, size, completion and redundancy:
 ```{r}
-bins[(Sample != 'Azfil_wild'),
+write.csv(
+  x = bins[(Sample != 'Azfil_wild'),
      .(length_mb     = round(sum(total_length/1000000),2),
        anvio_compl   = round(sum(percent_completion),0),
        anvio_redun   = round(sum(percent_redundancy),0),
@@ -73,7 +74,8 @@ bins[(Sample != 'Azfil_wild'),
        checkm_redun  = round(sum(Contamination),0)
        ),
      by=c('Sample', 'bins')
-     ]
+     ],file = "all_bins_table.csv",
+  row.names = T)
 ```
 
 ## Look at bins per sample
