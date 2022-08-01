@@ -4,3 +4,4 @@ channels:
   - bioconda
 dependencies:
   - anvio=6
+  - django
