@@ -213,21 +213,70 @@ Here, I'm splitting the contigs based on superkingdom, and for legibility, I'm n
 I do include archaea and viruses, even though their numbers are limited.
 Naturally the distributions will differ for sequences identified by CAT as plant were filtered out. Hence, I plot these separately.
 ```{r lengthboxplot_2500+_perkingdom, fig.height = 10, fig.width = 15}
-lenghtbox <- ggplot(metrics[scaffolded == 'scaffolds' & 
-                              assembly != 'hybrid_doublefiltered' & 
-                              superkingdom != '' & 
-                              superkingdom != 'not classified'],
-                    aes(y=length/1000,col=assembly,alpha=.4)
+tempdt <- metrics[scaffolded   == 'scaffolds' & 
+                  assembly     != 'hybrid_doublefiltered' & 
+                  superkingdom != '' & 
+                  superkingdom != 'not classified']
+levels(tempdt$sample) <- c("Azfil_lab",
+                           "_A. filiculoides_<br>lab-250",
+                           "_A. filiculoides_<br>lab-500",
+                           "_A. filiculoides_<br>lab-800",
+                           "Azfil_minuscyano",
+                           "_A. filiculoides_<br>minus-cyano-170",
+                           "_A. filiculoides_<br>minus-cyano-350",
+                           "Azfil_wild",
+                           "_A. filiculoides_<br>wild-E-1",
+                           "_A. filiculoides_<br>wild-E-2",
+                           "_A. filiculoides_<br>wild-E-3",
+                           "_A. filiculoides_<br>wild-P-1",
+                           "_A. filiculoides_<br>wild-P-2",
+                           "_A. filiculoides_<br>wild-P-3",
+                           "_A. mexicana_",
+                           "_A. microphylla_",
+                           "_A. nilotica_",
+                           "_A. rubra_",
+                           "_A. caroliniana_<br>1",
+                           "_A. caroliniana_<br>2"
+                           )
+tempdt$assembly <- droplevels.factor(tempdt$assembly)
+levels(tempdt$assembly) <- c("Double filtered",
+                             "Host filtered")
+tempdt$assembly <- relevel(x = tempdt$assembly,ref = 'Host filtered')
+#tempdt$assembly <- factor(tempdt$assembly,
+#                          levels = c('Host filtered','Double filtered')
+#                    )
+lenghtbox <- ggplot(tempdt,
+                    aes(y=length/1000,col=assembly,x=assembly)
                     )
-lenghtbox <- lenghtbox + facet_grid(superkingdom ~ sample,scales = 'free_y',space = 'free_y',)
+lenghtbox <- lenghtbox + facet_grid(superkingdom ~ sample,scales = 'free_y',space = 'free_y')
 #lenghtbox <- lenghtbox + geom_violin()
-lenghtbox <- lenghtbox + geom_boxplot()
+lenghtbox <- lenghtbox + geom_boxplot(varwidth = T)
 #lenghtbox <- lenghtbox + geom_freqpoly(inherit.aes = F, aes(x=length,col=assembly,alpha=.4),binsize=80 ) 
 lenghtbox <- lenghtbox + theme_classic()
 lenghtbox <- lenghtbox + scale_y_log10()
+lenghtbox <- lenghtbox + ylab('Scaffold length')
+lenghtbox <- lenghtbox + scale_color_brewer(type = 'qual',palette = 'Set1')
 #lenghtbox <- lenghtbox + geom_vline(xintercept =0)
-lenghtbox <- lenghtbox + theme(axis.text.x=element_text(angle = 90,hjust = 1),legend.position = "bottom")
-lenghtbox
+lenghtbox <- lenghtbox + theme(
+                               axis.text.x = element_blank(),
+                               axis.title.x= element_blank(),
+                               legend.position = "bottom",
+                               strip.text.x= element_markdown(angle=80,size = 10),
+                               strip.background.x = element_blank()
+                               )
+ggsave(filename = "./lengthdist_perkingdom.svg",
+       plot = lenghtbox,
+       device = 'svg', 
+       #,device = 'png'
+       width = unit(x = 18,units = 'cm'),
+       height = unit(x = 14,units = 'cm')
+       ,scale = .55 # somehow I don't get the right dimensions out and this is an approximate fix...
+       # for landscape format:
+       #,width = unit(x = 27,units = 'cm')
+       #,height = unit(x = 18,units = 'cm')
+       ,dpi = 1500
+             )
+#lenghtbox
 ```
 
 To my surprise, filtering out plant DNA from the first assembly, filtering the reads and then reassembling the plant DNA depleted short sequences, has not yielded longer scaffolds nor contigs for Bacteria. 
