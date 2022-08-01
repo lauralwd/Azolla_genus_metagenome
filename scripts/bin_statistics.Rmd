@@ -47,6 +47,21 @@ Azfil_ratios[,.(bin,
                 pacbio_mean_coverage=round(pacbio_mean_coverage,2))]
 ```
 
+```{r}
+bins[(Sample == 'Azfil_wild'),
+     .(order,
+       length_mb     = round(sum(total_length/1000000),2),
+       anvio_compl   = round(sum(percent_completion),0),
+       anvio_redun   = round(sum(percent_redundancy),0),
+       checkm_compl  = round(sum(Completeness),0),
+       checkm_redun  = round(sum(Contamination),0)
+       ),
+     by=c('Sample', 'bins')
+     ]
+```
+
+
+
 # Tabulate all bins, size and QC
 Now, look at a smaller table with all bins, their origin sample, size, completion and redundancy:
 ```{r}
