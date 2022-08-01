@@ -262,6 +262,7 @@ lenghtbox <- lenghtbox + theme(
                                axis.title.x= element_blank(),
                                legend.position = "bottom",
                                strip.text.x= element_markdown(angle=80,size = 10),
+                               strip.text.y= element_markdown(angle=90,size = 10),
                                strip.background.x = element_blank()
                                )
 ggsave(filename = "./lengthdist_perkingdom.svg",
