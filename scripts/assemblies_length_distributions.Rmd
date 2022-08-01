@@ -189,14 +189,14 @@ First I plot this as a table, and later the length distributions in a graph.
 
 ```{r}
 knitr::kable(
-  metrics[scaffolded == 'scaffolds' & assembly != 'hybrid_doublefiltered',
+  metrics[assembly != 'hybrid_doublefiltered',
           .(contig_count=length(length), 
             length_mb=sum(length)/1000000, 
             median_length_kb=median(length),
             average_size_kb=mean(length)
             ), 
-          .(superkingdom,assembly)]
-  ,digits = 0
+          .(superkingdom,assembly,scaffolded)]
+    ,digits = 0
 )
 ```
 
