@@ -277,7 +277,7 @@ ggsave(filename = "./lengthdist_perkingdom.svg",
        #,height = unit(x = 18,units = 'cm')
        ,dpi = 1500
              )
-#lenghtbox
+lenghtbox
 ```
 
 To my surprise, filtering out plant DNA from the first assembly, filtering the reads and then reassembling the plant DNA depleted short sequences, has not yielded longer scaffolds nor contigs for Bacteria. 
