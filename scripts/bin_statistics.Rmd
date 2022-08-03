@@ -204,3 +204,69 @@ bins[order %in% i_orders,
      ]
 ```
 
+# binning quality per sample per method figure
+As a final figure for the chapter, I want to visualise somehow if the quality of binning improved with my manual selection.
+I'm still running the calculations, but here we go:
+
+(with a temporary table first:)
+```{r}
+bincollections <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/data/curated_bins/refined.bin_info.tab",
+                        sep = '\t',
+                        fill = TRUE,
+                        header = T,
+                        stringsAsFactors = T,
+                        data.table = T
+                        )
+```
+
+```{r}
+bincollections$Collection <- 'refined' # fix while waiting for the final table
+levels(bincollections$Sample) <- c("_A. filiculoides_<br>'lab'",
+                                   "_A. filiculoides_<br>'minus-cyano'",
+                                   "_A. filiculoides_<br>'wild'",
+                                   "_A. mexicana_",
+                                   "_A. microphylla_",
+                                   "_A. nilotica_",
+                                   "_A. rubra_",
+                                   "_A. caroliniana_<br>1",
+                                   "_A. caroliniana_<br>2"
+                                   )
+```
+
+
+Now I want to rank the bins per sample, per method for completeness. 
+I can use this later as an x axis in my plot that is universal for all sample/method combos
+
+```{r}
+bincollections[,
+               rank := rank(x = -percent_completion,
+                            ties.method='first'
+                            )
+               , by=list(Sample)]
+```
+
+```{r}
+attach(bincollections)
+# set the basic data and aesthetic
+bincol_plot <- ggplot(data = bincollections)
+bincol_plot <- bincol_plot + geom_bar(aes(y= percent_completion,x=rank),stat='identity',fill='darkgreen')
+bincol_plot <- bincol_plot + geom_bar(aes(y=-percent_redundancy,x=rank),stat='identity',fill='red')
+
+# facets
+bincol_plot <- bincol_plot + facet_grid(Collection ~ Sample)
+bincol_plot <- bincol_plot + scale_y_continuous(name = 'Redundancy/Completion'
+                                                ,limits = c(-50,100))
+
+# make it pretty
+bincol_plot <- bincol_plot + theme_classic()
+bincol_plot <- bincol_plot + theme(
+                               #axis.text.x = element_blank(),
+                               #axis.title.x= element_blank(),
+                               legend.position = "bottom",
+                               strip.text.x= element_markdown(angle=80,size = 10),
+                               strip.text.y= element_markdown(angle=90,size = 10),
+                               strip.background = element_blank()
+                               )
+# and go!
+bincol_plot
+```
