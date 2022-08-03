@@ -8,8 +8,9 @@ output:
 ---
 
 
-# Get the data
-Import the data:
+# Import data for 'Refined' collection of bins/MAGs.
+Import the data, firstly a table of CheckM, BAT and Anvi'o data combined in snakemake. 
+For now I only import the refined dataset, since this is the main piece of work, but later I'll work on comparing the different binning options.
 ```{r, root.dir="/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/"}
 #setwd("/stor/azolla_metagenome/Azolla_genus_metagenome/analyses/")
 library(data.table)
@@ -23,8 +24,9 @@ bins <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/data/cura
 )
 ```
 
-# A.fil wild sample
-First, I'm interested in calculating differential abundance in the _Azolla filiculoides_ wild samples:
+## Azfil wild sample
+Additionally, I'm interested in calculing the differential abundance for all bins in the _Azolla filiculoides_ 'wild' sample.
+Since this is the only sample with differential sampling, I'll do this separately from other analyses.
 ```{r}
 azfil_wild_abundance <- fread(input = "../data/curated_bins/refined/Azfil_wild/bins_across_samples/mean_coverage.txt",
                               sep = '\t',
@@ -46,6 +48,9 @@ Azfil_ratios[,.(bin,
                 ratio_leaf_over_plant=round(ratio_leaf_over_plant,2),
                 pacbio_mean_coverage=round(pacbio_mean_coverage,2))]
 ```
+That's that, I include here presence ratio of leaf samples over plant samples, as well as PacBio read presence.
+The rationalle behind the latter that this sequencing was derived from plants sampled at the same spot but a few years earlier.
+Hence, for a bin to be present in both samples, and be enriched in the leaf samples, is a strong indication that it is endophytic.
 
 ```{r}
 bins[(Sample == 'Azfil_wild'),
@@ -59,14 +64,16 @@ bins[(Sample == 'Azfil_wild'),
      by=c('Sample', 'bins')
      ]
 ```
+Above is a table with all kinds of stats for the Azfil wild sample, this is going to be a maintext table so I write the code separately here.
 
+## Bins, size, taxonomy and QC for the entire genus
+Now, look at a table with all bins, their origin sample, size, completion and redundancy.
+~~I do this for everything except Azfil wild, since I did that already above.~~
 
-
-# Tabulate all bins, size and QC
-Now, look at a smaller table with all bins, their origin sample, size, completion and redundancy:
+This table is huge, so I don't include it in the markdown render here, instead I write it to csv so I can make something out of it.
 ```{r}
 write.csv(
-  x = bins[(Sample != 'Azfil_wild'),
+  x = bins[,#(Sample != 'Azfil_wild'),
      .(length_mb     = round(sum(total_length/1000000),2),
        anvio_compl   = round(sum(percent_completion),0),
        anvio_redun   = round(sum(percent_redundancy),0),
@@ -79,7 +86,8 @@ write.csv(
 ```
 
 ## Look at bins per sample
-How many bins do we have per sample
+Now let's see how many bins we have per sample.
+I'll make separate tables for various QC cut-offs and combine these in Markdown/LateX.
 ```{r}
 bins_per_sample <- bins[,
                         .(bincount=length(bins)),
@@ -105,8 +113,10 @@ bins[(Completeness > 70 & Contamination < 20),
 ```
 
 ## bin vs metagenome size
-
-get metagenome size stuff from assembly file with bash, selecting only for contigs of 2500bp and higher.
+Now I wonder how much of a total metagenome is present in bins. 
+First I need to get the total size of a metagenome, this is most easily done from the fasta headers of the spades assemblies. 
+While doing so, I want to filter out any contigs shorter dan 2.5kbp, since these aren't binned anyway.
+I do this in bash:
 
 ```{bash}
 cd /stor/azolla_metagenome/Azolla_genus_metagenome
@@ -114,13 +124,15 @@ fastas=( data/assembly_*doublefiltered/*/scaffolds.fasta )
 for f in ${fastas[@]}
 do  echo $f':' $(                    \
     cat $f                           \
+    | grep '>'                       \
     | egrep -o 'length_[0-9]+'       \
     | sed 's/length_//g'             \
     | awk '$1 > 2500  {print $1 ;}'  \
     | awk '{s+=$1} END {print s/1000000}' )
 done
 ```
-
+Now I put these manually in a df, not very elegant but I prefer it over having another small random tab file. 
+Next, I'll calculate fraction binned with that data.
 ```{r}
 fraction_binned <- bins[,
                         .(binned_mb     = round(sum(total_length/1000000),2)
@@ -140,8 +152,9 @@ fraction_binned$assembly_mb <- c(56.9081,
 fraction_binned$fraction <- round(fraction_binned$binned_mb / fraction_binned$assembly_mb * 100)
 fraction_binned
 ```
+Actually, I don't believe these numbers, I'm taking them from the Anvio summary html pages instead.
 
-# Bin taxonomy
+## Bin taxonomy
 Next, pivot sample origin versus taxonomy and either count bins, or display size in mbase
 
 First, count bins in class:
