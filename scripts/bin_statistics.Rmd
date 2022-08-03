@@ -261,11 +261,15 @@ attach(bincollections)
 bincol_plot <- ggplot(data = bincollections)
 bincol_plot <- bincol_plot + geom_bar(aes(y= percent_completion,x=rank),stat='identity',fill='darkgreen')
 bincol_plot <- bincol_plot + geom_bar(aes(y=-percent_redundancy,x=rank),stat='identity',fill='red')
+bincol_plot <- bincol_plot + geom_text(data=bincolcount,
+                                       aes(y=90,x=15,label=count))
 
 # facets
 bincol_plot <- bincol_plot + facet_grid(Collection ~ Sample)
 bincol_plot <- bincol_plot + scale_y_continuous(name = 'Redundancy/Completion'
                                                 ,limits = c(-50,100))
+bincol_plot <- bincol_plot + scale_x_continuous(name = 'Completeness rank'
+                                                ,breaks = c(0,10,20))
 
 # make it pretty
 bincol_plot <- bincol_plot + theme_classic()
