@@ -220,7 +220,11 @@ bincollections <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome
 ```
 
 ```{r}
+# remove double entries due to double BAT taxonomy
+bincollections <- bincollections[classification != 'taxid_assigned_(2/2)' ]
+
 bincollections$Collection <- 'refined' # fix while waiting for the final table
+
 levels(bincollections$Sample) <- c("_A. filiculoides_<br>'lab'",
                                    "_A. filiculoides_<br>'minus-cyano'",
                                    "_A. filiculoides_<br>'wild'",
