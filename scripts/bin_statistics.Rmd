@@ -247,6 +247,12 @@ bincollections[,
                             ties.method='first'
                             )
                , by=list(Sample,Collection)]
+
+# get total nr of bins in small table
+bincolcount <- bincollections[,
+               .(count = max(rank))
+               , by=list(Sample,Collection)]
+bincolcount
 ```
 
 ```{r}
