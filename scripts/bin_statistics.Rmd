@@ -246,7 +246,7 @@ bincollections[,
                rank := rank(x = -percent_completion,
                             ties.method='first'
                             )
-               , by=list(Sample)]
+               , by=list(Sample,Collection)]
 ```
 
 ```{r}
