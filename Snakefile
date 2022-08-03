@@ -1261,7 +1261,7 @@ rule collect_bins_in_folder:
   input:
     "data/curated_bins/{collection}/{hostcode}"
   output:
-    directory("data/curated_bins/{collection}/{hostcode}.bin-fastas")
+    "data/curated_bins/{collection}/{hostcode}.bin-fastas"
   shell:
     """
     if [ ! -d {output} ]
