@@ -287,7 +287,29 @@ bincol_plot
 
 ## ideas for a similar thing with taxonomy level 
 
-note to self: actually I'm only interested in the no_support counts, so I can melt all taxnomies in a long table, filter for no support and make a "fail" count per taxonomy level... 
+First, I want to "melt" all the taxonomy levels into two collumns rather than a collumn per level.
+
+```{r}
+bincolmelt <- data.table::melt.data.table(data = bincollections
+                                          ,id.vars = c('Collection',
+                                                       'Sample')
+                                          ,measure.vars = c('superkingdom',
+                                                            'phylum',
+                                                            'class',
+                                                            'order',
+                                                            'family',
+                                                            'genus',
+                                                            'species'
+                                                            )
+                                          ,variable.name = 'taxlevel'
+                                          ,value.name    = 'taxvalue'
+                                          ,na.rm = F
+                                          ,variable.factor = T
+                                          ,value.factor = T
+                                          )
+bincolmelt
+```
+
 
 ```{r}
 attach(bincollections)
