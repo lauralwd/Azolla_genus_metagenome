@@ -261,6 +261,11 @@ bincollections[,
                             ties.method='first'
                             )
                , by=list(Sample,Collection)]
+bincollections[,
+               rankCM := rank(x = -Completeness,
+                              ties.method='first'
+                              )
+               , by=list(Sample,Collection)]
 
 # get total nr of bins in small table
 bincolcount <- bincollections[,
