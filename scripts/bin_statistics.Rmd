@@ -85,6 +85,20 @@ write.csv(
   row.names = T)
 ```
 
+```{r}
+bins[,
+     .(order=order,
+       length_mb     = round(sum(total_length/1000000),2),
+       anvio_compl   = round(sum(percent_completion),0),
+       anvio_redun   = round(sum(percent_redundancy),0),
+       checkm_compl  = round(sum(Completeness),0),
+       checkm_redun  = round(sum(Contamination),0)
+       ),
+     by=c('Sample', 'bins')
+     ]
+```
+
+
 ## Look at bins per sample
 Now let's see how many bins we have per sample.
 I'll make separate tables for various QC cut-offs and combine these in Markdown/LateX.
