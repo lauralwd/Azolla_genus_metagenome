@@ -267,7 +267,7 @@ bincol_plot <- bincol_plot + geom_text(data=bincolcount,
 # facets
 bincol_plot <- bincol_plot + facet_grid(Collection ~ Sample)
 bincol_plot <- bincol_plot + scale_y_continuous(name = 'Redundancy/Completion'
-                                                ,limits = c(-50,100))
+                                                ,limits = c(-20,100))
 bincol_plot <- bincol_plot + scale_x_continuous(name = 'Completeness rank'
                                                 ,breaks = c(0,10,20))
 
