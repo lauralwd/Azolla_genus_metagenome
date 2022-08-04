@@ -312,25 +312,26 @@ bincolmelt
 
 
 ```{r}
-attach(bincollections)
 # set the basic data and aesthetic
-bincol_plot <- ggplot(data = bincollections)
-bincol_plot <- bincol_plot + geom_bar(aes(x=order,
-                                          fill=order))
+bincol_plot <- ggplot(data = bincolmelt[taxvalue=='no_support'])
+bincol_plot <- bincol_plot + geom_bar(aes(x=Collection,
+                                          fill=Collection))
 
 
 # facets
-bincol_plot <- bincol_plot + facet_grid(Collection ~ Sample)
-bincol_plot <- bincol_plot + scale_fill_discrete()
+bincol_plot <- bincol_plot + facet_grid(Sample ~ taxlevel)
+bincol_plot <- bincol_plot + scale_fill_brewer(type = 'qual',palette = 2)
 
 # make it pretty
 bincol_plot <- bincol_plot + theme_classic()
+bincol_plot <- bincol_plot + xlab('Binning method') + ylab('Count of bins without taxonomy assigned')
 bincol_plot <- bincol_plot + theme(
-                               axis.text.x = element_text(angle=90),
+                               #axis.text.x = element_markdown(angle=45,hjust = 1),
+                               axis.text.x = element_blank(),
                                #axis.title.x= element_blank(),
                                legend.position = "bottom",
-                               strip.text.x= element_markdown(angle=80,size = 10),
-                               strip.text.y= element_markdown(angle=90,size = 10),
+                               strip.text.x= element_markdown(angle=60,size = 10),
+                               strip.text.y= element_markdown(angle=0,size = 10),
                                strip.background = element_blank()
                                )
 # and go!
