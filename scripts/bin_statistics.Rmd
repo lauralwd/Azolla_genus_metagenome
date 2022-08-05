@@ -324,8 +324,8 @@ bincol_plot <- bincol_plot + theme(
                                #axis.text.x = element_blank(),
                                #axis.title.x= element_blank(),
                                legend.position = "bottom",
-                               strip.text.x= element_markdown(angle=80,size = 10),
-                               strip.text.y= element_markdown(angle=90,size = 10),
+                               strip.text.x= element_markdown(angle=0,size = 10),
+                               strip.text.y= element_markdown(angle=0,size = 10),
                                strip.background = element_blank()
                                )
 # and go!
