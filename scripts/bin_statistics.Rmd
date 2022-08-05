@@ -222,7 +222,6 @@ bins[order %in% i_orders,
 As a final figure for the chapter, I want to visualise somehow if the quality of binning improved with my manual selection.
 I'm still running the calculations, but here we go:
 
-(with a temporary table first:)
 ```{r}
 bincollections <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome/data/curated_bins/summary.bin_info.tab",
                         sep = '\t',
@@ -233,12 +232,12 @@ bincollections <- fread(input = "/stor/azolla_metagenome/Azolla_genus_metagenome
                         )
 ```
 
+Make factors nicer and filter double bins.
 ```{r}
 # remove double entries due to double BAT taxonomy
 bincollections <- bincollections[classification != 'taxid_assigned_(2/2)' ]
 
-#bincollections$Collection <- 'refined' # fix while waiting for the final table
-
+# markdown formatting for species/sample names:
 levels(bincollections$Sample) <- c("_A. filiculoides_<br>'lab'",
                                    "_A. filiculoides_<br>'minus-cyano'",
                                    "_A. filiculoides_<br>'wild'",
@@ -249,12 +248,16 @@ levels(bincollections$Sample) <- c("_A. filiculoides_<br>'lab'",
                                    "_A. caroliniana_<br>1",
                                    "_A. caroliniana_<br>2"
                                    )
-```
 
+# nicer names for binning methods:
+levels(bincollections$Collection) <- c('Concoct',
+                                       'Metabat2',
+                                       'Manual')
+
+```
 
 Now I want to rank the bins per sample, per method for completeness. 
 I can use this later as an x axis in my plot that is universal for all sample/method combos
-
 ```{r}
 bincollections[,
                rank := rank(x = -percent_completion,
@@ -266,8 +269,10 @@ bincollections[,
                               ties.method='first'
                               )
                , by=list(Sample,Collection)]
+```
 
-# get total nr of bins in small table
+Get total nr of bins in small table for all bins, and those passing QC thresholds in Anvio and in CheckM
+```{r}
 bincolcount <- bincollections[,
                .(count = max(rank))
                , by=list(Sample,Collection)]
@@ -279,12 +284,10 @@ bincolcountAnvio9010 <- bincollections[(percent_completion > 90 & percent_redund
 bincolcountCheckM9010 <- bincollections[(Completeness > 90 & Contamination < 10),
                         .(count = max(rank))
                         , by=list(Sample,Collection)]
-
-
 ```
 
 
-On Anvio stats:
+Make figure on Anvio stats:
 ```{r}
 attach(bincollections)
 # set the basic data and aesthetic
@@ -340,7 +343,6 @@ bincol_plot
 ```
 
 the same with CheckM
-
 ```{r}
 attach(bincollections)
 # set the basic data and aesthetic
@@ -395,10 +397,11 @@ bincol_plot
 ```
 
 
-## ideas for a similar thing with taxonomy level 
+## QC by succesfull taxonomy assignment.
+The rationale here is that better bins, get better or more precise taxonomy assigned via CAT/BAT. 
+Hence, I compare per binning method, per species/sample, the nr of bins NOT allocated taxonomy.
 
 First, I want to "melt" all the taxonomy levels into two collumns rather than a collumn per level.
-
 ```{r}
 bincolmelt <- data.table::melt.data.table(data = bincollections
                                           ,id.vars = c('Collection',
@@ -416,11 +419,10 @@ bincolmelt <- data.table::melt.data.table(data = bincollections
                                           ,na.rm = F
                                           ,variable.factor = T
                                           ,value.factor = T
-                                          )
-bincolmelt
+)
 ```
 
-
+Make a bar chart where bars are the binning methods:
 ```{r}
 # set the basic data and aesthetic
 bincol_plot <- ggplot(data = bincolmelt[taxvalue=='no_support'])
@@ -457,7 +459,7 @@ bincol_plot <- bincol_plot + geom_bar(aes(x=Collection,
                                      ,position = 'dodge')
 
 # facets
-bincol_plot <- bincol_plot + facet_grid(Sample ~ .)
+bincol_plot <- bincol_plot + facet_grid(Sample ~ taxlevel)
 bincol_plot <- bincol_plot + scale_fill_brewer(type = 'qual',palette = 2)
 
 # make it pretty
