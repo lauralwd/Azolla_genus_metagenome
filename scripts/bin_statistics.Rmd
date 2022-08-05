@@ -291,46 +291,46 @@ Make figure on Anvio stats:
 ```{r}
 attach(bincollections)
 # set the basic data and aesthetic
-bincol_plot <- ggplot(data = bincollections)
-bincol_plot <- bincol_plot + geom_bar(aes(y= percent_completion,
+bincol_plot_anvio <- ggplot(data = bincollections)
+bincol_plot_anvio <- bincol_plot_anvio + geom_bar(aes(y= percent_completion,
                                           x=rank),
                                       stat='identity',
                                       fill='darkgreen'
                                       )
-bincol_plot <- bincol_plot + geom_bar(aes(y=-percent_redundancy,
+bincol_plot_anvio <- bincol_plot_anvio + geom_bar(aes(y=-percent_redundancy,
                                           x=rank),
                                       stat='identity',
                                       fill='red'
                                       )
-bincol_plot <- bincol_plot + geom_text(data=bincolcount,
+bincol_plot_anvio <- bincol_plot_anvio + geom_text(data=bincolcount,
                                        aes(y=80,
                                            x=22,
                                            label=count)
                                        )
-bincol_plot <- bincol_plot + geom_text(data=bincolcountAnvio9010,
+bincol_plot_anvio <- bincol_plot_anvio + geom_text(data=bincolcountAnvio9010,
                                        aes(y=99,
                                            x=22,
                                            label=count)
                                        ,col='darkgreen')
 
 
-bincol_plot <- bincol_plot + geom_abline(mapping = aes(intercept= 90,
+bincol_plot_anvio <- bincol_plot_anvio + geom_abline(mapping = aes(intercept= 90,
                                                        slope=0),
                                          col='grey')
-bincol_plot <- bincol_plot + geom_abline(mapping = aes(intercept=-10,
+bincol_plot_anvio <- bincol_plot_anvio + geom_abline(mapping = aes(intercept=-10,
                                                        slope=0),
                                          col='grey')
 
 # facets
-bincol_plot <- bincol_plot + facet_grid(Sample ~ Collection)
-bincol_plot <- bincol_plot + scale_y_continuous(name = 'Redundancy/Completion'
+bincol_plot_anvio <- bincol_plot_anvio + facet_grid(Sample ~ Collection)
+bincol_plot_anvio <- bincol_plot_anvio + scale_y_continuous(name = 'Redundancy/Completion'
                                                 ,limits = c(-20,100))
-bincol_plot <- bincol_plot + scale_x_continuous(name = 'Completeness rank'
+bincol_plot_anvio <- bincol_plot_anvio + scale_x_continuous(name = 'Completeness rank'
                                                 ,breaks = c(0,10,20))
 
 # make it pretty
-bincol_plot <- bincol_plot + theme_classic()
-bincol_plot <- bincol_plot + theme(
+bincol_plot_anvio <- bincol_plot_anvio + theme_classic()
+bincol_plot_anvio <- bincol_plot_anvio + theme(
                                #axis.text.x = element_blank(),
                                #axis.title.x= element_blank(),
                                legend.position = "bottom",
@@ -339,52 +339,52 @@ bincol_plot <- bincol_plot + theme(
                                strip.background = element_blank()
                                )
 # and go!
-bincol_plot
+bincol_plot_anvio
 ```
 
 the same with CheckM
 ```{r}
 attach(bincollections)
 # set the basic data and aesthetic
-bincol_plot <- ggplot(data = bincollections)
-bincol_plot <- bincol_plot + geom_bar(aes(y= Completeness,
+bincol_plot_checkm <- ggplot(data = bincollections)
+bincol_plot_checkm <- bincol_plot_checkm + geom_bar(aes(y= Completeness,
                                           x=rankCM),
                                       stat='identity',
                                       fill='darkgreen'
                                       )
-bincol_plot <- bincol_plot + geom_bar(aes(y=-Contamination,
+bincol_plot_checkm <- bincol_plot_checkm + geom_bar(aes(y=-Contamination,
                                           x=rank),
                                       stat='identity',
                                       fill='red'
                                       )
-bincol_plot <- bincol_plot + geom_text(data=bincolcount,
+bincol_plot_checkm <- bincol_plot_checkm + geom_text(data=bincolcount,
                                        aes(y=80,
                                            x=22,
                                            label=count)
                                        )
-bincol_plot <- bincol_plot + geom_text(data=bincolcountCheckM9010,
+bincol_plot_checkm <- bincol_plot_checkm + geom_text(data=bincolcountCheckM9010,
                                        aes(y=99,
                                            x=22,
                                            label=count)
                                        ,col='darkgreen')
 
-bincol_plot <- bincol_plot + geom_abline(mapping = aes(intercept= 90,
+bincol_plot_checkm <- bincol_plot_checkm + geom_abline(mapping = aes(intercept= 90,
                                                        slope=0),
                                          col='grey')
-bincol_plot <- bincol_plot + geom_abline(mapping = aes(intercept=-10,
+bincol_plot_checkm <- bincol_plot_checkm + geom_abline(mapping = aes(intercept=-10,
                                                        slope=0),
                                          col='grey')
 
 # facets
-bincol_plot <- bincol_plot + facet_grid(Sample ~ Collection)
-bincol_plot <- bincol_plot + scale_y_continuous(name = 'Redundancy/Completion'
+bincol_plot_checkm <- bincol_plot_checkm + facet_grid(Sample ~ Collection)
+bincol_plot_checkm <- bincol_plot_checkm + scale_y_continuous(name = 'Redundancy/Completion'
                                                 ,limits = c(-20,100))
-bincol_plot <- bincol_plot + scale_x_continuous(name = 'Completeness rank'
+bincol_plot_checkm <- bincol_plot_checkm + scale_x_continuous(name = 'Completeness rank'
                                                 ,breaks = c(0,10,20,30))
 
 # make it pretty
-bincol_plot <- bincol_plot + theme_classic()
-bincol_plot <- bincol_plot + theme(
+bincol_plot_checkm <- bincol_plot_checkm + theme_classic()
+bincol_plot_checkm <- bincol_plot_checkm + theme(
                                #axis.text.x = element_blank(),
                                #axis.title.x= element_blank(),
                                legend.position = "bottom",
@@ -393,7 +393,7 @@ bincol_plot <- bincol_plot + theme(
                                strip.background = element_blank()
                                )
 # and go!
-bincol_plot
+bincol_plot_checkm
 ```
 
 
@@ -425,19 +425,19 @@ bincolmelt <- data.table::melt.data.table(data = bincollections
 Make a bar chart where bars are the binning methods:
 ```{r}
 # set the basic data and aesthetic
-bincol_plot <- ggplot(data = bincolmelt[taxvalue=='no_support'])
-bincol_plot <- bincol_plot + geom_bar(aes(x=Collection,
+bincol_plot_notaxsupport <- ggplot(data = bincolmelt[taxvalue=='no_support'])
+bincol_plot_notaxsupport <- bincol_plot_notaxsupport + geom_bar(aes(x=Collection,
                                           fill=Collection))
 
 
 # facets
-bincol_plot <- bincol_plot + facet_grid(Sample ~ taxlevel)
-bincol_plot <- bincol_plot + scale_fill_brewer(type = 'qual',palette = 2)
+bincol_plot_notaxsupport <- bincol_plot_notaxsupport + facet_grid(Sample ~ taxlevel)
+bincol_plot_notaxsupport <- bincol_plot_notaxsupport + scale_fill_brewer(type = 'qual',palette = 2)
 
 # make it pretty
-bincol_plot <- bincol_plot + theme_classic()
-bincol_plot <- bincol_plot + xlab('Binning method') + ylab('Count of bins without taxonomy assigned')
-bincol_plot <- bincol_plot + theme(
+bincol_plot_notaxsupport <- bincol_plot_notaxsupport + theme_classic()
+bincol_plot_notaxsupport <- bincol_plot_notaxsupport + xlab('Binning method') + ylab('Count of bins without taxonomy assigned')
+bincol_plot_notaxsupport <- bincol_plot_notaxsupport + theme(
                                #axis.text.x = element_markdown(angle=45,hjust = 1),
                                axis.text.x = element_blank(),
                                #axis.title.x= element_blank(),
@@ -447,7 +447,7 @@ bincol_plot <- bincol_plot + theme(
                                strip.background = element_blank()
                                )
 # and go!
-bincol_plot
+bincol_plot_notaxsupport
 ```
 
 
