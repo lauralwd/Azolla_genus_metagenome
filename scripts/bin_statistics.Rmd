@@ -357,9 +357,15 @@ bincol_plot <- bincol_plot + geom_bar(aes(y=-Contamination,
                                       )
 bincol_plot <- bincol_plot + geom_text(data=bincolcount,
                                        aes(y=80,
-                                           x=18,
+                                           x=22,
                                            label=count)
                                        )
+bincol_plot <- bincol_plot + geom_text(data=bincolcountCheckM9010,
+                                       aes(y=99,
+                                           x=22,
+                                           label=count)
+                                       ,col='darkgreen')
+
 bincol_plot <- bincol_plot + geom_abline(mapping = aes(intercept= 90,
                                                        slope=0),
                                          col='grey')
@@ -368,11 +374,11 @@ bincol_plot <- bincol_plot + geom_abline(mapping = aes(intercept=-10,
                                          col='grey')
 
 # facets
-bincol_plot <- bincol_plot + facet_grid(Collection ~ Sample)
+bincol_plot <- bincol_plot + facet_grid(Sample ~ Collection)
 bincol_plot <- bincol_plot + scale_y_continuous(name = 'Redundancy/Completion'
                                                 ,limits = c(-20,100))
 bincol_plot <- bincol_plot + scale_x_continuous(name = 'Completeness rank'
-                                                ,breaks = c(0,10,20))
+                                                ,breaks = c(0,10,20,30))
 
 # make it pretty
 bincol_plot <- bincol_plot + theme_classic()
@@ -380,8 +386,8 @@ bincol_plot <- bincol_plot + theme(
                                #axis.text.x = element_blank(),
                                #axis.title.x= element_blank(),
                                legend.position = "bottom",
-                               strip.text.x= element_markdown(angle=80,size = 10),
-                               strip.text.y= element_markdown(angle=90,size = 10),
+                               strip.text.x= element_markdown(angle=00,size = 10),
+                               strip.text.y= element_markdown(angle=0,size = 10),
                                strip.background = element_blank()
                                )
 # and go!
@@ -459,7 +465,7 @@ bincol_plot <- bincol_plot + theme_classic()
 bincol_plot <- bincol_plot + xlab('Binning method') + ylab('Count of bins without taxonomy assigned')
 bincol_plot <- bincol_plot + theme(
                                #axis.text.x = element_markdown(angle=45,hjust = 1),
-                               axis.text.x = element_blank(),
+                               #axis.text.x = element_blank(),
                                #axis.title.x= element_blank(),
                                legend.position = "bottom",
                                strip.text.x= element_markdown(angle=60,size = 10),
