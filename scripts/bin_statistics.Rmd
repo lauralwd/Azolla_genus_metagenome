@@ -486,20 +486,22 @@ ggsave(filename = "../analyses/binning_QC_no_taxonomy.svg",
 
 ```{r}
 # set the basic data and aesthetic
-bincol_plot <- ggplot(data = bincolmelt[taxvalue=='no_support'])
+bincol_plot <- ggplot(data = bincolmelt[(taxlevel=='order' & taxvalue != 'no_support')])
 bincol_plot <- bincol_plot + geom_bar(aes(x=Collection,
-                                         fill=taxlevel)
+                                         fill=taxvalue)
                                      ,position = 'dodge')
+library(RColorBrewer)
+colours <-colorRampPalette(brewer.pal(8, "Set2"))(15)
+bincol_plot <- bincol_plot + scale_fill_manual(values = colours)
 
 # facets
-bincol_plot <- bincol_plot + facet_grid(Sample ~ taxlevel)
-bincol_plot <- bincol_plot + scale_fill_brewer(type = 'qual',palette = 2)
+bincol_plot <- bincol_plot + facet_grid(Sample ~ taxvalue)
 
 # make it pretty
 bincol_plot <- bincol_plot + theme_classic()
-bincol_plot <- bincol_plot + xlab('Binning method') + ylab('Count of bins without taxonomy assigned')
+bincol_plot <- bincol_plot + xlab('Binning method') + ylab('Count of bins')
 bincol_plot <- bincol_plot + theme(
-                               #axis.text.x = element_markdown(angle=45,hjust = 1),
+                               axis.text.x = element_markdown(angle=45,hjust = 1),
                                #axis.text.x = element_blank(),
                                #axis.title.x= element_blank(),
                                legend.position = "bottom",
@@ -509,4 +511,66 @@ bincol_plot <- bincol_plot + theme(
                                )
 # and go!
 bincol_plot
+```
+
+
+Now let's try to have a summary figure of all bins their taxonomy over all levels:
+
+```{r}
+# set the basic data and aesthetic
+bincolmelt[,taxvalue_md := taxvalue ]
+
+bincolmelt[(taxlevel == 'genus' & taxvalue != 'no_support')
+           ,taxvalue_md := paste('_',taxvalue,'_',sep = '')
+           ]
+
+bincol_plot <- ggplot(data = bincolmelt[(Collection=='Manual' & 
+                                          taxvalue != 'no_support' &
+                                          taxlevel != 'species' &
+                                          taxlevel != 'superkingdom')
+                                        ,.N
+                                        ,by = c('taxlevel',
+                                                'taxvalue_md',
+                                                'Sample',
+                                                'Collection'
+                                                )
+                                        ])
+
+
+bincol_plot <- bincol_plot + scale_fill_viridis_c(trans='log10')
+bincol_plot <- bincol_plot + geom_tile(aes(x=taxvalue_md
+                                           ,y=Sample
+                                           ,fill=N))
+
+
+# facets
+bincol_plot <- bincol_plot + facet_grid( ~ taxlevel,scales = 'free_x',space = 'free_x')
+
+# make it pretty
+bincol_plot <- bincol_plot + theme_classic()
+bincol_plot <- bincol_plot + xlab('Bin taxonomy') + ylab('Host species + sample')
+bincol_plot <- bincol_plot  + guides(fill=guide_colorbar(title="Bin count"
+                                                         ,direction = 'horizontal'
+                                                         ,title.position = 'top'
+                                                         ,barwidth = unit(x = 2.3,units = 'cm')
+                                                         ))
+
+bincol_plot <- bincol_plot + theme(
+                               axis.text.x = element_markdown(angle=90,vjust = .5,hjust = 1),
+                               axis.text.y = element_markdown(angle=0,hjust = 1),
+                               legend.position = c(-.06,-.2),
+                               strip.text.x= element_markdown(angle=0,size = 10),
+                               strip.text.y= element_markdown(angle=0,size = 10),
+                               strip.background = element_blank()
+                               )
+# and go!
+bincol_plot
+ggsave(filename = "../analyses/binning_QC_all_taxonomy.svg",
+       plot = bincol_plot,
+       device = 'svg', 
+       #,device = 'png'
+       width = unit(x = 20,units = 'cm'),
+       height = unit(x = 8,units = 'cm')
+       ,scale = .55 
+             )
 ```
