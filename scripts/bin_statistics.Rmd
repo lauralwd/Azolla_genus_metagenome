@@ -274,7 +274,7 @@ bincollections[,
 Get total nr of bins in small table for all bins, and those passing QC thresholds in Anvio and in CheckM
 ```{r}
 bincolcount <- bincollections[,
-               .(count = max(rank))
+               .(count = .N)
                , by=list(Sample,Collection)]
 
 bincolcountAnvio9010 <- bincollections[(percent_completion > 90 & percent_redundancy < 10),
