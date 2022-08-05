@@ -326,7 +326,8 @@ bincol_plot_anvio <- bincol_plot_anvio + facet_grid(Sample ~ Collection)
 bincol_plot_anvio <- bincol_plot_anvio + scale_y_continuous(name = 'Redundancy/Completion'
                                                 ,limits = c(-20,100))
 bincol_plot_anvio <- bincol_plot_anvio + scale_x_continuous(name = 'Completeness rank'
-                                                ,breaks = c(0,10,20))
+                                                ,breaks = c(0,10,20,30)
+                                                ,limits = c(0,25))
 
 # make it pretty
 bincol_plot_anvio <- bincol_plot_anvio + theme_classic()
@@ -379,8 +380,9 @@ bincol_plot_checkm <- bincol_plot_checkm + geom_abline(mapping = aes(intercept=-
 bincol_plot_checkm <- bincol_plot_checkm + facet_grid(Sample ~ Collection)
 bincol_plot_checkm <- bincol_plot_checkm + scale_y_continuous(name = 'Redundancy/Completion'
                                                 ,limits = c(-20,100))
-bincol_plot_checkm <- bincol_plot_checkm + scale_x_continuous(name = 'Completeness rank'
-                                                ,breaks = c(0,10,20,30))
+bincol_plot_anvio <- bincol_plot_anvio + scale_x_continuous(name = 'Completeness rank'
+                                                ,breaks = c(0,10,20,30)
+                                                ,limits = c(0,25))
 
 # make it pretty
 bincol_plot_checkm <- bincol_plot_checkm + theme_classic()
