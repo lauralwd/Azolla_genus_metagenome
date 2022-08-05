@@ -354,7 +354,7 @@ bincol_plot_checkm <- bincol_plot_checkm + geom_bar(aes(y= Completeness+1,
                                       fill='darkgreen'
                                       )
 bincol_plot_checkm <- bincol_plot_checkm + geom_bar(aes(y=-Contamination,
-                                          x=rank),
+                                          x=rankCM),
                                       stat='identity',
                                       fill='red'
                                       )
