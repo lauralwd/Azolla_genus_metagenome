@@ -341,6 +341,14 @@ bincol_plot_anvio <- bincol_plot_anvio + theme(
                                )
 # and go!
 bincol_plot_anvio
+ggsave(filename = "../analyses/binning_QC_anvio.svg",
+       plot = bincol_plot_anvio,
+       device = 'svg', 
+       #,device = 'png'
+       width = unit(x = 14,units = 'cm'),
+       height = unit(x = 18,units = 'cm')
+       ,scale = .55 
+             )
 ```
 
 the same with CheckM
@@ -396,6 +404,14 @@ bincol_plot_checkm <- bincol_plot_checkm + theme(
                                )
 # and go!
 bincol_plot_checkm
+ggsave(filename = "../analyses/binning_QC_checkm.svg",
+       plot = bincol_plot_checkm,
+       device = 'svg', 
+       #,device = 'png'
+       width = unit(x = 14,units = 'cm'),
+       height = unit(x = 18,units = 'cm')
+       ,scale = .55 
+             )
 ```
 
 
