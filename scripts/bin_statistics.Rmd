@@ -271,9 +271,20 @@ bincollections[,
 bincolcount <- bincollections[,
                .(count = max(rank))
                , by=list(Sample,Collection)]
-bincolcount
+
+bincolcountAnvio9010 <- bincollections[(percent_completion > 90 & percent_redundancy < 10),
+                        .(count = max(rank))
+                        , by=list(Sample,Collection)]
+
+bincolcountCheckM9010 <- bincollections[(Completeness > 90 & Contamination < 10),
+                        .(count = max(rank))
+                        , by=list(Sample,Collection)]
+
+
 ```
 
+
+On Anvio stats:
 ```{r}
 attach(bincollections)
 # set the basic data and aesthetic
