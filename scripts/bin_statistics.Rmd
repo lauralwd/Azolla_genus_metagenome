@@ -444,28 +444,44 @@ Make a bar chart where bars are the binning methods:
 ```{r}
 # set the basic data and aesthetic
 bincol_plot_notaxsupport <- ggplot(data = bincolmelt[taxvalue=='no_support'])
-bincol_plot_notaxsupport <- bincol_plot_notaxsupport + geom_bar(aes(x=Collection,
-                                          fill=Collection))
+#bincol_plot_notaxsupport <- bincol_plot_notaxsupport + geom_bar(aes(x=Collection,
+#                                          fill=Collection))
+
+bincol_plot_notaxsupport <- bincol_plot_notaxsupport + geom_line(aes(x=taxlevel,
+                                                                     group=Collection,
+                                                                     col=Collection)
+                                                                 ,stat = 'count')
+bincol_plot_notaxsupport <- bincol_plot_notaxsupport + geom_point(aes(x=taxlevel,
+                                                                     group=Collection,
+                                                                     col=Collection)
+                                                                 ,stat = 'count')
 
 
 # facets
-bincol_plot_notaxsupport <- bincol_plot_notaxsupport + facet_grid(Sample ~ taxlevel)
+bincol_plot_notaxsupport <- bincol_plot_notaxsupport + facet_grid(Sample ~ .)
 bincol_plot_notaxsupport <- bincol_plot_notaxsupport + scale_fill_brewer(type = 'qual',palette = 2)
 
 # make it pretty
 bincol_plot_notaxsupport <- bincol_plot_notaxsupport + theme_classic()
-bincol_plot_notaxsupport <- bincol_plot_notaxsupport + xlab('Binning method') + ylab('Count of bins without taxonomy assigned')
+bincol_plot_notaxsupport <- bincol_plot_notaxsupport + xlab('Taxonomy level') + ylab('Count of bins without taxonomy assigned') 
 bincol_plot_notaxsupport <- bincol_plot_notaxsupport + theme(
-                               #axis.text.x = element_markdown(angle=45,hjust = 1),
-                               axis.text.x = element_blank(),
-                               #axis.title.x= element_blank(),
+                               axis.text.x  = element_markdown(angle=45,hjust = 1),
                                legend.position = "bottom",
-                               strip.text.x= element_markdown(angle=60,size = 10),
-                               strip.text.y= element_markdown(angle=0,size = 10),
+                               legend.title = element_blank(),
+                               strip.text.x = element_markdown(angle=0,size = 10),
+                               strip.text.y = element_markdown(angle=0,size = 10),
                                strip.background = element_blank()
                                )
 # and go!
 bincol_plot_notaxsupport
+ggsave(filename = "../analyses/binning_QC_no_taxonomy.svg",
+       plot = bincol_plot_notaxsupport,
+       device = 'svg', 
+       #,device = 'png'
+       width = unit(x = 7.5,units = 'cm'),
+       height = unit(x = 12,units = 'cm')
+       ,scale = .55 
+             )
 ```
 
 
