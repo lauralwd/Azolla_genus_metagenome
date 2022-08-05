@@ -353,7 +353,6 @@ ggsave(filename = "../analyses/binning_QC_anvio.svg",
 
 the same with CheckM
 ```{r}
-attach(bincollections)
 # set the basic data and aesthetic
 bincol_plot_checkm <- ggplot(data = bincollections)
 bincol_plot_checkm <- bincol_plot_checkm + geom_bar(aes(y= Completeness+1,
