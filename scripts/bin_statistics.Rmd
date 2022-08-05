@@ -73,7 +73,7 @@ Now, look at a table with all bins, their origin sample, size, completion and re
 This table is huge, so I don't include it in the markdown render here, instead I write it to csv so I can make something out of it.
 ```{r}
 write.csv(
-  x = bins[,#(Sample != 'Azfil_wild'),
+  x = bins[classification != 'taxid_assigned_(2/2)' & Sample != 'Azfil_wild' & Sample != 'Azmic_IRRI_456',
      .(length_mb     = round(sum(total_length/1000000),2),
        anvio_compl   = round(sum(percent_completion),0),
        anvio_redun   = round(sum(percent_redundancy),0),
@@ -86,7 +86,7 @@ write.csv(
 ```
 
 ```{r}
-bins[,
+bins[classification != 'taxid_assigned_(2/2)' & Sample != 'Azfil_wild' & Sample != 'Azmic_IRRI_456',
      .(order=order,
        length_mb     = round(sum(total_length/1000000),2),
        anvio_compl   = round(sum(percent_completion),0),
@@ -103,7 +103,7 @@ bins[,
 Now let's see how many bins we have per sample.
 I'll make separate tables for various QC cut-offs and combine these in Markdown/LateX.
 ```{r}
-bins_per_sample <- bins[,
+bins_per_sample <- bins[classification != 'taxid_assigned_(2/2)',
                         .(bincount=length(bins)),
                         by='Sample'
                         ]
@@ -112,7 +112,7 @@ bins_per_sample[order(-bins_per_sample[,2])]
 
 How many bins do we have per sample with sufficient quality according to anvio
 ```{r}
-bins[(percent_completion > 70 & percent_redundancy < 20),
+bins[(classification != 'taxid_assigned_(2/2)' & percent_completion > 90 & percent_redundancy < 10),
                         .(bincount=length(bins)),
                         by='Sample'
                         ][order(-bins_per_sample[,2])]
@@ -120,7 +120,7 @@ bins[(percent_completion > 70 & percent_redundancy < 20),
 
 How many bins do we have per sample with sufficient quality according to CheckM
 ```{r}
-bins[(Completeness > 70 & Contamination < 20),
+bins[(classification != 'taxid_assigned_(2/2)' & Completeness > 90 & Contamination < 10),
                         .(bincount=length(bins)),
                         by='Sample'
                         ][order(-bins_per_sample[,2])]
