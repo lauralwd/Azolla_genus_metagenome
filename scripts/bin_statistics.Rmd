@@ -458,7 +458,7 @@ bincol_plot_notaxsupport <- bincol_plot_notaxsupport + geom_point(aes(x=taxlevel
 
 # facets
 bincol_plot_notaxsupport <- bincol_plot_notaxsupport + facet_grid(Sample ~ .)
-bincol_plot_notaxsupport <- bincol_plot_notaxsupport + scale_fill_brewer(type = 'qual',palette = 2)
+bincol_plot_notaxsupport <- bincol_plot_notaxsupport + scale_color_brewer(type = 'qual',palette = 2)
 
 # make it pretty
 bincol_plot_notaxsupport <- bincol_plot_notaxsupport + theme_classic()
