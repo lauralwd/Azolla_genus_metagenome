@@ -250,6 +250,7 @@ lenghtbox <- ggplot(tempdt,
                     )
 lenghtbox <- lenghtbox + facet_grid(superkingdom ~ sample,scales = 'free_y',space = 'free_y')
 #lenghtbox <- lenghtbox + geom_violin()
+#lenghtbox <- lenghtbox + geom_jitter(alpha=0.1)
 lenghtbox <- lenghtbox + geom_boxplot(varwidth = T)
 #lenghtbox <- lenghtbox + geom_freqpoly(inherit.aes = F, aes(x=length,col=assembly,alpha=.4),binsize=80 ) 
 lenghtbox <- lenghtbox + theme_classic()
