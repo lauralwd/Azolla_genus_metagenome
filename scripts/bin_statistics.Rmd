@@ -413,6 +413,69 @@ ggsave(filename = "../analyses/binning_QC_checkm.svg",
              )
 ```
 
+```{r}
+# set the basic data and aesthetic
+bincol_plot_checkm_anvio <- ggplot(data = bincollections)
+bincol_plot_checkm_anvio <- bincol_plot_checkm_anvio + geom_line(aes(y= Completeness+1,
+                                                                     x=rankCM,
+                                                                     colour=Collection),
+                                                                 stat='identity'
+                                      )
+bincol_plot_checkm_anvio <- bincol_plot_checkm_anvio + geom_line(aes(y=-Contamination-1,
+                                                                     x=rankCM,
+                                                                     colour=Collection),
+                                                                 stat='identity')
+bincol_plot_checkm_anvio <- bincol_plot_checkm_anvio + geom_point(aes(y= Completeness+1,
+                                                                     x=rankCM,
+                                                                     colour=Collection))
+bincol_plot_checkm_anvio <- bincol_plot_checkm_anvio + geom_text(data=bincolcount,
+                                       aes(y=80,
+                                           x=22,
+                                           label=count)
+                                       )
+bincol_plot_checkm_anvio <- bincol_plot_checkm_anvio + geom_text(data=bincolcountCheckM9010,
+                                       aes(y=99,
+                                           x=22,
+                                           label=count)
+                                       ,col='darkgreen')
+
+bincol_plot_checkm_anvio <- bincol_plot_checkm_anvio + geom_abline(mapping = aes(intercept= 90,
+                                                       slope=0),
+                                         col='grey')
+bincol_plot_checkm_anvio <- bincol_plot_checkm_anvio + geom_abline(mapping = aes(intercept=-10,
+                                                       slope=0),
+                                         col='grey')
+
+# facets
+bincol_plot_checkm_anvio <- bincol_plot_checkm_anvio + facet_grid(Sample ~ .)
+bincol_plot_checkm_anvio <- bincol_plot_checkm_anvio + scale_y_continuous(name = 'Redundancy/Completion'
+                                                ,limits = c(-20,101))
+bincol_plot_checkm_anvio <- bincol_plot_checkm_anvio + scale_x_continuous(name = 'Completeness rank'
+                                                ,breaks = c(0,10,20,30)
+                                                ,limits = c(0,25))
+
+# make it pretty
+bincol_plot_checkm_anvio <- bincol_plot_checkm_anvio + theme_classic()
+bincol_plot_checkm_anvio <- bincol_plot_checkm_anvio + theme(
+                               #axis.text.x = element_blank(),
+                               #axis.title.x= element_blank(),
+                               legend.position = "bottom",
+                               strip.text.x= element_markdown(angle=00,size = 10),
+                               strip.text.y= element_markdown(angle=0,size = 10),
+                               strip.background = element_blank()
+                               )
+# and go!
+bincol_plot_checkm_anvio
+ggsave(filename = "../analyses/binning_QC_checkm_anvio.svg",
+       plot = bincol_plot_checkm_anvio,
+       device = 'svg', 
+       #,device = 'png'
+       width = unit(x = 14,units = 'cm'),
+       height = unit(x = 18,units = 'cm')
+       ,scale = .55 
+             )
+```
+
 
 ## QC by succesfull taxonomy assignment.
 The rationale here is that better bins, get better or more precise taxonomy assigned via CAT/BAT. 
